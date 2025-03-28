@@ -19,12 +19,14 @@ const GOOGLE_MAPS_API_KEY = "AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ";
 type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
+  categoryFilter?: string | null;
 };
 
-export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, lng: -74.0060 } }: MapProps) {
+export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, lng: -74.0060 }, categoryFilter }: MapProps) {
   const [filter, setFilter] = useState("");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
+  const [zoom, setZoom] = useState(12);
   
   // Load the Google Maps JavaScript API with the API key
   const { isLoaded, loadError } = useJsApiLoader({
@@ -37,17 +39,35 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
     setMapLoaded(true);
+    
+    // Set up zoom changed listener
+    map.addListener('zoom_changed', () => {
+      if (map.getZoom()) {
+        setZoom(map.getZoom()!);
+      }
+    });
   }, []);
 
   const onUnmount = useCallback(() => {
     mapRef.current = null;
   }, []);
 
-  const filteredPlaces = mockPlaces.filter(place => 
-    place.name.toLowerCase().includes(filter.toLowerCase()) || 
-    place.category.toLowerCase().includes(filter.toLowerCase()) || 
-    place.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()))
-  );
+  // Filter places based on search text AND category filter if provided
+  const filteredPlaces = mockPlaces.filter(place => {
+    // Apply search text filter
+    const matchesSearch = 
+      place.name.toLowerCase().includes(filter.toLowerCase()) || 
+      place.category.toLowerCase().includes(filter.toLowerCase()) || 
+      place.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()));
+    
+    // Apply category filter if it exists
+    const matchesCategory = categoryFilter 
+      ? place.category.toLowerCase() === categoryFilter.toLowerCase() ||
+        place.tags.some(tag => tag.toLowerCase() === categoryFilter.toLowerCase())
+      : true;
+    
+    return matchesSearch && matchesCategory;
+  });
 
   const handleMarkerClick = (place: typeof mockPlaces[0]) => {
     setSelectedPlace(place);
@@ -55,6 +75,15 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
 
   const handleCloseInfoWindow = () => {
     setSelectedPlace(null);
+  };
+
+  // Function to handle map zoom
+  const handleZoom = (zoomIn: boolean) => {
+    if (mapRef.current) {
+      const currentZoom = mapRef.current.getZoom() || zoom;
+      const newZoom = zoomIn ? currentZoom + 1 : currentZoom - 1;
+      mapRef.current.setZoom(newZoom);
+    }
   };
 
   return (
@@ -81,7 +110,7 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
           <GoogleMap
             mapContainerStyle={containerStyle}
             center={defaultLocation}
-            zoom={12}
+            zoom={zoom}
             onLoad={onMapLoad}
             onUnmount={onUnmount}
             options={{
@@ -140,6 +169,26 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
             </div>
           </div>
         )}
+        
+        {/* Custom zoom controls */}
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
+            onClick={() => handleZoom(true)}
+          >
+            +
+          </Button>
+          <Button 
+            size="sm" 
+            variant="secondary" 
+            className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
+            onClick={() => handleZoom(false)}
+          >
+            -
+          </Button>
+        </div>
       </div>
     </div>
   );

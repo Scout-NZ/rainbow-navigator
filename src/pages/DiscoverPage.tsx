@@ -11,9 +11,25 @@ import { Badge } from "@/components/ui/badge";
 
 export default function DiscoverPage() {
   const [showChat, setShowChat] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   
   // Filter businesses only
   const businesses = mockPlaces.filter(place => place.type === 'business');
+  
+  // Function to handle category selection
+  const handleCategorySelect = (category: string) => {
+    // If the same category is clicked again, clear the filter
+    setSelectedCategory(prevCategory => 
+      prevCategory === category ? null : category
+    );
+  };
+
+  // Filter businesses by category if a category is selected
+  const filteredBusinesses = selectedCategory 
+    ? businesses.filter(business => 
+        business.category.toLowerCase() === selectedCategory.toLowerCase() ||
+        business.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()))
+    : businesses;
   
   return (
     <div className="pb-4">
@@ -24,7 +40,7 @@ export default function DiscoverPage() {
         </Button>
       </div>
       
-      <InteractiveMap className="h-64 mb-6" />
+      <InteractiveMap className="h-64 mb-6" categoryFilter={selectedCategory} />
       
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
@@ -36,7 +52,7 @@ export default function DiscoverPage() {
         
         <ScrollArea className="w-full whitespace-nowrap pb-4">
           <div className="flex gap-3">
-            {businesses.map(business => (
+            {filteredBusinesses.map(business => (
               <Card key={business.id} className="min-w-[250px] max-w-[250px] card-hover">
                 <div 
                   className="h-32 bg-muted bg-cover bg-center relative"
@@ -87,7 +103,11 @@ export default function DiscoverPage() {
         <TabsContent value="categories" className="mt-0">
           <div className="grid grid-cols-2 gap-3">
             {["Cafés", "Nightlife", "Healthcare", "Retail", "Services", "Community"].map(category => (
-              <Card key={category} className="card-hover">
+              <Card 
+                key={category} 
+                className={`card-hover cursor-pointer ${selectedCategory === category.toLowerCase() ? 'ring-2 ring-primary' : ''}`}
+                onClick={() => handleCategorySelect(category.toLowerCase())}
+              >
                 <CardContent className="p-3 flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-rainbow-gradient flex items-center justify-center text-white">
                     <Store className="h-5 w-5" />
