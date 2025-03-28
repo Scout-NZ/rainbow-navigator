@@ -1,4 +1,3 @@
-
 import { Calendar, Compass, Heart, MessageSquare, Settings, User } from "lucide-react";
 
 export type NavItem = {
@@ -141,52 +140,51 @@ export type UserProfile = {
   joined: string;
 };
 
-// Mock data for places (businesses, events, resources)
 export const mockPlaces: Place[] = [
   {
     id: "1",
-    name: "Rainbow Café",
+    name: "Rainbow Café Wellington",
     type: "business",
-    category: "Café",
+    category: "Cafés",
     location: {
-      lat: 40.7128,
-      lng: -74.0060,
-      address: "123 Pride Street",
-      city: "New York"
+      lat: -41.2965,
+      lng: 174.7762,
+      address: "123 Cuba Street",
+      city: "Wellington"
     },
     rating: 4.8,
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56",
-    tags: ["café", "inclusive", "trans-friendly"],
-    description: "A cozy café with inclusive atmosphere and great coffee. Regular community events and meetups."
+    tags: ["cafés", "inclusive", "trans-friendly"],
+    description: "A cozy café in the heart of Wellington with inclusive atmosphere and great coffee. Regular community events and meetups."
   },
   {
     id: "2",
-    name: "Spectrum Bookstore",
+    name: "Unity Books Auckland",
     type: "business",
-    category: "Books & Media",
+    category: "Retail",
     location: {
-      lat: 40.7138,
-      lng: -74.0070,
-      address: "456 Equality Avenue",
-      city: "New York"
+      lat: -36.8485,
+      lng: 174.7633,
+      address: "19 High Street",
+      city: "Auckland"
     },
     rating: 4.6,
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1521056787327-266e2587772f",
-    tags: ["bookstore", "queer-owned", "inclusive"],
+    tags: ["bookstore", "queer-owned", "retail"],
     description: "LGBTQ+ focused bookstore with a wide selection of queer literature, history, and art books."
   },
   {
     id: "3",
-    name: "Pride Health Clinic",
+    name: "Rainbow Health NZ",
     type: "resource",
     category: "Healthcare",
     location: {
-      lat: 40.7148,
-      lng: -74.0080,
-      address: "789 Rainbow Road",
-      city: "New York"
+      lat: -36.8508,
+      lng: 174.7645,
+      address: "35 Ponsonby Road",
+      city: "Auckland"
     },
     rating: 4.9,
     verified: true,
@@ -196,41 +194,74 @@ export const mockPlaces: Place[] = [
   },
   {
     id: "4",
-    name: "Colorful Threads",
+    name: "Proud Threads Christchurch",
     type: "business",
-    category: "Clothing",
+    category: "Retail",
     location: {
-      lat: 40.7158,
-      lng: -74.0090,
-      address: "321 Diversity Drive",
-      city: "New York"
+      lat: -43.5321,
+      lng: 172.6362,
+      address: "87 Cashel Street",
+      city: "Christchurch"
     },
     rating: 4.5,
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a",
-    tags: ["clothing", "pride-merchandise", "queer-owned"],
+    tags: ["clothing", "pride-merchandise", "retail"],
     description: "Gender-affirming clothing store with a focus on comfortable and stylish options for everyone."
   },
   {
     id: "5",
-    name: "Unity Nightclub",
+    name: "Family Bar Auckland",
     type: "business",
     category: "Nightlife",
     location: {
-      lat: 40.7168,
-      lng: -74.0100,
-      address: "555 Liberty Lane",
-      city: "New York"
+      lat: -36.8473,
+      lng: 174.7631,
+      address: "270 Karangahape Road",
+      city: "Auckland"
     },
     rating: 4.7,
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67",
-    tags: ["nightclub", "dancing", "drag-shows"],
+    tags: ["nightlife", "dancing", "drag-shows"],
     description: "Popular nightclub with inclusive atmosphere, regular drag shows, and themed party nights."
+  },
+  {
+    id: "6",
+    name: "Queenstown Pride Center",
+    type: "resource",
+    category: "Community",
+    location: {
+      lat: -45.0312,
+      lng: 168.6626,
+      address: "45 Camp Street",
+      city: "Queenstown"
+    },
+    rating: 4.8,
+    verified: true,
+    imageUrl: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4",
+    tags: ["community", "support", "events"],
+    description: "Community center offering resources, support, and social events for the LGBTQ+ community in Queenstown."
+  },
+  {
+    id: "7",
+    name: "Aroha Coffee Roasters",
+    type: "business",
+    category: "Cafés",
+    location: {
+      lat: -43.5324,
+      lng: 172.6365,
+      address: "123 Victoria Street",
+      city: "Christchurch"
+    },
+    rating: 4.6,
+    verified: true,
+    imageUrl: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8",
+    tags: ["cafés", "coffee", "queer-owned"],
+    description: "Queer-owned coffee roastery and café with a welcoming atmosphere and locally sourced products."
   }
 ];
 
-// Mock data for groups
 export const mockGroups: Group[] = [
   {
     id: "1",
@@ -289,7 +320,6 @@ export const mockGroups: Group[] = [
   }
 ];
 
-// Mock data for events
 export const mockEvents: Event[] = [
   {
     id: "1",
@@ -408,7 +438,6 @@ export const mockEvents: Event[] = [
   }
 ];
 
-// Mock data for resources
 export const mockResources: Resource[] = [
   {
     id: "1",
@@ -491,7 +520,6 @@ export const mockResources: Resource[] = [
   }
 ];
 
-// Mock data for posts
 export const mockPosts: Post[] = [
   {
     id: "1",
@@ -569,7 +597,6 @@ export const mockPosts: Post[] = [
   }
 ];
 
-// Mock user profile
 export const mockUserProfile: UserProfile = {
   id: "user1",
   name: "Alex Rivera",

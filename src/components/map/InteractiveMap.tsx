@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { MapPin, Search } from "lucide-react";
+import { MapPin, Search, Locate } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mockPlaces } from "@/data/mockData";
@@ -13,6 +13,9 @@ const containerStyle = {
   height: '100%'
 };
 
+// Default location (Auckland, New Zealand)
+const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
+
 // Google Maps API key
 const GOOGLE_MAPS_API_KEY = "AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ";
 
@@ -22,11 +25,13 @@ type MapProps = {
   categoryFilter?: string | null;
 };
 
-export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, lng: -74.0060 }, categoryFilter }: MapProps) {
+export function InteractiveMap({ className, defaultLocation = DEFAULT_LOCATION, categoryFilter }: MapProps) {
   const [filter, setFilter] = useState("");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
   const [zoom, setZoom] = useState(12);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
   
   // Load the Google Maps JavaScript API with the API key
   const { isLoaded, loadError } = useJsApiLoader({
@@ -86,6 +91,51 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
     }
   };
 
+  // Function to get user's location
+  const getUserLocation = () => {
+    setIsLocating(true);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const userPos = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          setUserLocation(userPos);
+          
+          // Center map on user's location
+          if (mapRef.current) {
+            mapRef.current.panTo(userPos);
+            mapRef.current.setZoom(14);
+          }
+          
+          toast({
+            title: "Location found",
+            description: "Map centered on your current location",
+          });
+          setIsLocating(false);
+        },
+        (error) => {
+          console.error("Error getting location: ", error);
+          toast({
+            title: "Location error",
+            description: "Could not get your location. Please check permissions.",
+            variant: "destructive"
+          });
+          setIsLocating(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 10000 }
+      );
+    } else {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support geolocation",
+        variant: "destructive"
+      });
+      setIsLocating(false);
+    }
+  };
+
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
       <div className="p-3 bg-background border-b flex items-center gap-2">
@@ -99,8 +149,15 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
             onChange={(e) => setFilter(e.target.value)}
           />
         </div>
-        <Button size="sm" variant="outline" className="rounded-full">
-          Filter
+        <Button 
+          size="sm" 
+          variant="outline" 
+          className="rounded-full flex items-center gap-1"
+          onClick={getUserLocation}
+          disabled={isLocating}
+        >
+          <Locate className="h-4 w-4" />
+          {isLocating ? "Locating..." : "Near Me"}
         </Button>
       </div>
       
@@ -109,7 +166,7 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
-            center={defaultLocation}
+            center={userLocation || defaultLocation}
             zoom={zoom}
             onLoad={onMapLoad}
             onUnmount={onUnmount}
@@ -121,13 +178,28 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
               fullscreenControl: true,
             }}
           >
+            {/* User location marker */}
+            {userLocation && (
+              <Marker
+                position={userLocation}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  fillColor: '#4285F4',
+                  fillOpacity: 1,
+                  scale: 8,
+                  strokeColor: '#FFFFFF',
+                  strokeWeight: 2,
+                }}
+              />
+            )}
+            
             {/* Render markers for each place */}
             {mapLoaded && filteredPlaces.map((place) => (
               <Marker
                 key={place.id}
                 position={{
-                  lat: place.location.lat || defaultLocation.lat,
-                  lng: place.location.lng || defaultLocation.lng
+                  lat: place.location.lat,
+                  lng: place.location.lng
                 }}
                 onClick={() => handleMarkerClick(place)}
                 icon={{
@@ -146,15 +218,15 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
             {selectedPlace && (
               <InfoWindow
                 position={{
-                  lat: selectedPlace.location.lat || defaultLocation.lat,
-                  lng: selectedPlace.location.lng || defaultLocation.lng
+                  lat: selectedPlace.location.lat,
+                  lng: selectedPlace.location.lng
                 }}
                 onCloseClick={handleCloseInfoWindow}
               >
                 <div className="p-2 max-w-[200px]">
                   <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
                   <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
-                  <p className="text-xs mt-1">{selectedPlace.location.address}</p>
+                  <p className="text-xs mt-1">{selectedPlace.location.address}, {selectedPlace.location.city}</p>
                 </div>
               </InfoWindow>
             )}

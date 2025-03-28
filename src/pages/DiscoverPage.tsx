@@ -9,6 +9,9 @@ import { mockPlaces } from "@/data/mockData";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 
+// Default location (Auckland, New Zealand)
+const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
+
 export default function DiscoverPage() {
   const [showChat, setShowChat] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -65,7 +68,7 @@ export default function DiscoverPage() {
         </Button>
       </div>
       
-      <InteractiveMap className="h-64 mb-6" categoryFilter={selectedCategory} />
+      <InteractiveMap className="h-64 mb-6" defaultLocation={DEFAULT_LOCATION} categoryFilter={selectedCategory} />
       
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
@@ -96,7 +99,7 @@ export default function DiscoverPage() {
                 <CardContent className="p-3">
                   <div className="flex items-center text-sm text-muted-foreground mb-2">
                     <MapPin className="h-4 w-4 mr-1" />
-                    <span className="truncate">{business.location.address}</span>
+                    <span className="truncate">{business.location.address}, {business.location.city}</span>
                   </div>
                   <div className="flex gap-1">
                     {business.tags.slice(0, 2).map(tag => (
