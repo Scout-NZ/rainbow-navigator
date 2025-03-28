@@ -135,8 +135,8 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
               <Marker
                 key={place.id}
                 position={{
-                  lat: place.location.coordinates.lat || defaultLocation.lat,
-                  lng: place.location.coordinates.lng || defaultLocation.lng
+                  lat: place.location.lat || defaultLocation.lat,
+                  lng: place.location.lng || defaultLocation.lng
                 }}
                 onClick={() => handleMarkerClick(place)}
                 icon={{
@@ -155,8 +155,8 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
             {selectedPlace && (
               <InfoWindow
                 position={{
-                  lat: selectedPlace.location.coordinates.lat || defaultLocation.lat,
-                  lng: selectedPlace.location.coordinates.lng || defaultLocation.lng
+                  lat: selectedPlace.location.lat || defaultLocation.lat,
+                  lng: selectedPlace.location.lng || defaultLocation.lng
                 }}
                 onCloseClick={handleCloseInfoWindow}
               >
