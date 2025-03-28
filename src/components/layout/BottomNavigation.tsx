@@ -30,9 +30,8 @@ export function BottomNavigation() {
               )}
             >
               <Icon 
-                size={24} 
+                className={isActive ? "text-primary h-6 w-6" : "h-6 w-6"} 
                 strokeWidth={isActive ? 2.5 : 2}
-                className={isActive ? "text-primary" : ""} 
               />
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
