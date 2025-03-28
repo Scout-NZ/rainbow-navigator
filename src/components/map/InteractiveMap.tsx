@@ -26,13 +26,25 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
     return localStorage.getItem('google_maps_api_key') || '';
   });
   
+  // Use a memoized empty key instead of a space to prevent loader conflicts
+  const effectiveApiKey = apiKey || '';
+  
   // Load the Google Maps JavaScript API
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: apiKey || ' ', // Fallback to empty string if no API key
+    googleMapsApiKey: effectiveApiKey,
     id: 'google-map-script'
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
+
+  // Force page reload when API key changes
+  const handleApiKeyChange = (newKey: string) => {
+    if (newKey !== apiKey) {
+      localStorage.setItem('google_maps_api_key', newKey);
+      // Force page reload instead of just state update
+      window.location.reload();
+    }
+  };
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -63,13 +75,11 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
     const key = formData.get('apiKey') as string;
     
     if (key) {
-      localStorage.setItem('google_maps_api_key', key);
-      setApiKey(key);
+      handleApiKeyChange(key);
       toast({
         title: "API Key Saved",
         description: "Your Google Maps API key has been saved. The map will now reload.",
       });
-      window.location.reload();
     }
   };
 
