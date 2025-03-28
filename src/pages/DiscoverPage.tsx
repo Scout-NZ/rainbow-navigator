@@ -8,6 +8,7 @@ import { InteractiveMap } from "@/components/map/InteractiveMap";
 import { mockPlaces } from "@/data/mockData";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { LocationDetailsDialog } from "@/components/map/LocationDetailsDialog";
 
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
@@ -15,6 +16,8 @@ const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 export default function DiscoverPage() {
   const [showChat, setShowChat] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<typeof mockPlaces[0] | null>(null);
+  const [showLocationDetails, setShowLocationDetails] = useState(false);
   
   // Filter businesses only
   const businesses = mockPlaces.filter(place => place.type === 'business');
@@ -30,6 +33,12 @@ export default function DiscoverPage() {
   // Function to clear category filter
   const handleViewAll = () => {
     setSelectedCategory(null);
+  };
+
+  // Function to open location details
+  const handleOpenLocationDetails = (location: typeof mockPlaces[0]) => {
+    setSelectedLocation(location);
+    setShowLocationDetails(true);
   };
 
   // Filter businesses by category if a category is selected
@@ -68,7 +77,12 @@ export default function DiscoverPage() {
         </Button>
       </div>
       
-      <InteractiveMap className="h-64 mb-6" defaultLocation={DEFAULT_LOCATION} categoryFilter={selectedCategory} />
+      <InteractiveMap 
+        className="h-64 mb-6" 
+        defaultLocation={DEFAULT_LOCATION} 
+        categoryFilter={selectedCategory}
+        onLocationSelect={handleOpenLocationDetails}
+      />
       
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
@@ -81,7 +95,11 @@ export default function DiscoverPage() {
         <ScrollArea className="w-full whitespace-nowrap pb-4">
           <div className="flex gap-3">
             {filteredBusinesses.map(business => (
-              <Card key={business.id} className="min-w-[250px] max-w-[250px] card-hover">
+              <Card 
+                key={business.id} 
+                className="min-w-[250px] max-w-[250px] card-hover cursor-pointer"
+                onClick={() => handleOpenLocationDetails(business)}
+              >
                 <div 
                   className="h-32 bg-muted bg-cover bg-center relative"
                   style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
@@ -163,7 +181,11 @@ export default function DiscoverPage() {
         <TabsContent value="trending" className="mt-0">
           <div className="space-y-3">
             {businesses.slice(0, 3).map(business => (
-              <Card key={business.id} className="card-hover">
+              <Card 
+                key={business.id} 
+                className="card-hover cursor-pointer"
+                onClick={() => handleOpenLocationDetails(business)}
+              >
                 <CardContent className="p-3 flex gap-3">
                   <div 
                     className="h-16 w-16 bg-muted rounded-md bg-cover bg-center flex-shrink-0"
@@ -186,7 +208,11 @@ export default function DiscoverPage() {
         <TabsContent value="nearby" className="mt-0">
           <div className="space-y-3">
             {businesses.slice(3, 6).map(business => (
-              <Card key={business.id} className="card-hover">
+              <Card 
+                key={business.id} 
+                className="card-hover cursor-pointer"
+                onClick={() => handleOpenLocationDetails(business)}
+              >
                 <CardContent className="p-3 flex gap-3">
                   <div 
                     className="h-16 w-16 bg-muted rounded-md bg-cover bg-center flex-shrink-0"
@@ -206,6 +232,13 @@ export default function DiscoverPage() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Location Details Dialog */}
+      <LocationDetailsDialog
+        location={selectedLocation}
+        isOpen={showLocationDetails}
+        onClose={() => setShowLocationDetails(false)}
+      />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { mockPlaces } from "@/data/mockData";
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import { toast } from "@/components/ui/use-toast";
+import { LocationDetailsDialog } from "./LocationDetailsDialog";
 
 // Default map container style
 const containerStyle = {
@@ -23,15 +24,22 @@ type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
   categoryFilter?: string | null;
+  onLocationSelect?: (location: typeof mockPlaces[0]) => void;
 };
 
-export function InteractiveMap({ className, defaultLocation = DEFAULT_LOCATION, categoryFilter }: MapProps) {
+export function InteractiveMap({ 
+  className, 
+  defaultLocation = DEFAULT_LOCATION, 
+  categoryFilter,
+  onLocationSelect 
+}: MapProps) {
   const [filter, setFilter] = useState("");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   
   // Load the Google Maps JavaScript API with the API key
   const { isLoaded, loadError } = useJsApiLoader({
@@ -80,6 +88,24 @@ export function InteractiveMap({ className, defaultLocation = DEFAULT_LOCATION, 
 
   const handleCloseInfoWindow = () => {
     setSelectedPlace(null);
+  };
+
+  // Function to open location details dialog
+  const openLocationDetails = (place: typeof mockPlaces[0]) => {
+    setSelectedPlace(place);
+    setShowDetailsDialog(true);
+    
+    // If a parent component wants to handle the selection, call the callback
+    if (onLocationSelect) {
+      onLocationSelect(place);
+    }
+  };
+
+  // Handle viewing details from info window
+  const handleViewDetails = () => {
+    if (selectedPlace) {
+      setShowDetailsDialog(true);
+    }
   };
 
   // Function to handle map zoom
@@ -227,6 +253,14 @@ export function InteractiveMap({ className, defaultLocation = DEFAULT_LOCATION, 
                   <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
                   <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
                   <p className="text-xs mt-1">{selectedPlace.location.address}, {selectedPlace.location.city}</p>
+                  <Button 
+                    size="sm" 
+                    variant="link" 
+                    className="text-xs p-0 h-auto mt-1" 
+                    onClick={handleViewDetails}
+                  >
+                    View Details
+                  </Button>
                 </div>
               </InfoWindow>
             )}
@@ -262,6 +296,13 @@ export function InteractiveMap({ className, defaultLocation = DEFAULT_LOCATION, 
           </Button>
         </div>
       </div>
+
+      {/* Location Details Dialog */}
+      <LocationDetailsDialog 
+        location={selectedPlace} 
+        isOpen={showDetailsDialog} 
+        onClose={() => setShowDetailsDialog(false)}
+      />
     </div>
   );
 }
