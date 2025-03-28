@@ -166,7 +166,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 4 123 4567",
       email: "info@rainbowcafe.co.nz",
-      website: "https://www.rainbowcafe.co.nz"
+      website: "rainbowcafe.co.nz"
     }
   },
   {
@@ -188,7 +188,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 9 987 6543",
       email: "books@unitybooks.co.nz",
-      website: "https://www.unitybooks.co.nz"
+      website: "unitybooks.co.nz"
     }
   },
   {
@@ -210,7 +210,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 9 876 5432",
       email: "care@rainbowhealth.org.nz",
-      website: "https://www.rainbowhealth.org.nz"
+      website: "rainbowhealth.org.nz"
     }
   },
   {
@@ -232,7 +232,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 3 345 6789",
       email: "shop@proudthreads.co.nz",
-      website: "https://www.proudthreads.co.nz"
+      website: "proudthreads.co.nz"
     }
   },
   {
@@ -254,7 +254,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 9 234 5678",
       email: "info@familybar.co.nz",
-      website: "https://www.familybar.co.nz"
+      website: "familybar.co.nz"
     }
   },
   {
@@ -276,7 +276,7 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 3 456 7890",
       email: "hello@queenstownpride.org.nz",
-      website: "https://www.queenstownpride.org.nz"
+      website: "queenstownpride.org.nz"
     }
   },
   {
@@ -298,7 +298,51 @@ export const mockPlaces: Place[] = [
     contact: {
       phone: "+64 3 567 8901",
       email: "brew@arohacoffee.co.nz",
-      website: "https://www.arohacoffee.co.nz"
+      website: "arohacoffee.co.nz"
+    }
+  },
+  {
+    id: "8",
+    name: "Scotty and Mal's Cocktail Bar",
+    type: "business",
+    category: "Nightlife",
+    location: {
+      lat: -41.2930,
+      lng: 174.7787,
+      address: "176 Cuba Street",
+      city: "Wellington"
+    },
+    rating: 4.9,
+    verified: true,
+    imageUrl: "https://images.unsplash.com/photo-1470337458703-46ad1756a187",
+    tags: ["cocktails", "lgbtq-friendly", "lounge"],
+    description: "A stylish cocktail bar with expert mixologists creating unique rainbow-inspired drinks in a welcoming atmosphere. Popular for date nights and social gatherings.",
+    contact: {
+      phone: "+64 4 891 2345",
+      email: "hello@scottyandmals.co.nz",
+      website: "scottyandmals.co.nz"
+    }
+  },
+  {
+    id: "9",
+    name: "Ivy Bar Wellington",
+    type: "business",
+    category: "Nightlife",
+    location: {
+      lat: -41.2944,
+      lng: 174.7770,
+      address: "49 Dixon Street",
+      city: "Wellington"
+    },
+    rating: 4.7,
+    verified: true,
+    imageUrl: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34",
+    tags: ["bar", "dancing", "events"],
+    description: "Wellington's premier LGBTQ+ bar with regular themed nights, drag performances, and a vibrant dance floor. Known for their inclusive environment and strong community focus.",
+    contact: {
+      phone: "+64 4 385 6754",
+      email: "contact@ivybarwellington.co.nz",
+      website: "ivybarwellington.co.nz"
     }
   }
 ];

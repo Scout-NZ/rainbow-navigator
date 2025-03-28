@@ -14,6 +14,12 @@ type LocationDetailsProps = {
 export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDetailsProps) {
   if (!location) return null;
 
+  const handleOpenWebsite = (url: string) => {
+    // Check if the URL has a protocol, if not add https://
+    const websiteUrl = url.startsWith('http') ? url : `https://${url}`;
+    window.open(websiteUrl, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
@@ -62,14 +68,12 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
                 {location.contact.website && (
                   <div className="flex items-center gap-2 text-sm">
                     <ExternalLink className="h-4 w-4 text-primary" />
-                    <a 
-                      href={location.contact.website} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
+                    <button 
+                      onClick={() => handleOpenWebsite(location.contact!.website!)} 
+                      className="text-primary hover:underline text-left"
                     >
                       {location.contact.website.replace(/^https?:\/\/(www\.)?/, '')}
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -91,15 +95,13 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" onClick={onClose}>Close</Button>
           {location.contact?.website && (
-            <Button className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
-              <a 
-                href={location.contact.website} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="flex items-center gap-1"
-              >
+            <Button 
+              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+              onClick={() => handleOpenWebsite(location.contact!.website!)}
+            >
+              <span className="flex items-center gap-1">
                 Visit Website <ExternalLink className="h-4 w-4" />
-              </a>
+              </span>
             </Button>
           )}
         </div>
