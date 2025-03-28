@@ -1,24 +1,62 @@
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mockPlaces } from "@/data/mockData";
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from "@react-google-maps/api";
 import { toast } from "@/components/ui/use-toast";
 import { LocationDetailsDialog } from "./LocationDetailsDialog";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix Leaflet marker icon issue
+// This is needed because Leaflet expects the marker icons to be in a specific location
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
 
 // Default map container style
 const containerStyle = {
   width: '100%',
-  height: '100%'
+  height: '100%',
+  borderRadius: '0.5rem'
 };
 
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
-// Google Maps API key
-const GOOGLE_MAPS_API_KEY = "AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ";
+// Custom marker icons based on place type
+const getMarkerIcon = (type: string) => {
+  return L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    className: `marker-${type.toLowerCase()}`
+  });
+};
+
+// MapController component to control the map view when props change
+function MapController({ center, zoom }: { center: { lat: number; lng: number }, zoom: number }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, zoom);
+  }, [center, zoom, map]);
+  
+  return null;
+}
 
 type MapProps = {
   className?: string;
@@ -34,37 +72,14 @@ export function InteractiveMap({
   onLocationSelect 
 }: MapProps) {
   const [filter, setFilter] = useState("");
-  const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [mapCenter, setMapCenter] = useState(defaultLocation);
+  const mapRef = useRef<L.Map | null>(null);
   
-  // Load the Google Maps JavaScript API with the API key
-  const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    id: 'google-map-script'
-  });
-
-  const mapRef = useRef<google.maps.Map | null>(null);
-
-  const onMapLoad = useCallback((map: google.maps.Map) => {
-    mapRef.current = map;
-    setMapLoaded(true);
-    
-    // Set up zoom changed listener
-    map.addListener('zoom_changed', () => {
-      if (map.getZoom()) {
-        setZoom(map.getZoom()!);
-      }
-    });
-  }, []);
-
-  const onUnmount = useCallback(() => {
-    mapRef.current = null;
-  }, []);
-
   // Filter places based on search text AND category filter if provided
   const filteredPlaces = mockPlaces.filter(place => {
     // Apply search text filter
@@ -86,10 +101,6 @@ export function InteractiveMap({
     setSelectedPlace(place);
   };
 
-  const handleCloseInfoWindow = () => {
-    setSelectedPlace(null);
-  };
-
   // Function to open location details dialog
   const openLocationDetails = (place: typeof mockPlaces[0]) => {
     setSelectedPlace(place);
@@ -101,19 +112,13 @@ export function InteractiveMap({
     }
   };
 
-  // Handle viewing details from info window
-  const handleViewDetails = () => {
-    if (selectedPlace) {
-      setShowDetailsDialog(true);
-    }
-  };
-
   // Function to handle map zoom
   const handleZoom = (zoomIn: boolean) => {
     if (mapRef.current) {
-      const currentZoom = mapRef.current.getZoom() || zoom;
+      const currentZoom = mapRef.current.getZoom();
       const newZoom = zoomIn ? currentZoom + 1 : currentZoom - 1;
       mapRef.current.setZoom(newZoom);
+      setZoom(newZoom);
     }
   };
 
@@ -128,12 +133,8 @@ export function InteractiveMap({
             lng: position.coords.longitude
           };
           setUserLocation(userPos);
-          
-          // Center map on user's location
-          if (mapRef.current) {
-            mapRef.current.panTo(userPos);
-            mapRef.current.setZoom(14);
-          }
+          setMapCenter(userPos);
+          setZoom(14);
           
           toast({
             title: "Location found",
@@ -188,96 +189,70 @@ export function InteractiveMap({
       </div>
       
       <div className="relative flex-1 min-h-[300px]">
-        {/* Google Maps component */}
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={userLocation || defaultLocation}
-            zoom={zoom}
-            onLoad={onMapLoad}
-            onUnmount={onUnmount}
-            options={{
-              disableDefaultUI: false,
-              zoomControl: true,
-              mapTypeControl: false,
-              streetViewControl: false,
-              fullscreenControl: true,
-            }}
-          >
-            {/* User location marker */}
-            {userLocation && (
-              <Marker
-                position={userLocation}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  fillColor: '#4285F4',
-                  fillOpacity: 1,
-                  scale: 8,
-                  strokeColor: '#FFFFFF',
-                  strokeWeight: 2,
-                }}
-              />
-            )}
-            
-            {/* Render markers for each place */}
-            {mapLoaded && filteredPlaces.map((place) => (
-              <Marker
-                key={place.id}
-                position={{
-                  lat: place.location.lat,
-                  lng: place.location.lng
-                }}
-                onClick={() => handleMarkerClick(place)}
-                icon={{
-                  path: "M10.453 14.016l6.563-6.609-1.406-1.406-5.156 5.203-2.063-2.109-1.406 1.406zM12 2.016q2.906 0 4.945 2.039t2.039 4.945q0 1.453-0.727 3.328t-1.758 3.516-2.039 3.070-1.711 2.273l-0.75 0.797q-0.281-0.328-0.75-0.867t-1.688-2.156-2.133-3.141-1.664-3.445-0.75-3.375q0-2.906 2.039-4.945t4.945-2.039z",
-                  fillColor: place.type === 'business' ? '#3b82f6' : place.type === 'event' ? '#8b5cf6' : '#10b981',
-                  fillOpacity: 1,
-                  strokeWeight: 0,
-                  rotation: 0,
-                  scale: 2,
-                  anchor: new google.maps.Point(12, 24),
-                }}
-              />
-            ))}
-
-            {/* Info window for selected place */}
-            {selectedPlace && (
-              <InfoWindow
-                position={{
-                  lat: selectedPlace.location.lat,
-                  lng: selectedPlace.location.lng
-                }}
-                onCloseClick={handleCloseInfoWindow}
-              >
+        {/* Leaflet Map component */}
+        <MapContainer
+          center={[mapCenter.lat, mapCenter.lng]}
+          zoom={zoom}
+          style={containerStyle}
+          whenCreated={(map) => {
+            mapRef.current = map;
+          }}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          
+          {/* Controller to update map view when props change */}
+          <MapController 
+            center={userLocation || mapCenter} 
+            zoom={zoom} 
+          />
+          
+          {/* User location marker */}
+          {userLocation && (
+            <Marker
+              position={[userLocation.lat, userLocation.lng]}
+              icon={L.divIcon({
+                className: 'user-location-marker',
+                html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8],
+              })}
+            />
+          )}
+          
+          {/* Render markers for each place */}
+          {filteredPlaces.map((place) => (
+            <Marker
+              key={place.id}
+              position={[place.location.lat, place.location.lng]}
+              icon={getMarkerIcon(place.type)}
+              eventHandlers={{
+                click: () => handleMarkerClick(place),
+              }}
+            >
+              <Popup>
                 <div className="p-2 max-w-[200px]">
-                  <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
-                  <p className="text-xs mt-1">{selectedPlace.location.address}, {selectedPlace.location.city}</p>
+                  <h3 className="font-semibold text-sm">{place.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{place.category}</p>
+                  <p className="text-xs mt-1">{place.location.address}, {place.location.city}</p>
                   <Button 
                     size="sm" 
                     variant="link" 
                     className="text-xs p-0 h-auto mt-1" 
-                    onClick={handleViewDetails}
+                    onClick={() => openLocationDetails(place)}
                   >
                     View Details
                   </Button>
                 </div>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm">
-            <div className="animate-pulse flex flex-col items-center">
-              <div className="h-12 w-12 rounded-full bg-rainbow-gradient"></div>
-              <p className="mt-2 text-sm font-medium">
-                {loadError ? "Error loading Google Maps" : "Loading map..."}
-              </p>
-            </div>
-          </div>
-        )}
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
         
         {/* Custom zoom controls */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 z-10">
+        <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
           <Button 
             size="sm" 
             variant="secondary" 
@@ -303,6 +278,23 @@ export function InteractiveMap({
         isOpen={showDetailsDialog} 
         onClose={() => setShowDetailsDialog(false)}
       />
+      
+      {/* Add CSS for custom markers */}
+      <style jsx global>{`
+        .marker-business {
+          filter: hue-rotate(30deg);
+        }
+        .marker-event {
+          filter: hue-rotate(240deg);
+        }
+        .marker-resource {
+          filter: hue-rotate(120deg);
+        }
+        .user-location-marker {
+          border-radius: 50%;
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+      `}</style>
     </div>
   );
 }

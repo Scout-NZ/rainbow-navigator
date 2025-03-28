@@ -107,4 +107,23 @@
   .gradient-header {
     @apply bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green;
   }
+  
+  /* Leaflet map styles */
+  .leaflet-container {
+    font-family: inherit;
+    z-index: 1;
+  }
+  
+  .leaflet-popup-content-wrapper {
+    border-radius: 0.5rem;
+  }
+  
+  .leaflet-popup-content {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .leaflet-control-attribution {
+    font-size: 8px;
+  }
 }

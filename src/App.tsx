@@ -13,6 +13,7 @@ import ProfilePage from "./pages/ProfilePage";
 import FeedPage from "./pages/FeedPage";
 import NotFound from "./pages/NotFound";
 
+// Create a client
 const queryClient = new QueryClient();
 
 const App = () => (
