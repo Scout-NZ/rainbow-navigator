@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users } from "lucide-react";
+import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +22,11 @@ export default function DiscoverPage() {
     setSelectedCategory(prevCategory => 
       prevCategory === category ? null : category
     );
+  };
+
+  // Function to clear category filter
+  const handleViewAll = () => {
+    setSelectedCategory(null);
   };
 
   // Filter businesses by category if a category is selected
@@ -121,6 +126,19 @@ export default function DiscoverPage() {
         </TabsList>
         
         <TabsContent value="categories" className="mt-0">
+          {/* View All button across both columns */}
+          <Card 
+            className={`card-hover cursor-pointer mb-3 ${selectedCategory === null ? 'ring-2 ring-primary' : ''}`}
+            onClick={handleViewAll}
+          >
+            <CardContent className="p-3 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-rainbow-gradient flex items-center justify-center text-white">
+                <Grid className="h-5 w-5" />
+              </div>
+              <span className="font-medium">View All Locations</span>
+            </CardContent>
+          </Card>
+          
           <div className="grid grid-cols-2 gap-3">
             {["Cafés", "Nightlife", "Healthcare", "Retail", "Services", "Community"].map(category => (
               <Card 
