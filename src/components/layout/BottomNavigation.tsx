@@ -29,10 +29,11 @@ export function BottomNavigation() {
                 isActive ? "active" : "text-muted-foreground"
               )}
             >
-              <Icon className={cn(
-                "h-6 w-6",
-                isActive && "stroke-[2.5px] text-primary"
-              )} />
+              <Icon 
+                size={24} 
+                strokeWidth={isActive ? 2.5 : 2}
+                className={isActive ? "text-primary" : ""} 
+              />
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
