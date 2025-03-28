@@ -13,6 +13,9 @@ const containerStyle = {
   height: '100%'
 };
 
+// Google Maps API key
+const GOOGLE_MAPS_API_KEY = "AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ";
+
 type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
@@ -22,29 +25,14 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
   const [filter, setFilter] = useState("");
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
-  const [apiKey, setApiKey] = useState<string>(() => {
-    return localStorage.getItem('google_maps_api_key') || '';
-  });
   
-  // Use a memoized empty key instead of a space to prevent loader conflicts
-  const effectiveApiKey = apiKey || '';
-  
-  // Load the Google Maps JavaScript API
+  // Load the Google Maps JavaScript API with the API key
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: effectiveApiKey,
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     id: 'google-map-script'
   });
 
   const mapRef = useRef<google.maps.Map | null>(null);
-
-  // Force page reload when API key changes
-  const handleApiKeyChange = (newKey: string) => {
-    if (newKey !== apiKey) {
-      localStorage.setItem('google_maps_api_key', newKey);
-      // Force page reload instead of just state update
-      window.location.reload();
-    }
-  };
 
   const onMapLoad = useCallback((map: google.maps.Map) => {
     mapRef.current = map;
@@ -69,20 +57,6 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
     setSelectedPlace(null);
   };
 
-  const handleApiKeySubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const key = formData.get('apiKey') as string;
-    
-    if (key) {
-      handleApiKeyChange(key);
-      toast({
-        title: "API Key Saved",
-        description: "Your Google Maps API key has been saved. The map will now reload.",
-      });
-    }
-  };
-
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
       <div className="p-3 bg-background border-b flex items-center gap-2">
@@ -102,28 +76,6 @@ export function InteractiveMap({ className, defaultLocation = { lat: 40.7128, ln
       </div>
       
       <div className="relative flex-1 min-h-[300px]">
-        {!apiKey && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center p-4">
-            <div className="max-w-md w-full bg-card p-4 rounded-lg shadow-lg">
-              <h3 className="text-lg font-semibold mb-2">Google Maps API Key Required</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                To use interactive maps, you need to provide a Google Maps API key.
-              </p>
-              <form onSubmit={handleApiKeySubmit} className="space-y-3">
-                <Input 
-                  name="apiKey" 
-                  placeholder="Enter your Google Maps API key"
-                  required
-                />
-                <Button type="submit" className="w-full">Save API Key</Button>
-              </form>
-              <p className="text-xs text-muted-foreground mt-3">
-                You can get a key from the <a href="https://console.cloud.google.com/google/maps-apis/credentials" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Google Cloud Console</a>.
-              </p>
-            </div>
-          </div>
-        )}
-
         {/* Google Maps component */}
         {isLoaded ? (
           <GoogleMap
