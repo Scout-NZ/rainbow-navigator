@@ -102,4 +102,9 @@
   .nav-item.active {
     @apply text-primary;
   }
+
+  /* New styles for the header design */
+  .gradient-header {
+    @apply bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green;
+  }
 }
