@@ -43,23 +43,23 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
             </div>
           </div>
           
-          {(location.contact?.phone || location.contact?.email || location.contact?.website) && (
+          {location.contact && (location.contact.phone || location.contact.email || location.contact.website) && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium">Contact</h4>
               <div className="space-y-1">
-                {location.contact?.phone && (
+                {location.contact.phone && (
                   <div className="flex items-center gap-2 text-sm">
                     <Phone className="h-4 w-4 text-primary" />
                     <span>{location.contact.phone}</span>
                   </div>
                 )}
-                {location.contact?.email && (
+                {location.contact.email && (
                   <div className="flex items-center gap-2 text-sm">
                     <Mail className="h-4 w-4 text-primary" />
                     <span>{location.contact.email}</span>
                   </div>
                 )}
-                {location.contact?.website && (
+                {location.contact.website && (
                   <div className="flex items-center gap-2 text-sm">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <a 

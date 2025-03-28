@@ -1,3 +1,4 @@
+
 import { Calendar, Compass, Heart, MessageSquare, Settings, User } from "lucide-react";
 
 export type NavItem = {
@@ -50,6 +51,11 @@ export type Place = {
   imageUrl?: string;
   tags: string[];
   description: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
 };
 
 export type Group = {
@@ -156,7 +162,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56",
     tags: ["cafés", "inclusive", "trans-friendly"],
-    description: "A cozy café in the heart of Wellington with inclusive atmosphere and great coffee. Regular community events and meetups."
+    description: "A cozy café in the heart of Wellington with inclusive atmosphere and great coffee. Regular community events and meetups.",
+    contact: {
+      phone: "+64 4 123 4567",
+      email: "info@rainbowcafe.co.nz",
+      website: "https://www.rainbowcafe.co.nz"
+    }
   },
   {
     id: "2",
@@ -173,7 +184,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1521056787327-266e2587772f",
     tags: ["bookstore", "queer-owned", "retail"],
-    description: "LGBTQ+ focused bookstore with a wide selection of queer literature, history, and art books."
+    description: "LGBTQ+ focused bookstore with a wide selection of queer literature, history, and art books.",
+    contact: {
+      phone: "+64 9 987 6543",
+      email: "books@unitybooks.co.nz",
+      website: "https://www.unitybooks.co.nz"
+    }
   },
   {
     id: "3",
@@ -190,7 +206,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf",
     tags: ["healthcare", "trans-care", "mental-health"],
-    description: "Specialized healthcare services for LGBTQ+ individuals including gender-affirming care and counseling."
+    description: "Specialized healthcare services for LGBTQ+ individuals including gender-affirming care and counseling.",
+    contact: {
+      phone: "+64 9 876 5432",
+      email: "care@rainbowhealth.org.nz",
+      website: "https://www.rainbowhealth.org.nz"
+    }
   },
   {
     id: "4",
@@ -207,7 +228,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a",
     tags: ["clothing", "pride-merchandise", "retail"],
-    description: "Gender-affirming clothing store with a focus on comfortable and stylish options for everyone."
+    description: "Gender-affirming clothing store with a focus on comfortable and stylish options for everyone.",
+    contact: {
+      phone: "+64 3 345 6789",
+      email: "shop@proudthreads.co.nz",
+      website: "https://www.proudthreads.co.nz"
+    }
   },
   {
     id: "5",
@@ -224,7 +250,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67",
     tags: ["nightlife", "dancing", "drag-shows"],
-    description: "Popular nightclub with inclusive atmosphere, regular drag shows, and themed party nights."
+    description: "Popular nightclub with inclusive atmosphere, regular drag shows, and themed party nights.",
+    contact: {
+      phone: "+64 9 234 5678",
+      email: "info@familybar.co.nz",
+      website: "https://www.familybar.co.nz"
+    }
   },
   {
     id: "6",
@@ -241,7 +272,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4",
     tags: ["community", "support", "events"],
-    description: "Community center offering resources, support, and social events for the LGBTQ+ community in Queenstown."
+    description: "Community center offering resources, support, and social events for the LGBTQ+ community in Queenstown.",
+    contact: {
+      phone: "+64 3 456 7890",
+      email: "hello@queenstownpride.org.nz",
+      website: "https://www.queenstownpride.org.nz"
+    }
   },
   {
     id: "7",
@@ -258,7 +294,12 @@ export const mockPlaces: Place[] = [
     verified: true,
     imageUrl: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8",
     tags: ["cafés", "coffee", "queer-owned"],
-    description: "Queer-owned coffee roastery and café with a welcoming atmosphere and locally sourced products."
+    description: "Queer-owned coffee roastery and café with a welcoming atmosphere and locally sourced products.",
+    contact: {
+      phone: "+64 3 567 8901",
+      email: "brew@arohacoffee.co.nz",
+      website: "https://www.arohacoffee.co.nz"
+    }
   }
 ];
 
