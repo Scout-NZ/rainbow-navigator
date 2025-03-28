@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MapPin, Plus, Store } from "lucide-react";
+import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,6 +30,26 @@ export default function DiscoverPage() {
         business.category.toLowerCase() === selectedCategory.toLowerCase() ||
         business.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()))
     : businesses;
+  
+  // Get appropriate icon for each category
+  const getCategoryIcon = (category: string) => {
+    switch(category.toLowerCase()) {
+      case 'cafés':
+        return <Coffee className="h-5 w-5" />;
+      case 'nightlife':
+        return <Music className="h-5 w-5" />;
+      case 'healthcare':
+        return <Heart className="h-5 w-5" />;
+      case 'retail':
+        return <ShoppingBag className="h-5 w-5" />;
+      case 'services':
+        return <Settings className="h-5 w-5" />;
+      case 'community':
+        return <Users className="h-5 w-5" />;
+      default:
+        return <MapPin className="h-5 w-5" />;
+    }
+  };
   
   return (
     <div className="pb-4">
@@ -110,7 +130,7 @@ export default function DiscoverPage() {
               >
                 <CardContent className="p-3 flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-rainbow-gradient flex items-center justify-center text-white">
-                    <Store className="h-5 w-5" />
+                    {getCategoryIcon(category)}
                   </div>
                   <span className="font-medium">{category}</span>
                 </CardContent>
