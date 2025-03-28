@@ -197,15 +197,20 @@ export function InteractiveMap({
         {/* Leaflet Map component */}
         <MapContainer
           style={containerStyle}
-          center={mapCenterPosition}
           zoom={zoom}
           ref={(map) => {
             if (map) mapRef.current = map;
           }}
+          // We need to use `center` as an attribute that gets passed to MapOptions
+          // rather than a React prop, so we use typescript assertion here
+          {...{center: mapCenterPosition} as any}
         >
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            // Fix the TileLayer props
+            {...{
+              url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            } as any}
           />
           
           {/* Controller to update map view when props change */}
@@ -217,13 +222,16 @@ export function InteractiveMap({
           {/* User location marker */}
           {userLocation && userLocationPosition && (
             <Marker
-              position={userLocationPosition}
-              icon={L.divIcon({
-                className: 'user-location-marker',
-                html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>',
-                iconSize: [16, 16],
-                iconAnchor: [8, 8],
-              })}
+              // Fix the Marker props 
+              {...{
+                position: userLocationPosition,
+                icon: L.divIcon({
+                  className: 'user-location-marker',
+                  html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>',
+                  iconSize: [16, 16],
+                  iconAnchor: [8, 8],
+                })
+              } as any}
             />
           )}
           
@@ -233,11 +241,14 @@ export function InteractiveMap({
             return (
               <Marker
                 key={place.id}
-                position={position}
-                icon={getMarkerIcon(place.type)}
-                eventHandlers={{
-                  click: () => handleMarkerClick(place),
-                }}
+                // Fix the Marker props
+                {...{
+                  position: position,
+                  icon: getMarkerIcon(place.type),
+                  eventHandlers: {
+                    click: () => handleMarkerClick(place),
+                  }
+                } as any}
               >
                 <Popup>
                   <div className="p-2 max-w-[200px]">
