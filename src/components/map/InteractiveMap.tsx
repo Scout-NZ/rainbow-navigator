@@ -9,6 +9,7 @@ import { LocationDetailsDialog } from "./LocationDetailsDialog";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { LatLngExpression } from 'leaflet';
 
 // Fix Leaflet marker icon issue
 // This is needed because Leaflet expects the marker icons to be in a specific location
@@ -163,6 +164,10 @@ export function InteractiveMap({
     }
   };
 
+  // Convert location objects to LatLngExpression for Leaflet
+  const mapCenterPosition: LatLngExpression = [mapCenter.lat, mapCenter.lng];
+  const userLocationPosition: LatLngExpression | undefined = userLocation ? [userLocation.lat, userLocation.lng] : undefined;
+
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
       <div className="p-3 bg-background border-b flex items-center gap-2">
@@ -192,15 +197,15 @@ export function InteractiveMap({
         {/* Leaflet Map component */}
         <MapContainer
           style={containerStyle}
+          center={mapCenterPosition}
           zoom={zoom}
-          center={[mapCenter.lat, mapCenter.lng]}
           ref={(map) => {
             if (map) mapRef.current = map;
           }}
         >
           <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           
           {/* Controller to update map view when props change */}
@@ -210,9 +215,9 @@ export function InteractiveMap({
           />
           
           {/* User location marker */}
-          {userLocation && (
+          {userLocation && userLocationPosition && (
             <Marker
-              position={[userLocation.lat, userLocation.lng]}
+              position={userLocationPosition}
               icon={L.divIcon({
                 className: 'user-location-marker',
                 html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>',
@@ -223,32 +228,35 @@ export function InteractiveMap({
           )}
           
           {/* Render markers for each place */}
-          {filteredPlaces.map((place) => (
-            <Marker
-              key={place.id}
-              position={[place.location.lat, place.location.lng]}
-              icon={getMarkerIcon(place.type)}
-              eventHandlers={{
-                click: () => handleMarkerClick(place),
-              }}
-            >
-              <Popup>
-                <div className="p-2 max-w-[200px]">
-                  <h3 className="font-semibold text-sm">{place.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{place.category}</p>
-                  <p className="text-xs mt-1">{place.location.address}, {place.location.city}</p>
-                  <Button 
-                    size="sm" 
-                    variant="link" 
-                    className="text-xs p-0 h-auto mt-1" 
-                    onClick={() => openLocationDetails(place)}
-                  >
-                    View Details
-                  </Button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+          {filteredPlaces.map((place) => {
+            const position: LatLngExpression = [place.location.lat, place.location.lng];
+            return (
+              <Marker
+                key={place.id}
+                position={position}
+                icon={getMarkerIcon(place.type)}
+                eventHandlers={{
+                  click: () => handleMarkerClick(place),
+                }}
+              >
+                <Popup>
+                  <div className="p-2 max-w-[200px]">
+                    <h3 className="font-semibold text-sm">{place.name}</h3>
+                    <p className="text-xs text-muted-foreground mt-1">{place.category}</p>
+                    <p className="text-xs mt-1">{place.location.address}, {place.location.city}</p>
+                    <Button 
+                      size="sm" 
+                      variant="link" 
+                      className="text-xs p-0 h-auto mt-1" 
+                      onClick={() => openLocationDetails(place)}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
         
         {/* Custom zoom controls */}
@@ -280,8 +288,7 @@ export function InteractiveMap({
       />
       
       {/* Add CSS for custom markers */}
-      <style>
-        {`
+      <style dangerouslySetInnerHTML={{ __html: `
         .marker-business {
           filter: hue-rotate(30deg);
         }
@@ -295,8 +302,7 @@ export function InteractiveMap({
           border-radius: 50%;
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
         }
-        `}
-      </style>
+      `}} />
     </div>
   );
 }
