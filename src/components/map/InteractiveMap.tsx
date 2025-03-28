@@ -52,7 +52,7 @@ function MapController({ center, zoom }: { center: { lat: number; lng: number },
   const map = useMap();
   
   useEffect(() => {
-    map.setView(center, zoom);
+    map.setView([center.lat, center.lng], zoom);
   }, [center, zoom, map]);
   
   return null;
@@ -191,11 +191,11 @@ export function InteractiveMap({
       <div className="relative flex-1 min-h-[300px]">
         {/* Leaflet Map component */}
         <MapContainer
-          center={[mapCenter.lat, mapCenter.lng]}
-          zoom={zoom}
           style={containerStyle}
-          whenCreated={(map) => {
-            mapRef.current = map;
+          zoom={zoom}
+          center={[mapCenter.lat, mapCenter.lng]}
+          ref={(map) => {
+            if (map) mapRef.current = map;
           }}
         >
           <TileLayer
@@ -280,7 +280,8 @@ export function InteractiveMap({
       />
       
       {/* Add CSS for custom markers */}
-      <style jsx global>{`
+      <style>
+        {`
         .marker-business {
           filter: hue-rotate(30deg);
         }
@@ -294,7 +295,8 @@ export function InteractiveMap({
           border-radius: 50%;
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 }
