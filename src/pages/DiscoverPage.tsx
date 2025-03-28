@@ -1,0 +1,150 @@
+
+import { useState } from "react";
+import { MapPin, Plus, Store } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InteractiveMap } from "@/components/map/InteractiveMap";
+import { mockPlaces } from "@/data/mockData";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+
+export default function DiscoverPage() {
+  const [showChat, setShowChat] = useState(false);
+  
+  // Filter businesses only
+  const businesses = mockPlaces.filter(place => place.type === 'business');
+  
+  return (
+    <div className="pb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-2xl font-bold rainbow-text">Discover</h1>
+        <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowChat(prev => !prev)}>
+          Ask AI
+        </Button>
+      </div>
+      
+      <InteractiveMap className="h-64 mb-6" />
+      
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Featured Locations</h2>
+          <Button variant="ghost" size="sm" className="text-primary">
+            View All
+          </Button>
+        </div>
+        
+        <ScrollArea className="w-full whitespace-nowrap pb-4">
+          <div className="flex gap-3">
+            {businesses.map(business => (
+              <Card key={business.id} className="min-w-[250px] max-w-[250px] card-hover">
+                <div 
+                  className="h-32 bg-muted bg-cover bg-center relative"
+                  style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                  <div className="absolute top-2 right-2">
+                    <Badge variant="outline" className="bg-white/90 text-black border-none">
+                      {business.category}
+                    </Badge>
+                  </div>
+                  <div className="absolute bottom-2 left-2">
+                    <h3 className="text-white font-semibold">{business.name}</h3>
+                  </div>
+                </div>
+                <CardContent className="p-3">
+                  <div className="flex items-center text-sm text-muted-foreground mb-2">
+                    <MapPin className="h-4 w-4 mr-1" />
+                    <span className="truncate">{business.location.address}</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {business.tags.slice(0, 2).map(tag => (
+                      <Badge key={tag} variant="secondary" className="text-xs">
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            
+            <div className="min-w-[250px] max-w-[250px] h-[180px] border border-dashed rounded-lg flex flex-col items-center justify-center">
+              <Plus className="h-8 w-8 text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground">Suggest a Location</p>
+              <Button variant="outline" size="sm" className="mt-2">Add Place</Button>
+            </div>
+          </div>
+        </ScrollArea>
+      </div>
+      
+      <Tabs defaultValue="categories">
+        <TabsList className="w-full mb-4">
+          <TabsTrigger value="categories" className="flex-1">Categories</TabsTrigger>
+          <TabsTrigger value="trending" className="flex-1">Trending</TabsTrigger>
+          <TabsTrigger value="nearby" className="flex-1">Nearby</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="categories" className="mt-0">
+          <div className="grid grid-cols-2 gap-3">
+            {["Cafés", "Nightlife", "Healthcare", "Retail", "Services", "Community"].map(category => (
+              <Card key={category} className="card-hover">
+                <CardContent className="p-3 flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-rainbow-gradient flex items-center justify-center text-white">
+                    <Store className="h-5 w-5" />
+                  </div>
+                  <span className="font-medium">{category}</span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="trending" className="mt-0">
+          <div className="space-y-3">
+            {businesses.slice(0, 3).map(business => (
+              <Card key={business.id} className="card-hover">
+                <CardContent className="p-3 flex gap-3">
+                  <div 
+                    className="h-16 w-16 bg-muted rounded-md bg-cover bg-center flex-shrink-0"
+                    style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{business.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{business.description}</p>
+                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span className="truncate">{business.location.address}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="nearby" className="mt-0">
+          <div className="space-y-3">
+            {businesses.slice(3, 6).map(business => (
+              <Card key={business.id} className="card-hover">
+                <CardContent className="p-3 flex gap-3">
+                  <div 
+                    className="h-16 w-16 bg-muted rounded-md bg-cover bg-center flex-shrink-0"
+                    style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
+                  />
+                  <div className="flex-1">
+                    <h3 className="font-semibold">{business.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-1">{business.description}</p>
+                    <div className="flex items-center text-xs text-muted-foreground mt-1">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <span className="truncate">{business.location.address}</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

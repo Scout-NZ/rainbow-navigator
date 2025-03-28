@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,7 +62,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				// Rainbow Navigator custom colors
+				rainbow: {
+					red: '#FF5757',
+					orange: '#FF914D',
+					yellow: '#FFDE59',
+					green: '#70CE88',
+					blue: '#5E9CF5',
+					indigo: '#9B87F5',
+					violet: '#D069C3',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -84,11 +95,24 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-rainbow': {
+					'0%, 100%': {
+						boxShadow: '0 0 0 0 rgba(155, 135, 245, 0.7)'
+					},
+					'50%': {
+						boxShadow: '0 0 0 10px rgba(155, 135, 245, 0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-rainbow': 'pulse-rainbow 2s infinite'
+			},
+			backgroundImage: {
+				'rainbow-gradient': 'linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)',
+				'rainbow-gradient-hover': 'linear-gradient(45deg, #FF3030, #FF7F1D, #FFCD00, #44B562, #2D7BFF, #8366FF, #C34AB0)',
 			}
 		}
 	},
