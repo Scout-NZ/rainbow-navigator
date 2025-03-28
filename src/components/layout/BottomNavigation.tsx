@@ -29,10 +29,12 @@ export function BottomNavigation() {
                 isActive ? "active" : "text-muted-foreground"
               )}
             >
-              <Icon 
-                className={isActive ? "text-primary h-6 w-6" : "h-6 w-6"} 
-                strokeWidth={isActive ? 2.5 : 2}
-              />
+              {/* Render the icon as a component without direct props */}
+              <div className={isActive ? "text-primary h-6 w-6" : "h-6 w-6"}>
+                <Icon 
+                  strokeWidth={isActive ? 2.5 : 2}
+                />
+              </div>
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
