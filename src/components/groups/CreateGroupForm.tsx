@@ -53,7 +53,7 @@ type FormValues = z.infer<typeof formSchema> & {
 export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
-  const { userId, createGroup } = useUser();
+  const { currentUser, createGroup } = useUser();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -82,8 +82,8 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         tags: values.tags, // This is now correctly typed as string[] after transformation
         memberCount: 1,
         imageUrl: imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}`,
-        members: [userId], // Initialize with current user as the first member
-        admins: [userId], // Initialize with current user as the admin
+        members: [currentUser.id], // Use currentUser.id instead of userId
+        admins: [currentUser.id], // Use currentUser.id instead of userId
       };
       
       // Add the new group to the mock data
