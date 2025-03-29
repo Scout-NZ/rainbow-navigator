@@ -123,6 +123,21 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (data) {
+          // Transform the social links from JSON to our expected format
+          const socialLinksData = data.sociallinks as Json;
+          let parsedSocialLinks: UserProfile['socialLinks'] = {};
+          
+          if (socialLinksData && typeof socialLinksData === 'object') {
+            parsedSocialLinks = {
+              instagram: (socialLinksData as any).instagram,
+              facebook: (socialLinksData as any).facebook,
+              twitter: (socialLinksData as any).twitter,
+              spotify: (socialLinksData as any).spotify,
+              tiktok: (socialLinksData as any).tiktok,
+              linkedin: (socialLinksData as any).linkedin,
+            };
+          }
+          
           const profileData: UserProfile = {
             id: data.id,
             name: data.name || user.email?.split('@')[0] || 'User',
@@ -133,11 +148,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             pronouns: data.pronouns,
             gender: data.gender,
             interests: data.interests || [],
-            imageUrl: data.imageurl, // Changed from imageUrl to imageurl to match the database column
+            imageUrl: data.imageurl, // Changed to match database column name
             friends: data.friends || 0,
             groups: data.groups || 0,
             events: data.events || 0,
-            socialLinks: data.sociallinks || {}, // Changed from socialLinks to sociallinks to match the database column
+            socialLinks: parsedSocialLinks,
           };
           
           setUserProfile(profileData);
@@ -235,6 +250,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // If authenticated, update the profile in Supabase
     if (user) {
       try {
+        // Convert our socialLinks object to the format expected by the database
+        const socialLinks = newProfile.socialLinks || {};
+        
         const { error } = await supabase
           .from('profiles')
           .update({
@@ -246,8 +264,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             pronouns: newProfile.pronouns,
             gender: newProfile.gender,
             interests: newProfile.interests,
-            imageurl: newProfile.imageUrl, // Changed from imageUrl to imageurl to match the database column
-            sociallinks: newProfile.socialLinks, // Changed from socialLinks to sociallinks to match the database column
+            imageurl: newProfile.imageUrl, // Changed to match database column name
+            sociallinks: socialLinks, // Changed to match database column name
           })
           .eq('id', user.id);
 
