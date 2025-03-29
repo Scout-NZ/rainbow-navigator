@@ -18,6 +18,8 @@ export default function AdminPage() {
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -82,13 +84,11 @@ export default function AdminPage() {
     setMagicLinkSent(false);
     
     try {
-      // Use signInWithOtp with no redirects to avoid the localhost issue
+      // Use signInWithOtp with no redirects and no email redirects
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          // Explicitly disable redirects
           shouldCreateUser: true,
-          emailRedirectTo: undefined
         }
       });
       
@@ -97,17 +97,51 @@ export default function AdminPage() {
       setMagicLinkSent(true);
       toast({
         title: "Check your email",
-        description: "We've sent you a magic link. Enter the code from the email below when you receive it.",
+        description: "We've sent you an email with a verification code. Enter that code below when you receive it.",
       });
     } catch (error: any) {
       setAuthError(error.message || "An error occurred during sign in");
       toast({
-        title: "Error sending magic link",
+        title: "Error sending verification code",
         description: error.message || "An error occurred during sign in",
         variant: "destructive",
       });
     } finally {
       setIsSigningIn(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!email || !otpCode) {
+      setAuthError("Email and verification code are required");
+      return;
+    }
+
+    setAuthError(null);
+    setVerifyingOtp(true);
+    
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token: otpCode,
+        type: 'email'
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Verified successfully",
+        description: `Welcome, ${data.user?.email}!`,
+      });
+    } catch (error: any) {
+      setAuthError(error.message || "Invalid or expired verification code");
+      toast({
+        title: "Verification failed",
+        description: error.message || "Invalid or expired verification code",
+        variant: "destructive",
+      });
+    } finally {
+      setVerifyingOtp(false);
     }
   };
 
@@ -165,13 +199,31 @@ export default function AdminPage() {
               </div>
               
               {magicLinkSent ? (
-                <Alert>
-                  <InfoIcon className="h-4 w-4" />
-                  <AlertTitle>Magic Link Sent</AlertTitle>
-                  <AlertDescription>
-                    Check your email for the magic link. If you don't see it, check your spam folder.
-                  </AlertDescription>
-                </Alert>
+                <>
+                  <Alert>
+                    <InfoIcon className="h-4 w-4" />
+                    <AlertTitle>Verification Code Sent</AlertTitle>
+                    <AlertDescription>
+                      Check your email for the verification code. If you don't see it, check your spam folder.
+                    </AlertDescription>
+                  </Alert>
+                  <div className="space-y-2 mt-4">
+                    <Label htmlFor="otpCode">Verification Code</Label>
+                    <Input
+                      id="otpCode"
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value)}
+                      placeholder="Enter verification code"
+                    />
+                    <Button 
+                      onClick={handleVerifyOtp}
+                      className="w-full mt-2"
+                      disabled={verifyingOtp || !otpCode}>
+                      {verifyingOtp ? "Verifying..." : "Verify Code"}
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
@@ -187,17 +239,21 @@ export default function AdminPage() {
             </form>
           </CardContent>
           <CardFooter className="flex justify-between">
-            <Button 
-              onClick={handleMagicLinkSignIn} 
-              variant="outline" 
-              disabled={isSigningIn || !email || magicLinkSent}>
-              {isSigningIn ? "Sending..." : magicLinkSent ? "Link Sent" : "Sign in with Magic Link"}
-            </Button>
-            <Button 
-              onClick={handlePasswordSignIn} 
-              disabled={isSigningIn || !email || !password}>
-              {isSigningIn ? "Signing in..." : "Sign in with Password"}
-            </Button>
+            {!magicLinkSent && (
+              <>
+                <Button 
+                  onClick={handleMagicLinkSignIn} 
+                  variant="outline" 
+                  disabled={isSigningIn || !email}>
+                  {isSigningIn ? "Sending..." : "Sign in with Email"}
+                </Button>
+                <Button 
+                  onClick={handlePasswordSignIn} 
+                  disabled={isSigningIn || !email || !password}>
+                  {isSigningIn ? "Signing in..." : "Sign in with Password"}
+                </Button>
+              </>
+            )}
           </CardFooter>
         </Card>
       ) : (
