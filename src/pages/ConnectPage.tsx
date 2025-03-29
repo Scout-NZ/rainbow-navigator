@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MessageCircle, Plus, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,9 +10,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
 
 export default function ConnectPage() {
   const [filter, setFilter] = useState("");
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
   
   const filteredGroups = mockGroups.filter(group => 
     group.name.toLowerCase().includes(filter.toLowerCase()) ||
@@ -27,6 +31,7 @@ export default function ConnectPage() {
         <Button 
           size="sm" 
           className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+          onClick={() => setOpenCreateDialog(true)}
         >
           <Plus className="h-4 w-4 mr-2" />
           Create Group
@@ -54,7 +59,11 @@ export default function ConnectPage() {
           
           <div className="flex justify-between items-center">
             <h2 className="text-lg font-semibold text-white">Popular Groups</h2>
-            <Button variant="outline" size="sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setOpenCreateDialog(true)}
+            >
               <Plus className="h-4 w-4 mr-2" />
               Create Group
             </Button>
@@ -184,6 +193,16 @@ export default function ConnectPage() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Create Group Dialog */}
+      <Dialog open={openCreateDialog} onOpenChange={setOpenCreateDialog}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create a New Group</DialogTitle>
+          </DialogHeader>
+          <CreateGroupForm onSuccess={() => setOpenCreateDialog(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
