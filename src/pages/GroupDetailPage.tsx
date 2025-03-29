@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Lock, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,10 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
+  const { toast } = useToast();
   
   const group = mockGroups.find(g => g.id === groupId);
   
@@ -24,6 +27,16 @@ export default function GroupDetailPage() {
       </div>
     );
   }
+
+  const handleJoinGroup = () => {
+    console.log("Joining group:", group.name);
+    
+    // In a real app, this would be an API call to join the group
+    toast({
+      title: "Group joined!",
+      description: `You have successfully joined ${group.name}`,
+    });
+  };
   
   return (
     <div className="pb-6">
@@ -74,7 +87,10 @@ export default function GroupDetailPage() {
             </Badge>
           ))}
         </div>
-        <Button className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
+        <Button 
+          className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+          onClick={handleJoinGroup}
+        >
           Join Group
         </Button>
       </div>
@@ -115,7 +131,10 @@ export default function GroupDetailPage() {
             <p className="text-muted-foreground mb-4">
               Join this group to participate in discussions
             </p>
-            <Button className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
+            <Button 
+              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+              onClick={handleJoinGroup}
+            >
               Join Group
             </Button>
           </Card>
