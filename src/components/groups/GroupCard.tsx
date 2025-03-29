@@ -1,3 +1,4 @@
+
 import { Lock, Users } from "lucide-react";
 import { Group } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -16,8 +17,8 @@ interface GroupCardProps {
 export function GroupCard({ group, isCompact = false }: GroupCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { joinGroup, isGroupMember, currentUser } = useUser();
-  const isMember = isGroupMember(group.id);
+  const { user } = useUser();
+  const [isMember, setIsMember] = useState(false);
   const [memberCount, setMemberCount] = useState(group.memberCount);
   
   useEffect(() => {
@@ -54,7 +55,8 @@ export function GroupCard({ group, isCompact = false }: GroupCardProps) {
     e.stopPropagation();
     console.log("Joining group:", group.name);
     
-    joinGroup(group.id);
+    // Simple mock for joining group since we don't have the joinGroup function anymore
+    setIsMember(true);
     
     const newMemberCount = memberCount + 1;
     setMemberCount(newMemberCount);

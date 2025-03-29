@@ -50,11 +50,11 @@ export function AppLayout() {
             <Link to="/profile" className="flex items-center">
               <Avatar className="h-10 w-10 border-2 border-white">
                 <AvatarImage 
-                  src={user?.user_metadata?.avatar_url || ""}
-                  alt={user?.user_metadata?.name || "User"} 
+                  src={user?.avatar || ""}
+                  alt={user?.name || "User"} 
                 />
                 <AvatarFallback>
-                  {user?.user_metadata?.name ? user.user_metadata.name.substring(0, 2).toUpperCase() : "U"}
+                  {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
             </Link>
