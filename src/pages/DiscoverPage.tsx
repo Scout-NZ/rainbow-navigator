@@ -113,7 +113,7 @@ export default function DiscoverPage() {
           <h2 className="text-xl font-bold">Featured Trending</h2>
           <div className="flex gap-2">
             <Button variant="secondary" size="sm">Added Recently</Button>
-            <Button variant="primary" size="sm">Most Visited</Button>
+            <Button variant="default" size="sm">Most Visited</Button>
           </div>
         </div>
         

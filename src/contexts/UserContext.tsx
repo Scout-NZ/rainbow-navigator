@@ -1,433 +1,372 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { mockUserProfile } from '@/data/mockData';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
-import { useToast } from '@/hooks/use-toast';
-import { Json } from '@/integrations/supabase/types';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { mockUserProfile, mockGroups, mockEvents } from "@/data/mockData";
+import { toast } from "@/components/ui/use-toast";
 
-type UserProfile = {
+interface UserProfile {
   id: string;
   name: string;
-  username?: string;
-  bio?: string;
-  location?: string;
-  identity?: string;
-  pronouns?: string;
-  gender?: string;
+  username: string;
+  email: string;
+  avatar: string;
+  coverPhoto: string;
+  bio: string;
+  location: string;
+  pronouns: string;
+  identities: string[];
   interests: string[];
-  imageUrl?: string;
-  friends: number;
-  groups: number;
-  events: number;
-  socialLinks?: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-    spotify?: string;
-    tiktok?: string;
-    linkedin?: string;
+  joinDate: string;
+  badges: string[];
+  socialLinks: {
+    instagram: string;
+    twitter: string;
+    website: string;
   };
-};
+  settings: {
+    privacy: string;
+    notifications: boolean;
+    theme: string;
+  };
+  friends: string[];
+  groups: string[];
+  events: string[];
+}
 
-type UserContextType = {
+interface AuthSession {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
+  refresh_token: string;
+  user: {
+    id: string;
+    app_metadata: Record<string, any>;
+    user_metadata: Record<string, any>;
+    aud: string;
+    email?: string;
+  };
+}
+
+interface UserContextType {
+  user: UserProfile | null;
+  session: AuthSession | null;
   loading: boolean;
-  session: Session | null;
-  user: User | null;
-  currentUser: { id: string; name: string };
-  joinedGroups: string[];
-  adminGroups: string[];
-  joinGroup: (groupId: string) => void;
-  leaveGroup: (groupId: string) => void;
-  isGroupMember: (groupId: string) => boolean;
-  isGroupAdmin: (groupId: string) => boolean;
-  createGroup: (groupId: string) => void;
-  userProfile: UserProfile;
-  updateUserProfile: (updatedProfile: Partial<UserProfile>) => Promise<void>;
   signOut: () => Promise<void>;
-};
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  joinGroup: (groupId: string) => Promise<void>;
+  leaveGroup: (groupId: string) => Promise<void>;
+  attendEvent: (eventId: string) => Promise<void>;
+  cancelEventAttendance: (eventId: string) => Promise<void>;
+  addFriend: (friendId: string) => Promise<void>;
+  removeFriend: (friendId: string) => Promise<void>;
+  isFriend: (userId: string) => boolean;
+  isInGroup: (groupId: string) => boolean;
+  isAttendingEvent: (eventId: string) => boolean;
+}
 
-const defaultUserContext: UserContextType = {
-  loading: true,
-  session: null,
-  user: null,
-  currentUser: { id: mockUserProfile.id, name: mockUserProfile.name },
-  joinedGroups: [],
-  adminGroups: [],
-  joinGroup: () => {},
-  leaveGroup: () => {},
-  isGroupMember: () => false,
-  isGroupAdmin: () => false,
-  createGroup: () => {},
-  userProfile: mockUserProfile,
-  updateUserProfile: async () => {},
-  signOut: async () => {},
-};
-
-const UserContext = createContext<UserContextType>(defaultUserContext);
-
-export const useUser = () => useContext(UserContext);
+const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [session, setSession] = useState<AuthSession | null>(null);
   const [loading, setLoading] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
-  const [adminGroups, setAdminGroups] = useState<string[]>([]);
-  const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
-  const [profileError, setProfileError] = useState<string | null>(null);
-  const { toast } = useToast();
 
-  // Listen for auth state changes
+  // Mock user for development
+  const mockUser: UserProfile = {
+    id: String(mockUserProfile.id),
+    name: mockUserProfile.name,
+    username: mockUserProfile.username,
+    email: mockUserProfile.email || "",
+    avatar: mockUserProfile.avatar,
+    coverPhoto: mockUserProfile.coverPhoto,
+    bio: mockUserProfile.bio,
+    location: mockUserProfile.location,
+    pronouns: mockUserProfile.pronouns,
+    identities: mockUserProfile.identities,
+    interests: mockUserProfile.interests,
+    joinDate: mockUserProfile.joinDate,
+    badges: mockUserProfile.badges,
+    socialLinks: mockUserProfile.socialLinks,
+    settings: mockUserProfile.settings,
+    friends: ["2", "3"],
+    groups: ["1", "4"],
+    events: ["1", "3"]
+  };
+
   useEffect(() => {
-    console.log('Setting up auth state listener');
-    
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, newSession) => {
-        console.log('Auth state changed:', event, newSession?.user?.id);
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        
-        // Don't fetch profile here - will be done in another effect
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      console.log('Initial session check:', initialSession?.user?.id);
-      setSession(initialSession);
-      setUser(initialSession?.user ?? null);
-      setLoading(false);
-    });
-
-    // Set up message listener for popup authentication
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
-      
-      if (event.data.type === 'AUTH_COMPLETE') {
-        console.log('Received auth complete message from popup', event.data);
-        if (event.data.success) {
-          window.location.reload(); // Reload to get the updated session
-        } else {
-          toast({
-            title: 'Authentication Error',
-            description: event.data.error || 'Failed to complete authentication',
-            variant: 'destructive',
-          });
-        }
-      }
-    };
-    
-    window.addEventListener('message', handleMessage);
-
-    return () => {
-      subscription.unsubscribe();
-      window.removeEventListener('message', handleMessage);
-    };
-  }, [toast]);
-
-  // Fetch user profile when user changes
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!user) {
-        // If not logged in, use mock data for demo purposes
-        setUserProfile(mockUserProfile);
-        setProfileError(null);
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      setProfileError(null);
-
+    async function getSession() {
       try {
-        console.log('Fetching profile for user:', user.id);
-        
-        // First, check if the profile exists
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .maybeSingle();
+        const { data, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('Error fetching user profile:', error);
-          throw error;
+          console.error("Error fetching session:", error.message);
+          setUser(mockUser); // For development, use mock data
+          setLoading(false);
+          return;
         }
-        
-        if (!data) {
-          console.log('Profile not found in UserContext, creating new profile for user:', user.id);
+
+        if (data?.session) {
+          setSession(data.session as AuthSession);
           
-          // Extract user details from auth metadata
-          let fullName = user.user_metadata?.full_name || 
-                         user.user_metadata?.name || 
-                         user.user_metadata?.preferred_username;
-          let userEmail = user.email;
-          
-          console.log('User metadata available:', user.user_metadata);
-          
-          // Create username from email if available
-          const userName = userEmail?.split('@')[0] || 'user';
-          
-          // Profile doesn't exist, create one
-          const newProfile = {
-            id: user.id,
-            name: fullName || userName,
-            username: userName,
-            interests: [],
-            friends: 0,
-            groups: 0,
-            events: 0,
-          };
-          
-          console.log('Creating new profile:', newProfile);
-          
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert([newProfile]);
-              
-          if (insertError) {
-            console.error('Error creating profile in UserContext:', insertError);
-            throw insertError;
+          // Fetch user profile from Supabase
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", data.session.user.id)
+            .single();
+
+          if (profileError || !profileData) {
+            console.log("No profile found, using mock data for development");
+            setUser(mockUser); // For development, use mock data
+          } else {
+            setUser(profileData as UserProfile);
           }
-          
-          setUserProfile({
-            ...mockUserProfile,
-            ...newProfile,
-            id: user.id,
-          });
-          
-          console.log('New profile created in UserContext');
         } else {
-          // Transform the social links from JSON to our expected format
-          const socialLinksData = data.sociallinks as Json;
-          let parsedSocialLinks: UserProfile['socialLinks'] = {};
-          
-          if (socialLinksData && typeof socialLinksData === 'object') {
-            parsedSocialLinks = {
-              instagram: (socialLinksData as any).instagram,
-              facebook: (socialLinksData as any).facebook,
-              twitter: (socialLinksData as any).twitter,
-              spotify: (socialLinksData as any).spotify,
-              tiktok: (socialLinksData as any).tiktok,
-              linkedin: (socialLinksData as any).linkedin,
-            };
-          }
-          
-          const profileData: UserProfile = {
-            id: data.id,
-            name: data.name || user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            username: data.username,
-            bio: data.bio,
-            location: data.location,
-            identity: data.identity,
-            pronouns: data.pronouns,
-            gender: data.gender,
-            interests: data.interests || [],
-            imageUrl: data.imageurl, // Changed to match database column name
-            friends: data.friends || 0,
-            groups: data.groups || 0,
-            events: data.events || 0,
-            socialLinks: parsedSocialLinks,
-          };
-          
-          console.log('Profile data loaded in UserContext:', profileData.name);
-          setUserProfile(profileData);
+          // No session found, use mock data for development
+          setUser(mockUser);
         }
-      } catch (error: any) {
-        console.error('Failed to fetch profile in UserContext:', error);
-        setProfileError('Failed to load user profile');
-        
-        // Show error but also try to create a basic profile as fallback
-        if (user) {
-          const fallbackProfile = {
-            id: user.id,
-            name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            username: user.email?.split('@')[0] || 'user',
-            interests: [],
-            friends: 0,
-            groups: 0,
-            events: 0,
-          };
-          
-          setUserProfile({
-            ...mockUserProfile,
-            ...fallbackProfile,
-          });
-          
-          console.log('Using fallback profile in UserContext');
-        }
-        
-        toast({
-          title: 'Error',
-          description: 'Failed to load user profile. Please try refreshing the page.',
-          variant: 'destructive',
-        });
+      } catch (error) {
+        console.error("Session check error:", error);
+        setUser(mockUser); // For development, use mock data
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchUserProfile();
-  }, [user, toast]);
-
-  // Load initial joined groups from mockData
-  useEffect(() => {
-    import('@/data/mockData').then(({ mockGroups }) => {
-      const userJoinedGroups = mockGroups
-        .filter(group => group.members.includes(userProfile.id))
-        .map(group => group.id);
-      
-      const userAdminGroups = mockGroups
-        .filter(group => group.admins.includes(userProfile.id))
-        .map(group => group.id);
-      
-      setJoinedGroups(userJoinedGroups);
-      setAdminGroups(userAdminGroups);
-    });
-  }, [userProfile.id]);
-
-  const currentUser = { 
-    id: user?.id || mockUserProfile.id,
-    name: userProfile.name || user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
-  };
-
-  const joinGroup = (groupId: string) => {
-    if (!joinedGroups.includes(groupId)) {
-      setJoinedGroups([...joinedGroups, groupId]);
-      
-      // In a real app, we would update the backend here
-      import('@/data/mockData').then(({ mockGroups }) => {
-        const groupIndex = mockGroups.findIndex(g => g.id === groupId);
-        if (groupIndex !== -1) {
-          if (!mockGroups[groupIndex].members.includes(currentUser.id)) {
-            mockGroups[groupIndex].members.push(currentUser.id);
-            mockGroups[groupIndex].memberCount += 1;
-          }
-        }
-      });
     }
-  };
 
-  const leaveGroup = (groupId: string) => {
-    setJoinedGroups(joinedGroups.filter(id => id !== groupId));
-    
-    // In a real app, we would update the backend here
-    import('@/data/mockData').then(({ mockGroups }) => {
-      const groupIndex = mockGroups.findIndex(g => g.id === groupId);
-      if (groupIndex !== -1) {
-        mockGroups[groupIndex].members = mockGroups[groupIndex].members.filter(id => id !== currentUser.id);
-        mockGroups[groupIndex].memberCount = Math.max(0, mockGroups[groupIndex].memberCount - 1);
-      }
-    });
-  };
+    getSession();
 
-  const createGroup = (groupId: string) => {
-    joinGroup(groupId);
-    setAdminGroups([...adminGroups, groupId]);
-    
-    // In a real app, we would update the backend here
-    import('@/data/mockData').then(({ mockGroups }) => {
-      const groupIndex = mockGroups.findIndex(g => g.id === groupId);
-      if (groupIndex !== -1 && !mockGroups[groupIndex].admins.includes(currentUser.id)) {
-        mockGroups[groupIndex].admins.push(currentUser.id);
-      }
-    });
-  };
-
-  const isGroupMember = (groupId: string) => joinedGroups.includes(groupId);
-  const isGroupAdmin = (groupId: string) => adminGroups.includes(groupId);
-
-  // Update profile function that saves to Supabase
-  const updateUserProfile = async (updatedProfile: Partial<UserProfile>) => {
-    const newProfile = { ...userProfile, ...updatedProfile };
-    setUserProfile(newProfile);
-    
-    // Save to localStorage for persistence in demo mode
-    localStorage.setItem('userProfile', JSON.stringify(newProfile));
-    
-    // If authenticated, update the profile in Supabase
-    if (user) {
-      try {
-        // Convert our socialLinks object to the format expected by the database
-        const socialLinks = newProfile.socialLinks || {};
+    // Subscribe to auth changes
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        setSession(newSession as AuthSession | null);
         
-        const { error } = await supabase
-          .from('profiles')
-          .update({
-            name: newProfile.name,
-            username: newProfile.username,
-            bio: newProfile.bio,
-            location: newProfile.location,
-            identity: newProfile.identity,
-            pronouns: newProfile.pronouns,
-            gender: newProfile.gender,
-            interests: newProfile.interests,
-            imageurl: newProfile.imageUrl, // Changed to match database column name
-            sociallinks: socialLinks, // Changed to match database column name
-          })
-          .eq('id', user.id);
+        if (event === "SIGNED_IN" && newSession) {
+          // Fetch user profile from Supabase
+          const { data: profileData, error: profileError } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", newSession.user.id)
+            .single();
 
-        if (error) {
-          console.error('Error updating profile:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to update profile.',
-            variant: 'destructive',
-          });
-          throw error;
+          if (profileError || !profileData) {
+            console.log("No profile found or error:", profileError?.message);
+            setUser(mockUser); // For development, use mock data
+          } else {
+            setUser(profileData as UserProfile);
+          }
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
         }
-
-        toast({
-          title: 'Profile updated',
-          description: 'Your profile has been successfully updated.',
-        });
-      } catch (error) {
-        console.error('Error updating profile:', error);
       }
-    }
-  };
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error('Error signing out:', error);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
       toast({
-        title: 'Error',
-        description: 'Failed to sign out.',
-        variant: 'destructive',
+        title: "Signed out successfully",
       });
-    } else {
-      // Reset to demo data when logged out
-      setUserProfile(mockUserProfile);
+    } catch (error) {
+      console.error("Error signing out:", error);
       toast({
-        title: 'Signed out',
-        description: 'You have been signed out successfully.',
+        title: "Error signing out",
+        variant: "destructive",
       });
     }
   };
 
-  return (
-    <UserContext.Provider
-      value={{
-        loading,
-        session,
-        user,
-        currentUser,
-        joinedGroups,
-        adminGroups,
-        joinGroup,
-        leaveGroup,
-        isGroupMember,
-        isGroupAdmin,
-        createGroup,
-        userProfile,
-        updateUserProfile,
-        signOut,
-      }}
-    >
-      {children}
-    </UserContext.Provider>
-  );
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the profile in Supabase
+      // For now, just update the local state
+      setUser({ ...user, ...updates });
+      
+      toast({
+        title: "Profile updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error updating profile",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const joinGroup = async (groupId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the groups in Supabase
+      // For now, just update the local state
+      const updatedGroups = [...user.groups, groupId];
+      setUser({ ...user, groups: updatedGroups });
+      
+      toast({
+        title: "Joined group successfully",
+      });
+    } catch (error) {
+      console.error("Error joining group:", error);
+      toast({
+        title: "Error joining group",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const leaveGroup = async (groupId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the groups in Supabase
+      // For now, just update the local state
+      const updatedGroups = user.groups.filter(g => g !== groupId);
+      setUser({ ...user, groups: updatedGroups });
+      
+      toast({
+        title: "Left group successfully",
+      });
+    } catch (error) {
+      console.error("Error leaving group:", error);
+      toast({
+        title: "Error leaving group",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const attendEvent = async (eventId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the events in Supabase
+      // For now, just update the local state
+      const updatedEvents = [...user.events, eventId];
+      setUser({ ...user, events: updatedEvents });
+      
+      toast({
+        title: "Attending event successfully",
+      });
+    } catch (error) {
+      console.error("Error attending event:", error);
+      toast({
+        title: "Error attending event",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const cancelEventAttendance = async (eventId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the events in Supabase
+      // For now, just update the local state
+      const updatedEvents = user.events.filter(e => e !== eventId);
+      setUser({ ...user, events: updatedEvents });
+      
+      toast({
+        title: "Canceled event attendance successfully",
+      });
+    } catch (error) {
+      console.error("Error canceling event attendance:", error);
+      toast({
+        title: "Error canceling event attendance",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const addFriend = async (friendId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the friends in Supabase
+      // For now, just update the local state
+      const updatedFriends = [...user.friends, friendId];
+      setUser({ ...user, friends: updatedFriends });
+      
+      toast({
+        title: "Added friend successfully",
+      });
+    } catch (error) {
+      console.error("Error adding friend:", error);
+      toast({
+        title: "Error adding friend",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const removeFriend = async (friendId: string) => {
+    if (!user) return;
+    
+    try {
+      // In a real app, update the friends in Supabase
+      // For now, just update the local state
+      const updatedFriends = user.friends.filter(f => f !== friendId);
+      setUser({ ...user, friends: updatedFriends });
+      
+      toast({
+        title: "Removed friend successfully",
+      });
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      toast({
+        title: "Error removing friend",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const isFriend = (userId: string) => {
+    if (!user) return false;
+    return user.friends.includes(userId);
+  };
+
+  const isInGroup = (groupId: string) => {
+    if (!user) return false;
+    return user.groups.includes(groupId);
+  };
+
+  const isAttendingEvent = (eventId: string) => {
+    if (!user) return false;
+    return user.events.includes(eventId);
+  };
+
+  const value = {
+    user,
+    session,
+    loading,
+    signOut,
+    updateProfile,
+    joinGroup,
+    leaveGroup,
+    attendEvent,
+    cancelEventAttendance,
+    addFriend,
+    removeFriend,
+    isFriend,
+    isInGroup,
+    isAttendingEvent,
+  };
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
+};
+
+export const useUser = () => {
+  const context = useContext(UserContext);
+  if (context === undefined) {
+    throw new Error("useUser must be used within a UserProvider");
+  }
+  return context;
 };

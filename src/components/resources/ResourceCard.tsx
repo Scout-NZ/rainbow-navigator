@@ -1,3 +1,4 @@
+
 import { ExternalLink, MapPin, Phone } from "lucide-react";
 import { Resource } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -13,18 +14,7 @@ import {
 import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-// Update the Resource type to include optional neighbourhood
-type ResourceWithNeighbourhood = Resource & {
-  location?: {
-    address: string;
-    city: string;
-    lat: number;
-    lng: number;
-    neighbourhood?: string;
-  };
-};
-
-export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood }) {
+export function ResourceCard({ resource }: { resource: Resource }) {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
@@ -37,7 +27,7 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
                 {resource.category}
               </Badge>
               <h3 className="font-semibold line-clamp-1">{resource.title}</h3>
-              <p className="text-sm text-muted-foreground">{resource.provider}</p>
+              <p className="text-sm text-muted-foreground">{resource.provider || resource.source}</p>
             </div>
             
             {resource.imageUrl && (
@@ -58,14 +48,14 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
               </div>
             )}
             
-            {resource.contact.phone && (
+            {resource.contact?.phone && (
               <div className="flex items-center text-sm">
                 <Phone className="h-4 w-4 mr-2 text-primary" />
                 <span>{resource.contact.phone}</span>
               </div>
             )}
             
-            {resource.contact.website && (
+            {resource.contact?.website && (
               <div className="flex items-center text-sm">
                 <ExternalLink className="h-4 w-4 mr-2 text-primary" />
                 <a href="#" className="text-primary hover:underline truncate">
@@ -100,14 +90,14 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
                 <Button 
                   size="sm" 
                   className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                  onClick={() => window.open(`tel:${resource.contact.phone}`)}
-                  disabled={!resource.contact.phone}
+                  onClick={() => resource.contact?.phone && window.open(`tel:${resource.contact.phone}`)}
+                  disabled={!resource.contact?.phone}
                 >
                   Contact
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                {resource.contact.phone ? `Call ${resource.contact.phone}` : "No contact information available"}
+                {resource.contact?.phone ? `Call ${resource.contact.phone}` : "No contact information available"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -119,7 +109,7 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
           <DialogHeader>
             <DialogTitle className="text-xl font-bold">{resource.title}</DialogTitle>
             <DialogDescription className="text-muted-foreground">
-              {resource.provider}
+              {resource.provider || resource.source}
             </DialogDescription>
           </DialogHeader>
           
@@ -153,7 +143,7 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
             <div>
               <h4 className="text-sm font-semibold mb-1">Contact Information</h4>
               
-              {resource.contact.phone && (
+              {resource.contact?.phone && (
                 <div className="flex items-center text-sm mb-2">
                   <Phone className="h-4 w-4 mr-2 text-primary" />
                   <a 
@@ -165,7 +155,7 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
                 </div>
               )}
               
-              {resource.contact.email && (
+              {resource.contact?.email && (
                 <div className="flex items-center text-sm mb-2">
                   <ExternalLink className="h-4 w-4 mr-2 text-primary" />
                   <a 
@@ -177,7 +167,7 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
                 </div>
               )}
               
-              {resource.contact.website && (
+              {resource.contact?.website && (
                 <div className="flex items-center text-sm">
                   <ExternalLink className="h-4 w-4 mr-2 text-primary" />
                   <a 
@@ -210,15 +200,15 @@ export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood
             <Button 
               className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
               onClick={() => {
-                if (resource.contact.website) {
+                if (resource.contact?.website) {
                   window.open(resource.contact.website, '_blank');
-                } else if (resource.contact.phone) {
+                } else if (resource.contact?.phone) {
                   window.open(`tel:${resource.contact.phone}`);
-                } else if (resource.contact.email) {
+                } else if (resource.contact?.email) {
                   window.open(`mailto:${resource.contact.email}`);
                 }
               }}
-              disabled={!resource.contact.website && !resource.contact.phone && !resource.contact.email}
+              disabled={!resource.contact?.website && !resource.contact?.phone && !resource.contact?.email}
             >
               Contact
             </Button>

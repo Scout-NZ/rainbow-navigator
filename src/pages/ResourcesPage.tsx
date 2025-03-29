@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResourceCard } from "@/components/resources/ResourceCard";
-import { mockResources } from "@/data/mockData";
+import { mockResources, Resource } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
@@ -16,27 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-type CombinedResource = {
-  id: string;
-  title: string;
-  category: string;
-  provider: string;
-  description: string;
-  contact: {
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-  location?: {
-    address: string;
-    city: string;
-    lat: number;
-    lng: number;
-    neighbourhood?: string;
-  };
-  tags: string[];
-  imageUrl?: string;
-};
+type CombinedResource = Resource;
 
 const healthcareTags = [
   "All", 
@@ -93,7 +73,7 @@ export default function ResourcesPage() {
 
         console.log("Fetched healthcare locations:", locations);
 
-        const healthcareResources = locations.map(location => ({
+        const healthcareResources: CombinedResource[] = locations.map(location => ({
           id: location.id,
           title: location.name,
           category: "Healthcare",
@@ -113,11 +93,21 @@ export default function ResourcesPage() {
           },
           tags: location.tags || ["healthcare"],
           imageUrl: location.image_url,
+          url: location.website || "",
+          source: "database",
+          featured: false,
+          createdAt: new Date().toISOString(),
         }));
 
-        const otherCategoryResources = mockResources.filter(
+        const otherCategoryResources: CombinedResource[] = mockResources.filter(
           resource => resource.category.toLowerCase() !== "healthcare"
-        );
+        ).map(resource => ({
+          ...resource,
+          provider: resource.source,
+          contact: {
+            website: resource.url
+          }
+        }));
         
         setResources([...healthcareResources, ...otherCategoryResources]);
       } catch (error) {
@@ -262,7 +252,7 @@ export default function ResourcesPage() {
                   {filteredHealthcareResources.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {filteredHealthcareResources.map(resource => (
-                        <ResourceCard key={resource.id} resource={resource} />
+                        <ResourceCard key={String(resource.id)} resource={resource} />
                       ))}
                     </div>
                   ) : (
@@ -294,7 +284,7 @@ export default function ResourcesPage() {
                       {categoryResources.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {categoryResources.map(resource => (
-                            <ResourceCard key={resource.id} resource={resource} />
+                            <ResourceCard key={String(resource.id)} resource={resource} />
                           ))}
                         </div>
                       ) : (
@@ -392,7 +382,7 @@ export default function ResourcesPage() {
           <h3 className="text-lg font-semibold mb-3">Emergency Resources</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {mockResources.filter(r => r.category === "Mental Health" || r.category === "Healthcare").map(resource => (
-              <ResourceCard key={resource.id} resource={resource} />
+              <ResourceCard key={String(resource.id)} resource={resource} />
             ))}
           </div>
           

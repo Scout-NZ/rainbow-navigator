@@ -41,7 +41,7 @@ export function PostCard({ post }: { post: Post }) {
         <div className="flex items-center gap-3 mb-3">
           <AvatarWithStatus 
             src={post.userImageUrl} 
-            fallback={post.userName} 
+            fallback={post.userName.charAt(0)} 
             status="online"
           />
           <div>

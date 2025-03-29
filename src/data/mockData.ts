@@ -77,11 +77,18 @@ export interface Event {
 
 export interface Post {
   id: number;
-  content: string;
-  imageUrl?: string;
+  content: {
+    text?: string;
+    imageUrl?: string;
+    videoUrl?: string;
+  };
+  tags: string[];
   likes: number;
   comments: number;
+  shares: number;
   createdAt: string;
+  userImageUrl: string;
+  userName: string;
   author: {
     id: number;
     name: string;
@@ -91,7 +98,7 @@ export interface Post {
 }
 
 export interface Resource {
-  id: number;
+  id: number | string;
   title: string;
   description: string;
   category: string;
@@ -101,6 +108,19 @@ export interface Resource {
   source: string;
   featured: boolean;
   createdAt: string;
+  provider?: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  location?: {
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+    neighbourhood?: string;
+  };
 }
 
 export const mockUserProfile = {
@@ -132,11 +152,16 @@ export const mockUserProfile = {
 export const mockPosts = [
   {
     id: 1,
-    content: "Just attended an amazing Pride event in Auckland! The community here is incredible.",
-    imageUrl: "https://picsum.photos/600/400?random=1",
+    content: {
+      text: "Just attended an amazing Pride event in Auckland! The community here is incredible."
+    },
+    tags: ["pride", "auckland", "community"],
     likes: 42,
     comments: 7,
+    shares: 12,
     createdAt: "2023-09-15T14:30:00Z",
+    userImageUrl: "https://picsum.photos/200?random=1",
+    userName: "Alex Rivera",
     author: {
       id: 1,
       name: "Alex Rivera",
@@ -146,11 +171,17 @@ export const mockPosts = [
   },
   {
     id: 2,
-    content: "Found this amazing queer-owned café today. The coffee is excellent and the atmosphere is so welcoming!",
-    imageUrl: "https://picsum.photos/600/400?random=2",
+    content: {
+      text: "Found this amazing queer-owned café today. The coffee is excellent and the atmosphere is so welcoming!",
+      imageUrl: "https://picsum.photos/600/400?random=2"
+    },
+    tags: ["cafe", "queerowned", "coffee"],
     likes: 28,
     comments: 5,
+    shares: 8,
     createdAt: "2023-09-14T10:15:00Z",
+    userImageUrl: "https://picsum.photos/200?random=2",
+    userName: "Sam Johnson",
     author: {
       id: 2,
       name: "Sam Johnson",
@@ -160,10 +191,16 @@ export const mockPosts = [
   },
   {
     id: 3,
-    content: "Looking for recommendations for LGBT-friendly healthcare providers in Wellington. Any suggestions?",
+    content: {
+      text: "Looking for recommendations for LGBT-friendly healthcare providers in Wellington. Any suggestions?"
+    },
+    tags: ["healthcare", "wellington", "recommendations"],
     likes: 15,
     comments: 12,
+    shares: 3,
     createdAt: "2023-09-13T18:45:00Z",
+    userImageUrl: "https://picsum.photos/200?random=3",
+    userName: "Jordan Smith",
     author: {
       id: 3,
       name: "Jordan Smith",
