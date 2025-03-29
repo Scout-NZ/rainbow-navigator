@@ -50,7 +50,7 @@ export const prideIdentities: PrideIdentity[] = [
   {
     id: "intersex",
     label: "Intersex",
-    flagGradient: "linear-gradient(180deg, #FFDA00 0% 100%), radial-gradient(circle at center, #7902AA 25%, #7902AA 35%, transparent 35%)",
+    flagGradient: "radial-gradient(circle at center, #7902AA 10%, #7902AA 20%, transparent 20%), linear-gradient(180deg, #FFDA00 0% 100%)",
   },
   {
     id: "genderfluid",
