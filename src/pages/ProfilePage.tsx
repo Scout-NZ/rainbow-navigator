@@ -1,4 +1,3 @@
-
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +33,6 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [profile, setProfile] = useState({
     ...mockUserProfile,
-    identity: mockUserProfile.identity || "",
     pronouns: mockUserProfile.pronouns || "",
     gender: mockUserProfile.gender || ""
   });
