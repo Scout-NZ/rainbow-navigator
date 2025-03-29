@@ -7,12 +7,16 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { parseCSV, importLocations } from "@/utils/csvImport";
 import { toast } from "@/components/ui/use-toast";
-import { FileText, Upload, AlertCircle, CheckCircle2, ShieldAlert } from "lucide-react";
+import { FileText, Upload, AlertCircle, CheckCircle2, ShieldAlert, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Database } from "@/integrations/supabase/types";
+
+type LocationInsert = Database['public']['Tables']['locations']['Insert'];
 
 export function CSVImporter() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<any[]>([]);
+  const [allLocations, setAllLocations] = useState<LocationInsert[]>([]);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<{success: number, errors: number} | null>(null);
@@ -22,6 +26,7 @@ export function CSVImporter() {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
     setPreview([]);
+    setAllLocations([]);
     setResult(null);
     setPermissionError(false);
     
@@ -32,6 +37,7 @@ export function CSVImporter() {
         try {
           const parsed = parseCSV(content);
           setPreview(parsed.slice(0, 5)); // Show first 5 items as preview
+          setAllLocations(parsed); // Keep all locations for potential export
         } catch (error) {
           console.error("Error parsing CSV:", error);
           toast({
@@ -93,8 +99,8 @@ export function CSVImporter() {
           setPermissionError(true);
           toast({
             title: "Permission denied",
-            description: "You don't have permission to import locations. Contact your administrator.",
-            variant: "destructive"
+            description: "You don't have permission to import locations. The data is available for preview or export.",
+            variant: "default"
           });
         } else if (result.success > 0) {
           toast({
@@ -105,8 +111,8 @@ export function CSVImporter() {
         } else {
           toast({
             title: "Import failed",
-            description: "Failed to import any locations. Please check your file and try again.",
-            variant: "destructive"
+            description: "Failed to import any locations. The data is available for preview or export.",
+            variant: "default"
           });
         }
         
@@ -125,6 +131,25 @@ export function CSVImporter() {
     }
   };
   
+  const handleExportJSON = () => {
+    if (allLocations.length === 0) return;
+    
+    const dataStr = JSON.stringify(allLocations, null, 2);
+    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
+    
+    const exportFileDefaultName = 'locations.json';
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    toast({
+      title: "Export completed",
+      description: `Successfully exported ${allLocations.length} locations as JSON.`,
+    });
+  };
+  
   return (
     <Card className="w-full">
       <CardHeader>
@@ -136,13 +161,12 @@ export function CSVImporter() {
       <CardContent>
         <div className="space-y-4">
           {permissionError && (
-            <Alert variant="destructive">
+            <Alert variant="default" className="border-l-4 border-l-blue-500">
               <ShieldAlert className="h-4 w-4" />
-              <AlertTitle>Permission Denied</AlertTitle>
+              <AlertTitle>Permission Notice</AlertTitle>
               <AlertDescription>
-                Your account doesn't have permission to import data into the locations table. 
-                This is likely due to Row Level Security (RLS) policies. Please contact your 
-                Supabase administrator to grant you the necessary permissions.
+                Your account doesn't have permission to import data into the locations table due to Row Level Security (RLS) policies. 
+                The data has been parsed and is available for preview or export. You can still use the JSON export feature below.
               </AlertDescription>
             </Alert>
           )}
@@ -179,6 +203,19 @@ export function CSVImporter() {
             </Alert>
           )}
           
+          {allLocations.length > 0 && (
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={handleExportJSON}
+                className="gap-2"
+              >
+                Export as JSON
+                <Download className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+          
           {preview.length > 0 && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium">Preview (first 5 entries)</h3>
@@ -205,7 +242,9 @@ export function CSVImporter() {
                 </Table>
               </div>
               <p className="text-xs text-muted-foreground">
-                {preview.length === 5 ? "Showing first 5 entries from your CSV file." : "Preview of all entries from your CSV file."}
+                {preview.length === 5 && allLocations.length > 5 
+                  ? `Showing first 5 entries of ${allLocations.length} from your CSV file.` 
+                  : "Preview of all entries from your CSV file."}
               </p>
             </div>
           )}
@@ -234,6 +273,7 @@ export function CSVImporter() {
         <Button variant="outline" onClick={() => {
           setFile(null);
           setPreview([]);
+          setAllLocations([]);
           setResult(null);
           setPermissionError(false);
         }} disabled={importing || !file}>

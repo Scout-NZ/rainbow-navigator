@@ -19,6 +19,10 @@ export default function AdminPage() {
         <AlertTitle>CSV Importer</AlertTitle>
         <AlertDescription>
           Use the importer below to upload your CSV files containing location data.
+          <strong className="block mt-2">Note: </strong> 
+          The application currently has Row Level Security (RLS) policies enabled on the locations table. 
+          The upload will preview locations, but you may need to disable RLS or configure proper permissions 
+          in Supabase to complete the actual import.
         </AlertDescription>
       </Alert>
       
