@@ -1,13 +1,13 @@
 
-import { Bell, Calendar, Edit, Globe, Heart, Settings, Users } from "lucide-react";
+import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockUserProfile, mockEvents, mockGroups, mockPosts } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostCard } from "@/components/feed/PostCard";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
   const [profile, setProfile] = useState(mockUserProfile);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
@@ -58,6 +59,28 @@ export default function ProfilePage() {
     });
   };
 
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // In a real app, you'd upload the file to a server
+    // For now, we'll use a local URL
+    const imageUrl = URL.createObjectURL(file);
+    setProfile({
+      ...profile,
+      imageUrl,
+    });
+
+    toast({
+      title: "Profile picture updated",
+      description: "Your profile picture has been successfully updated.",
+    });
+  };
+
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
@@ -73,13 +96,31 @@ export default function ProfilePage() {
         
         <CardContent className="p-0">
           <div className="px-4 pb-4 pt-0 relative">
-            <Avatar className="h-24 w-24 border-4 border-background absolute -top-12">
-              <img 
-                src={profile.imageUrl} 
-                alt={profile.name}
-                className="object-cover"
-              />
-            </Avatar>
+            <div className="absolute -top-12 group">
+              <Avatar className="h-24 w-24 border-4 border-background relative">
+                <AvatarImage
+                  src={profile.imageUrl} 
+                  alt={profile.name}
+                  className="object-cover"
+                />
+                <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                
+                <button 
+                  className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center"
+                  onClick={handleProfilePictureClick}
+                >
+                  <Camera className="h-8 w-8 text-white" />
+                </button>
+                
+                <input 
+                  type="file" 
+                  ref={fileInputRef}
+                  className="hidden" 
+                  accept="image/*"
+                  onChange={handleFileChange}
+                />
+              </Avatar>
+            </div>
             
             <div className="pt-16 flex justify-between items-start">
               <div>
