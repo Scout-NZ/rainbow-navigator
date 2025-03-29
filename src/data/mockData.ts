@@ -39,7 +39,7 @@ export interface Group {
 }
 
 export interface User {
-  id: number;
+  id: number | string;
   name: string;
   username: string;
   avatar: string;
@@ -51,16 +51,16 @@ export interface User {
 }
 
 export interface Event {
-  id: number;
+  id: number | string;
   title: string;
   date: string;
   time: string;
   location: {
     name: string;
     address: string;
-    city: string;
-    lat: number;
-    lng: number;
+    city?: string;
+    lat?: number;
+    lng?: number;
   };
   description: string;
   category: string;
@@ -69,28 +69,33 @@ export interface Event {
   imageUrl: string;
   tags?: string[];
   organizer?: {
-    id: number;
+    id: number | string;
     name: string;
-    avatar: string;
+    avatar?: string;
+    imageUrl?: string;
   };
+  capacity?: number;
+}
+
+export interface PostContent {
+  text?: string;
+  imageUrl?: string;
+  videoUrl?: string;
 }
 
 export interface Post {
-  id: number;
-  content: {
-    text?: string;
-    imageUrl?: string;
-    videoUrl?: string;
-  };
-  tags: string[];
+  id: number | string;
+  content: string | PostContent;
+  imageUrl?: string;
+  tags?: string[];
   likes: number;
   comments: number;
-  shares: number;
+  shares?: number;
   createdAt: string;
-  userImageUrl: string;
-  userName: string;
-  author: {
-    id: number;
+  userImageUrl?: string;
+  userName?: string;
+  author?: {
+    id: number | string;
     name: string;
     username: string;
     avatar: string;

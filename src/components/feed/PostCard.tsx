@@ -35,43 +35,52 @@ export function PostCard({ post }: { post: Post }) {
     return date.toLocaleDateString();
   };
 
+  // Get the author's details from either author object or direct properties
+  const authorName = post.author?.name || post.userName || "";
+  const authorImage = post.author?.avatar || post.userImageUrl || "";
+  
+  // Handle different content formats
+  const contentText = typeof post.content === 'string' ? post.content : post.content?.text || "";
+  const contentImage = typeof post.content === 'string' ? (post.imageUrl || "") : (post.content?.imageUrl || "");
+  const contentVideo = typeof post.content === 'string' ? "" : (post.content?.videoUrl || "");
+
   return (
     <Card className="card-hover overflow-hidden">
       <CardContent className="p-3 pt-4">
         <div className="flex items-center gap-3 mb-3">
           <AvatarWithStatus 
-            src={post.userImageUrl} 
-            fallback={post.userName.charAt(0)} 
+            src={authorImage} 
+            fallback={authorName.charAt(0)} 
             status="online"
           />
           <div>
-            <h3 className="font-semibold text-sm">{post.userName}</h3>
+            <h3 className="font-semibold text-sm">{authorName}</h3>
             <p className="text-xs text-muted-foreground">{formatRelativeTime(post.createdAt)}</p>
           </div>
         </div>
         
-        {post.content.text && (
-          <p className="text-sm mb-3">{post.content.text}</p>
+        {contentText && (
+          <p className="text-sm mb-3">{contentText}</p>
         )}
         
-        {post.content.imageUrl && (
+        {contentImage && (
           <div className="mb-3 rounded-lg overflow-hidden">
             <img 
-              src={post.content.imageUrl} 
+              src={contentImage} 
               alt="Post" 
               className="w-full h-auto object-cover"
             />
           </div>
         )}
         
-        {post.content.videoUrl && (
+        {contentVideo && (
           <div className="mb-3 rounded-lg overflow-hidden bg-muted aspect-video flex items-center justify-center">
             <span className="text-muted-foreground text-sm">Video content</span>
           </div>
         )}
         
         <div className="flex gap-1 flex-wrap">
-          {post.tags.map(tag => (
+          {post.tags && post.tags.map(tag => (
             <Badge key={tag} variant="secondary" className="text-xs">
               #{tag}
             </Badge>
@@ -87,7 +96,7 @@ export function PostCard({ post }: { post: Post }) {
           <MessageCircle className="h-4 w-4 mr-1" /> {post.comments}
         </Button>
         <Button variant="ghost" size="sm" className="text-muted-foreground">
-          <Share2 className="h-4 w-4 mr-1" /> {post.shares}
+          <Share2 className="h-4 w-4 mr-1" /> {post.shares || 0}
         </Button>
       </CardFooter>
     </Card>

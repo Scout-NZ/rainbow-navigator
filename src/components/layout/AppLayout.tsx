@@ -15,7 +15,13 @@ export function AppLayout() {
   const [showChat, setShowChat] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
-  const { userProfile } = useUser();
+  const { user } = useUser();
+  
+  // Create a default profile for when userProfile is not available
+  const defaultProfile = {
+    name: "Guest",
+    imageUrl: "",
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,10 +50,12 @@ export function AppLayout() {
             <Link to="/profile" className="flex items-center">
               <Avatar className="h-10 w-10 border-2 border-white">
                 <AvatarImage 
-                  src={userProfile.imageUrl}
-                  alt={userProfile.name} 
+                  src={user?.user_metadata?.avatar_url || ""}
+                  alt={user?.user_metadata?.name || "User"} 
                 />
-                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>
+                  {user?.user_metadata?.name ? user.user_metadata.name.substring(0, 2).toUpperCase() : "U"}
+                </AvatarFallback>
               </Avatar>
             </Link>
             <h1 className={cn(
