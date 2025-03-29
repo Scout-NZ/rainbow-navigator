@@ -89,8 +89,7 @@ export const importLocations = async (locations: LocationInsert[]): Promise<{suc
     const batch = locations.slice(i, i + batchSize);
     
     try {
-      // Add admin authentication to bypass RLS policy
-      // First try with service role key if available
+      // First try with standard authentication
       const { error } = await supabase
         .from('locations')
         .insert(batch);
@@ -101,11 +100,21 @@ export const importLocations = async (locations: LocationInsert[]): Promise<{suc
         // If we have RLS policy error (code 42501), inform the user
         if (error.code === '42501') {
           toast({
-            title: "Permission Error",
-            description: "Your account doesn't have permission to import locations. Please contact the administrator.",
+            title: "Authentication Required",
+            description: "You need to sign in with an account that has permissions to import data.",
             variant: "destructive"
           });
+          
           // Return early as all subsequent batches will also fail
+          return { success: 0, errors: locations.length };
+        } else if (error.code === 'PGRST301' || error.message?.includes('JWT')) {
+          // JWT expired or not authenticated
+          toast({
+            title: "Authentication Required",
+            description: "Please sign in to import data. Your session may have expired.",
+            variant: "destructive"
+          });
+          
           return { success: 0, errors: locations.length };
         }
         
