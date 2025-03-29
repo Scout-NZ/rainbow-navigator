@@ -10,6 +10,8 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { LatLngExpression } from 'leaflet';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from "@/integrations/supabase/client";
 
 // Fix Leaflet marker icon issue
 // This is needed because Leaflet expects the marker icons to be in a specific location
@@ -35,6 +37,31 @@ const containerStyle = {
 
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
+
+// Transform Supabase location to app location format
+const transformLocation = (location: any) => {
+  return {
+    id: location.id,
+    name: location.name,
+    type: location.type || 'business',
+    category: location.category,
+    tags: location.tags || [],
+    description: location.description || '',
+    location: {
+      address: location.address || '',
+      city: location.city || '',
+      lat: location.lat || DEFAULT_LOCATION.lat,
+      lng: location.lng || DEFAULT_LOCATION.lng
+    },
+    contact: {
+      phone: location.phone || '',
+      email: location.email || '',
+      website: location.website || ''
+    },
+    imageUrl: location.image_url || '',
+    verified: location.verified || false
+  };
+};
 
 // Custom marker icons based on place type
 const getMarkerIcon = (type: string) => {
@@ -63,7 +90,7 @@ type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
   categoryFilter?: string | null;
-  onLocationSelect?: (location: typeof mockPlaces[0]) => void;
+  onLocationSelect?: (location: any) => void;
 };
 
 export function InteractiveMap({ 
@@ -73,7 +100,7 @@ export function InteractiveMap({
   onLocationSelect 
 }: MapProps) {
   const [filter, setFilter] = useState("");
-  const [selectedPlace, setSelectedPlace] = useState<typeof mockPlaces[0] | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<any | null>(null);
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
@@ -81,29 +108,49 @@ export function InteractiveMap({
   const [mapCenter, setMapCenter] = useState(defaultLocation);
   const mapRef = useRef<L.Map | null>(null);
   
+  // Fetch locations from Supabase
+  const { data: locations = [], isLoading, error } = useQuery({
+    queryKey: ['locations'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('locations')
+        .select('*');
+      
+      if (error) {
+        console.error('Error fetching locations:', error);
+        throw error;
+      }
+      
+      return data.map(transformLocation);
+    }
+  });
+  
+  // Use mockPlaces as fallback while loading or if there's an error
+  const places = locations.length > 0 ? locations : mockPlaces;
+  
   // Filter places based on search text AND category filter if provided
-  const filteredPlaces = mockPlaces.filter(place => {
+  const filteredPlaces = places.filter(place => {
     // Apply search text filter
     const matchesSearch = 
       place.name.toLowerCase().includes(filter.toLowerCase()) || 
       place.category.toLowerCase().includes(filter.toLowerCase()) || 
-      place.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()));
+      place.tags.some((tag: string) => tag.toLowerCase().includes(filter.toLowerCase()));
     
     // Apply category filter if it exists
     const matchesCategory = categoryFilter 
       ? place.category.toLowerCase() === categoryFilter.toLowerCase() ||
-        place.tags.some(tag => tag.toLowerCase() === categoryFilter.toLowerCase())
+        place.tags.some((tag: string) => tag.toLowerCase() === categoryFilter.toLowerCase())
       : true;
     
     return matchesSearch && matchesCategory;
   });
 
-  const handleMarkerClick = (place: typeof mockPlaces[0]) => {
+  const handleMarkerClick = (place: any) => {
     setSelectedPlace(place);
   };
 
   // Function to open location details dialog
-  const openLocationDetails = (place: typeof mockPlaces[0]) => {
+  const openLocationDetails = (place: any) => {
     setSelectedPlace(place);
     setShowDetailsDialog(true);
     
@@ -167,6 +214,17 @@ export function InteractiveMap({
   // Convert location objects to LatLngExpression for Leaflet
   const mapCenterPosition: LatLngExpression = [mapCenter.lat, mapCenter.lng];
   const userLocationPosition: LatLngExpression | undefined = userLocation ? [userLocation.lat, userLocation.lng] : undefined;
+
+  // Display loading or error message
+  if (isLoading && locations.length === 0) {
+    // Show loading state (using mock data as fallback)
+    console.log("Loading locations...");
+  }
+
+  if (error && locations.length === 0) {
+    console.error("Error loading locations:", error);
+    // Using mock data as fallback
+  }
 
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>

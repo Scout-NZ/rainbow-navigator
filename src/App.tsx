@@ -11,6 +11,7 @@ import EventsPage from "./pages/EventsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FeedPage from "./pages/FeedPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 // Create a client
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/feed" element={<FeedPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
