@@ -29,9 +29,7 @@ export function BottomNavigation() {
                 isActive ? "active" : "text-muted-foreground"
               )}
             >
-              {/* Render the icon with a wrapping div for styling */}
               <div className={isActive ? "text-primary h-6 w-6" : "h-6 w-6"}>
-                {/* Render Icon as a component without passing any props */}
                 <Icon />
               </div>
               <span className="text-xs font-medium">{item.label}</span>
