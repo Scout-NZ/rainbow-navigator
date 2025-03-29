@@ -12,6 +12,16 @@ export function EventCard({ event }: { event: Event }) {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
+  // Helper function to safely display attendee count
+  const getAttendeeCount = () => {
+    if (typeof event.attendees === 'number') {
+      return event.attendees;
+    } else if (Array.isArray(event.attendees)) {
+      return event.attendees.length;
+    }
+    return 0; // Fallback value if attendees is undefined or an unexpected type
+  };
+
   return (
     <Card className="card-hover overflow-hidden">
       <div 
@@ -72,7 +82,7 @@ export function EventCard({ event }: { event: Event }) {
       <CardFooter className="p-3 pt-0 flex justify-between gap-2">
         <Button variant="outline" size="sm" className="w-1/2">Details</Button>
         <Button size="sm" className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
-          Attend ({typeof event.attendees === 'number' ? event.attendees : event.attendees.length})
+          Attend ({getAttendeeCount()})
         </Button>
       </CardFooter>
     </Card>
