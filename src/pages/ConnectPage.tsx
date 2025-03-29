@@ -25,7 +25,7 @@ export default function ConnectPage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Connect</h1>
+        <h1 className="text-2xl font-bold text-white">Connect</h1>
         <Button 
           size="sm" 
           className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
@@ -58,7 +58,7 @@ export default function ConnectPage() {
           </div>
           
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Popular Groups</h2>
+            <h2 className="text-lg font-semibold text-white">Popular Groups</h2>
             <Button variant="outline" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Create Group
@@ -78,7 +78,7 @@ export default function ConnectPage() {
               <div className="mx-auto w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <MessageCircle className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Start a conversation</h3>
+              <h3 className="text-lg font-semibold mb-2 text-white">Start a conversation</h3>
               <p className="text-muted-foreground mb-4">
                 Connect with friends, join group chats, or start a new conversation
               </p>
@@ -90,7 +90,7 @@ export default function ConnectPage() {
           </Card>
           
           <div className="mt-4">
-            <h3 className="text-sm font-medium mb-2">Recent Chats</h3>
+            <h3 className="text-sm font-medium mb-2 text-white">Recent Chats</h3>
             <div className="space-y-2">
               {[1, 2, 3].map(i => (
                 <Card key={i} className="card-hover">
@@ -133,7 +133,7 @@ export default function ConnectPage() {
             </div>
             
             <div>
-              <h3 className="text-sm font-medium mb-2">Friend Suggestions</h3>
+              <h3 className="text-sm font-medium mb-2 text-white">Friend Suggestions</h3>
               <ScrollArea className="w-full whitespace-nowrap pb-4">
                 <div className="flex gap-3">
                   {[1, 2, 3, 4, 5].map(i => (
@@ -161,7 +161,7 @@ export default function ConnectPage() {
             
             <div>
               <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-medium">Your Friends</h3>
+                <h3 className="text-sm font-medium text-white">Your Friends</h3>
                 <span className="text-xs text-muted-foreground">12 total</span>
               </div>
               
