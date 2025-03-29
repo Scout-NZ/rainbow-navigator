@@ -18,11 +18,11 @@ const badgeVariants = cva(
         outline: "text-foreground",
         // LGBT+ status badges with distinct gradient backgrounds
         lgbtOwned: 
-          "border-transparent bg-gradient-to-r from-rainbow-orange via-rainbow-green to-rainbow-blue text-white hover:opacity-90",
+          "border-transparent bg-gradient-to-r from-rainbow-red via-rainbow-yellow via-rainbow-green via-rainbow-blue to-rainbow-violet text-white hover:opacity-90",
         lgbtManaged: 
-          "border-transparent bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-indigo text-white hover:opacity-90",
+          "border-transparent bg-gradient-to-r from-rainbow-orange to-rainbow-indigo text-white hover:opacity-90",
         ally: 
-          "border-transparent bg-gradient-to-r from-rainbow-blue to-rainbow-indigo text-white hover:opacity-90",
+          "border-transparent bg-purple-100 text-purple-600 hover:opacity-90",
       },
     },
     defaultVariants: {

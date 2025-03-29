@@ -1,4 +1,3 @@
-
 import { ExternalLink, MapPin, Phone } from "lucide-react";
 import { Resource } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
