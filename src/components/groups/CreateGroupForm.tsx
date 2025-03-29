@@ -39,7 +39,9 @@ const formSchema = z.object({
   location: z.string().min(1, {
     message: "Location is required."
   }),
-  tags: z.string().transform(val => val.split(",").map(tag => tag.trim().toLowerCase()).filter(Boolean)),
+  tags: z.string().transform(val => 
+    val.split(",").map(tag => tag.trim().toLowerCase()).filter(Boolean)
+  ),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -72,7 +74,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         description: values.description,
         isPrivate: values.isPrivate,
         location: values.location,
-        tags: Array.isArray(values.tags) ? values.tags : values.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(Boolean),
+        tags: values.tags, // This is now correctly typed as string[] after transformation
         memberCount: 1,
         imageUrl: imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}`,
       };
