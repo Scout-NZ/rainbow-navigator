@@ -44,6 +44,7 @@ export type Place = {
     lat: number;
     lng: number;
     address: string;
+    neighbourhood?: string;
     city: string;
   };
   rating?: number;
