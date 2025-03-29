@@ -53,6 +53,26 @@ export const prideIdentities: PrideIdentity[] = [
     flagGradient: "linear-gradient(180deg, #FFDA00 0% 100%), radial-gradient(circle at center, #7902AA 25%, #7902AA 35%, transparent 35%)",
   },
   {
+    id: "genderfluid",
+    label: "Genderfluid",
+    flagGradient: "linear-gradient(180deg, #FF75A2 20%, #FFFFFF 20% 40%, #BE18D6 40% 60%, #000000 60% 80%, #333EBD 80%)",
+  },
+  {
+    id: "aromantic",
+    label: "Aromantic",
+    flagGradient: "linear-gradient(180deg, #3DA542 20%, #A7D379 20% 40%, #FFFFFF 40% 60%, #A9A9A9 60% 80%, #000000 80%)",
+  },
+  {
+    id: "polysexual",
+    label: "Polysexual",
+    flagGradient: "linear-gradient(180deg, #F61CB9 33.33%, #07D569 33.33% 66.66%, #1C92F6 66.66%)",
+  },
+  {
+    id: "agender",
+    label: "Agender",
+    flagGradient: "linear-gradient(180deg, #000000 14.28%, #BABABA 14.28% 28.56%, #FFFFFF 28.56% 42.84%, #B8F483 42.84% 57.12%, #FFFFFF 57.12% 71.4%, #BABABA 71.4% 85.68%, #000000 85.68%)",
+  },
+  {
     id: "ally",
     label: "Ally",
     flagGradient: "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)",
@@ -67,9 +87,9 @@ export const getIdentityById = (id: string | undefined): PrideIdentity | undefin
 
 export const getIdentityGradient = (id: string | undefined): string => {
   if (id === "none" || !id) {
-    // Default rainbow gradient for no selection or "none" value
-    return "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
+    // Progress Pride flag for no selection or "none" value
+    return "linear-gradient(to right, #000000 0, #000000 16.5%, #784F17 16.5%, #784F17 33%, #E40303 33%, #E40303 39%, #FF8C00 39%, #FF8C00 45%, #FFED00 45%, #FFED00 51%, #008026 51%, #008026 57%, #004DFF 57%, #004DFF 63%, #750787 63%, #750787 70%, #73D7EE 70%, #73D7EE 76%, #FFAFC8 76%, #FFAFC8 82%, #FFFFFF 82%, #FFFFFF 88%, #FFAFC8 88%, #FFAFC8 94%, #73D7EE 94%, #73D7EE 100%)";
   }
   const identity = getIdentityById(id);
-  return identity?.flagGradient || "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
+  return identity?.flagGradient || "linear-gradient(to right, #000000 0, #000000 16.5%, #784F17 16.5%, #784F17 33%, #E40303 33%, #E40303 39%, #FF8C00 39%, #FF8C00 45%, #FFED00 45%, #FFED00 51%, #008026 51%, #008026 57%, #004DFF 57%, #004DFF 63%, #750787 63%, #750787 70%, #73D7EE 70%, #73D7EE 76%, #FFAFC8 76%, #FFAFC8 82%, #FFFFFF 82%, #FFFFFF 88%, #FFAFC8 88%, #FFAFC8 94%, #73D7EE 94%, #73D7EE 100%)";
 };
