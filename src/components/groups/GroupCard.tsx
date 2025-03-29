@@ -16,14 +16,19 @@ export function GroupCard({ group }: { group: Group }) {
   const isMember = isGroupMember(group.id);
   const [memberCount, setMemberCount] = useState(group.memberCount);
   
-  // Ensure the member count reflects if the current user is a member
+  // Ensure the member count reflects if the current user is a member and any other updates
   useEffect(() => {
-    // Check if the member count should be updated based on local state
+    // First check local storage for any saved member count
     const storedMemberCount = localStorage.getItem(`group-${group.id}-member-count`);
     if (storedMemberCount) {
       setMemberCount(parseInt(storedMemberCount));
+    } else if (isMember && memberCount === group.memberCount) {
+      // If the user is a member but count hasn't been updated, increment it
+      const newCount = group.memberCount + 1;
+      setMemberCount(newCount);
+      localStorage.setItem(`group-${group.id}-member-count`, newCount.toString());
     }
-  }, [group.id]);
+  }, [group.id, group.memberCount, isMember]);
   
   const handleViewGroup = () => {
     console.log("Viewing group:", group.name);

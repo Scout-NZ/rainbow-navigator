@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageCircle, Plus, Search, Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GroupCard } from "@/components/groups/GroupCard";
@@ -16,6 +16,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { FriendData, FriendDetails } from "@/components/friends/FriendDetails";
 import { useToast } from "@/hooks/use-toast";
 import { ChatSession } from "@/components/chat/ChatSession";
+import { useLocation } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
 
 type ChatContact = {
   id: string;
@@ -33,6 +35,24 @@ export default function ConnectPage() {
   const [friendFilter, setFriendFilter] = useState("");
   const [activeChat, setActiveChat] = useState<ChatContact | null>(null);
   const { toast } = useToast();
+  const location = useLocation();
+  const { isGroupMember } = useUser();
+  const [groups, setGroups] = useState(mockGroups);
+  
+  useEffect(() => {
+    const updatedGroups = mockGroups.map(group => {
+      const storedCount = localStorage.getItem(`group-${group.id}-member-count`);
+      if (storedCount) {
+        return {
+          ...group,
+          memberCount: parseInt(storedCount)
+        };
+      }
+      return group;
+    });
+    
+    setGroups(updatedGroups);
+  }, [location.pathname, isGroupMember]);
   
   const friendSuggestions: FriendData[] = [
     { id: "f1", name: "Jamie Kim", imageUrl: "https://randomuser.me/api/portraits/women/1.jpg", status: "online", mutualGroups: 3 },
@@ -78,7 +98,7 @@ export default function ConnectPage() {
     },
   ];
 
-  const filteredGroups = mockGroups.filter(group => 
+  const filteredGroups = groups.filter(group => 
     group.name.toLowerCase().includes(filter.toLowerCase()) ||
     group.category.toLowerCase().includes(filter.toLowerCase()) ||
     group.description.toLowerCase().includes(filter.toLowerCase()) ||
