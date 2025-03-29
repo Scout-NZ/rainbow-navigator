@@ -98,8 +98,3 @@ export function AppLayout() {
     </div>
   );
 }
-
-// Helper function in case cn is not directly imported
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(" ");
-}
