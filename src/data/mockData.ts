@@ -33,6 +33,7 @@ export type Group = {
   tags: string[];
   members: string[];
   admins: string[];
+  rules?: string;
 }
 
 export type Event = {
@@ -250,6 +251,7 @@ export const mockGroups: Group[] = [
     tags: ["Outdoors", "Hiking", "Social", "LGBTQ+"],
     members: ["user1", "user2", "user3"],
     admins: ["user1"],
+    rules: "Be respectful and kind to other members\nNo hate speech or discriminatory content\nKeep discussions relevant to the group's purpose\nRespect privacy and confidentiality"
   },
   {
     id: "group2",
@@ -262,6 +264,7 @@ export const mockGroups: Group[] = [
     tags: ["Culture", "Books", "Discussion", "LGBTQ+"],
     members: ["user2", "user3", "user4"],
     admins: ["user2"],
+    rules: "Respect others' opinions\nFinish the book before discussions\nBe inclusive of all perspectives\nTake turns speaking"
   },
   {
     id: "group3",
@@ -274,6 +277,7 @@ export const mockGroups: Group[] = [
     tags: ["Support", "Transgender", "Community", "LGBTQ+"],
     members: ["user1", "user5", "user6"],
     admins: ["user5"],
+    rules: "Confidentiality is paramount\nUse correct pronouns\nShare speaking time equally\nNo unsolicited advice"
   },
   {
     id: "group4",
@@ -286,6 +290,7 @@ export const mockGroups: Group[] = [
     tags: ["Social", "Gaming", "Community", "LGBTQ+"],
     members: ["user3", "user4", "user7"],
     admins: ["user3"],
+    rules: "No toxic behavior\nBe supportive of all skill levels\nRespect preferred gaming platforms\nKeep discussions family-friendly"
   },
   {
     id: "group5",
@@ -298,6 +303,7 @@ export const mockGroups: Group[] = [
     tags: ["Art", "Community", "Collaboration", "LGBTQ+"],
     members: ["user8", "user9", "user10"],
     admins: ["user8"],
+    rules: "Give constructive feedback only\nRespect artistic styles and choices\nShare resources and opportunities\nCredit others' work appropriately"
   },
 ];
 
