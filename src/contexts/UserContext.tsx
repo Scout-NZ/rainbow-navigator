@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { mockUserProfile } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
@@ -133,25 +134,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         if (!data) {
-          console.log('Profile not found, creating new profile for user:', user.id);
+          console.log('Profile not found in UserContext, creating new profile for user:', user.id);
+          
+          // Extract user details from auth metadata
+          let fullName = user.user_metadata?.full_name || 
+                         user.user_metadata?.name || 
+                         user.user_metadata?.preferred_username;
+          let userEmail = user.email;
+          
+          console.log('User metadata available:', user.user_metadata);
+          
+          // Create username from email if available
+          const userName = userEmail?.split('@')[0] || 'user';
           
           // Profile doesn't exist, create one
           const newProfile = {
             id: user.id,
-            name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
-            username: user.email?.split('@')[0],
+            name: fullName || userName,
+            username: userName,
             interests: [],
             friends: 0,
             groups: 0,
             events: 0,
           };
           
+          console.log('Creating new profile:', newProfile);
+          
           const { error: insertError } = await supabase
             .from('profiles')
             .insert([newProfile]);
               
           if (insertError) {
-            console.error('Error creating profile:', insertError);
+            console.error('Error creating profile in UserContext:', insertError);
             throw insertError;
           }
           
@@ -161,7 +175,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             id: user.id,
           });
           
-          console.log('New profile created');
+          console.log('New profile created in UserContext');
         } else {
           // Transform the social links from JSON to our expected format
           const socialLinksData = data.sociallinks as Json;
@@ -195,12 +209,33 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             socialLinks: parsedSocialLinks,
           };
           
-          console.log('Profile data loaded:', profileData.name);
+          console.log('Profile data loaded in UserContext:', profileData.name);
           setUserProfile(profileData);
         }
       } catch (error: any) {
-        console.error('Failed to fetch profile:', error);
+        console.error('Failed to fetch profile in UserContext:', error);
         setProfileError('Failed to load user profile');
+        
+        // Show error but also try to create a basic profile as fallback
+        if (user) {
+          const fallbackProfile = {
+            id: user.id,
+            name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            username: user.email?.split('@')[0] || 'user',
+            interests: [],
+            friends: 0,
+            groups: 0,
+            events: 0,
+          };
+          
+          setUserProfile({
+            ...mockUserProfile,
+            ...fallbackProfile,
+          });
+          
+          console.log('Using fallback profile in UserContext');
+        }
+        
         toast({
           title: 'Error',
           description: 'Failed to load user profile. Please try refreshing the page.',

@@ -37,21 +37,36 @@ export default function AuthCallback() {
 
         console.log('Auth callback successful, user:', data.session.user.id);
         
-        // Check if profile exists, create if it doesn't
+        // Ensure user profile exists
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', data.session.user.id)
-          .single();
+          .maybeSingle();
           
-        if (profileError && profileError.code === 'PGRST116') {
+        if (!profileData) {
           console.log('Profile not found, creating new profile');
           
-          // Create a new profile
+          // Get user metadata
+          const userData = data.session.user;
+          let fullName = userData.user_metadata?.full_name || 
+                         userData.user_metadata?.name ||
+                         userData.user_metadata?.preferred_username;
+          let userEmail = userData.email;
+          
+          console.log('User data for profile creation:', {
+            id: userData.id,
+            email: userEmail,
+            metadata: userData.user_metadata,
+            fullName
+          });
+          
+          // Create a new profile with more robust defaults
+          const userName = userEmail?.split('@')[0] || 'user';
           const newProfile = {
-            id: data.session.user.id,
-            name: data.session.user.user_metadata?.name || data.session.user.user_metadata?.full_name || data.session.user.email?.split('@')[0] || 'User',
-            username: data.session.user.email?.split('@')[0],
+            id: userData.id,
+            name: fullName || userName,
+            username: userName,
             interests: [],
             friends: 0,
             groups: 0,
@@ -64,13 +79,15 @@ export default function AuthCallback() {
             
           if (insertError) {
             console.error('Error creating profile:', insertError);
-            // Continue anyway - we'll try to use the session
+            // We'll try to continue anyway
+            toast({
+              title: 'Profile Creation Warning',
+              description: 'Your profile was created with limited information. You can update it in your settings.',
+              variant: 'destructive',
+            });
           } else {
-            console.log('New profile created successfully');
+            console.log('New profile created successfully:', newProfile);
           }
-        } else if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          // Continue anyway - we'll try to use the session
         } else {
           console.log('Profile found:', profileData);
         }

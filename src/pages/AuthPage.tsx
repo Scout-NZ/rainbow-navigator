@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export default function AuthPage() {
   const { toast } = useToast();
@@ -21,7 +21,9 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [authInProgress, setAuthInProgress] = useState(false);
-
+  const [openDialog, setOpenDialog] = useState(false);
+  const [dialogMessage, setDialogMessage] = useState('');
+  
   // If user is already logged in, redirect to home
   if (!loading && user) {
     return <Navigate to="/" replace />;
@@ -108,6 +110,10 @@ export default function AuthPage() {
       
       console.log(`Initiating Google sign-in with redirect to: ${redirectUrl}`);
       
+      // Show dialog informing user about popup
+      setDialogMessage('Please complete the authentication in the new window. This window will refresh once you\'re logged in.');
+      setOpenDialog(true);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -131,6 +137,7 @@ export default function AuthPage() {
         variant: 'destructive',
       });
       setAuthInProgress(false);
+      setOpenDialog(false);
     }
   };
 
@@ -160,186 +167,199 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="container flex items-center justify-center min-h-screen py-8">
-      <Card className="mx-auto w-full max-w-md">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Welcome to Rainbow Navigator</CardTitle>
-          <CardDescription>
-            Sign in or create an account to connect with your community
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Button 
-              variant="outline" 
-              className="w-full" 
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={authInProgress}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
-                preserveAspectRatio="xMidYMid"
-                viewBox="0 0 256 262"
+    <>
+      <div className="container flex items-center justify-center min-h-screen py-8">
+        <Card className="mx-auto w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <CardTitle className="text-2xl font-bold">Welcome to Rainbow Navigator</CardTitle>
+            <CardDescription>
+              Sign in or create an account to connect with your community
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={authInProgress}
               >
-                <path
-                  fill="#4285F4"
-                  d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
-                />
-                <path
-                  fill="#34A853"
-                  d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
-                />
-                <path
-                  fill="#EB4335"
-                  d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
-                />
-              </svg>
-              {authInProgress 
-                ? 'Connecting to Google...' 
-                : 'Continue with Google'}
-            </Button>
-            <Button 
-              variant="outline" 
-              className="w-full"
-              type="button"
-              onClick={handleAppleSignIn}
-              disabled={authInProgress}
-            >
-              <Apple className="h-5 w-5 mr-2" />
-              Continue with Apple
-            </Button>
-          </div>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5 mr-2"
+                  preserveAspectRatio="xMidYMid"
+                  viewBox="0 0 256 262"
+                >
+                  <path
+                    fill="#4285F4"
+                    d="M255.878 133.451c0-10.734-.871-18.567-2.756-26.69H130.55v48.448h71.947c-1.45 12.04-9.283 30.172-26.69 42.356l-.244 1.622 38.755 30.023 2.685.268c24.659-22.774 38.875-56.282 38.875-96.027"
+                  />
+                  <path
+                    fill="#34A853"
+                    d="M130.55 261.1c35.248 0 64.839-11.605 86.453-31.622l-41.196-31.913c-11.024 7.688-25.82 13.055-45.257 13.055-34.523 0-63.824-22.773-74.269-54.25l-1.531.13-40.298 31.187-.527 1.465C35.393 231.798 79.49 261.1 130.55 261.1"
+                  />
+                  <path
+                    fill="#FBBC05"
+                    d="M56.281 156.37c-2.756-8.123-4.351-16.827-4.351-25.82 0-8.994 1.595-17.697 4.206-25.82l-.073-1.73L15.26 71.312l-1.335.635C5.077 89.644 0 109.517 0 130.55s5.077 40.905 13.925 58.602l42.356-32.782"
+                  />
+                  <path
+                    fill="#EB4335"
+                    d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
+                  />
+                </svg>
+                {authInProgress 
+                  ? 'Connecting to Google...' 
+                  : 'Continue with Google'}
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                type="button"
+                onClick={handleAppleSignIn}
+                disabled={authInProgress}
+              >
+                <Apple className="h-5 w-5 mr-2" />
+                Continue with Apple
+              </Button>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
 
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="login" className="space-y-4">
-              <form onSubmit={handleEmailSignIn}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        placeholder="m@example.com"
-                        className="pl-10"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or continue with
+                </span>
+              </div>
+            </div>
+
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="register">Register</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="login" className="space-y-4">
+                <form onSubmit={handleEmailSignIn}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          placeholder="m@example.com"
+                          className="pl-10"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type="password"
-                        className="pl-10"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type="password"
+                          className="pl-10"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Signing in...' : 'Sign In'}
+                    </Button>
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Signing in...' : 'Sign In'}
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-            
-            <TabsContent value="register" className="space-y-4">
-              <form onSubmit={handleEmailSignUp}>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <div className="relative">
-                      <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="name"
-                        placeholder="Your name"
-                        className="pl-10"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
+                </form>
+              </TabsContent>
+              
+              <TabsContent value="register" className="space-y-4">
+                <form onSubmit={handleEmailSignUp}>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Name</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          placeholder="Your name"
+                          className="pl-10"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email-register">Email</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="email-register"
-                        placeholder="m@example.com"
-                        className="pl-10"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="email-register">Email</Label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="email-register"
+                          placeholder="m@example.com"
+                          className="pl-10"
+                          type="email"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password-register">Password</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                      <Input
-                        id="password-register"
-                        type="password"
-                        className="pl-10"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
+                    <div className="space-y-2">
+                      <Label htmlFor="password-register">Password</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="password-register"
+                          type="password"
+                          className="pl-10"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          required
+                        />
+                      </div>
                     </div>
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? 'Creating account...' : 'Create Account'}
+                    </Button>
                   </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Creating account...' : 'Create Account'}
-                  </Button>
-                </div>
-              </form>
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-        <CardFooter className="flex flex-col space-y-4 text-center">
-          <p className="text-xs text-muted-foreground">
-            By continuing, you agree to our Terms of Service and Privacy Policy.
-          </p>
-        </CardFooter>
-      </Card>
-    </div>
+                </form>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4 text-center">
+            <p className="text-xs text-muted-foreground">
+              By continuing, you agree to our Terms of Service and Privacy Policy.
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
+      
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Authentication in Progress</DialogTitle>
+            <DialogDescription>
+              {dialogMessage}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
