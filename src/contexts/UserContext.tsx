@@ -75,6 +75,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
   const [adminGroups, setAdminGroups] = useState<string[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>(mockUserProfile);
+  const [profileError, setProfileError] = useState<string | null>(null);
   const { toast } = useToast();
 
   // Set up auth state listener and check for existing session
@@ -92,6 +93,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -106,11 +108,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!user) {
         // If not logged in, use mock data for demo purposes
         setUserProfile(mockUserProfile);
+        setProfileError(null);
         setLoading(false);
         return;
       }
 
+      setLoading(true);
+      setProfileError(null);
+
       try {
+        console.log('Fetching profile for user:', user.id);
+        
+        // First, check if the profile exists
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -118,11 +127,39 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single();
 
         if (error) {
-          console.error('Error fetching user profile:', error);
-          throw error;
-        }
-
-        if (data) {
+          if (error.code === 'PGRST116') {
+            console.log('Profile not found, creating new profile for user:', user.id);
+            
+            // Profile doesn't exist, create one
+            const newProfile = {
+              id: user.id,
+              name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+              username: user.email?.split('@')[0],
+              interests: [],
+              friends: 0,
+              groups: 0,
+              events: 0,
+            };
+            
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([newProfile]);
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+              throw insertError;
+            }
+            
+            setUserProfile({
+              ...mockUserProfile,
+              ...newProfile,
+              id: user.id,
+            });
+          } else {
+            console.error('Error fetching user profile:', error);
+            throw error;
+          }
+        } else if (data) {
           // Transform the social links from JSON to our expected format
           const socialLinksData = data.sociallinks as Json;
           let parsedSocialLinks: UserProfile['socialLinks'] = {};
@@ -140,7 +177,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           const profileData: UserProfile = {
             id: data.id,
-            name: data.name || user.email?.split('@')[0] || 'User',
+            name: data.name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
             username: data.username,
             bio: data.bio,
             location: data.location,
@@ -157,8 +194,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           setUserProfile(profileData);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Failed to fetch profile:', error);
+        setProfileError('Failed to load user profile');
         toast({
           title: 'Error',
           description: 'Failed to load user profile.',
@@ -190,7 +228,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const currentUser = { 
     id: user?.id || mockUserProfile.id,
-    name: userProfile.name || user?.email?.split('@')[0] || 'User',
+    name: userProfile.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
   };
 
   const joinGroup = (groupId: string) => {
