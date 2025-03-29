@@ -1,697 +1,464 @@
-import { DiscoverIcon, ConnectIcon, FeedIcon, EventsIcon, ResourcesIcon } from "@/components/navigation/NavIcons";
-
-export type Location = {
-  id: string;
+export interface Place {
+  id: number;
   name: string;
-  address: string;
-  city: string;
-  neighbourhood: string;
-  lat: number;
-  lng: number;
-  category: string;
   type: string;
-  tags: string[];
-  lgbt_status: string;
-  description: string;
-  image_url: string;
-  website: string;
-  email: string;
-  phone: string;
-  verified: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export type Group = {
-  id: string;
-  name: string;
   category: string;
-  description: string;
-  imageUrl: string;
-  memberCount: number;
-  isPrivate: boolean;
   tags: string[];
-  members: string[];
-  admins: string[];
-  rules?: string;
-}
-
-export type Event = {
-  id: string;
-  title: string;
-  category: string;
+  featured?: boolean;
   description: string;
-  imageUrl: string;
-  date: string;
-  time: string;
   location: {
-    name: string;
     address: string;
-  };
-  price: string;
-  attendees: number;
-  tags: string[];
-};
-
-export type Resource = {
-  id: string;
-  title: string;
-  provider: string;
-  category: string;
-  description: string;
-  imageUrl?: string;
-  location?: {
-    address: string;
+    neighbourhood: string;
     city: string;
     lat: number;
     lng: number;
-    neighbourhood?: string;
   };
   contact: {
-    phone?: string;
-    email?: string;
-    website?: string;
+    phone: string;
+    email: string;
+    website: string;
   };
-  tags: string[];
-};
-
-export type User = {
-  id: string;
-  name: string;
-  avatar: string;
-  pronouns: string;
-  bio: string;
-  interests: string[];
+  imageUrl: string;
+  verified: boolean;
+  lgbt_status: string | null;
 }
 
-export const mockUsers: User[] = [
-  {
-    id: "user1",
-    name: "Alex Rivera",
-    avatar: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
-    pronouns: "they/them",
-    bio: "LGBTQ+ advocate and outdoor enthusiast",
-    interests: ["hiking", "reading", "activism", "photography"]
-  },
-  {
-    id: "user2",
-    name: "Jamie Wong",
-    avatar: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
-    pronouns: "she/her",
-    bio: "Visual artist passionate about queer representation in media",
-    interests: ["art", "film", "fashion", "design"]
-  },
-  {
-    id: "user3",
-    name: "Sam Taylor",
-    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1000&auto=format&fit=crop",
-    pronouns: "he/him",
-    bio: "Software developer and gamer. Love creating inclusive tech spaces.",
-    interests: ["gaming", "coding", "music", "books"]
-  },
-  {
-    id: "user4",
-    name: "Jordan Lee",
-    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop",
-    pronouns: "she/they",
-    bio: "Mental health counselor specializing in LGBTQ+ youth support",
-    interests: ["psychology", "wellness", "education", "advocacy"]
-  },
-  {
-    id: "user5",
-    name: "Riley Johnson",
-    avatar: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
-    pronouns: "they/them",
-    bio: "Environmental activist and community organizer",
-    interests: ["sustainability", "politics", "community", "gardening"]
-  }
-];
+export interface Group {
+  id: number;
+  name: string;
+  category: string;
+  tags: string[];
+  description: string;
+  imageUrl: string;
+  isPrivate: boolean;
+  memberCount: number;
+  city: string;
+}
 
-export const mockLocations: Location[] = [
-  {
-    id: "location1",
-    name: "The Lavender Lounge",
-    address: "123 Main St",
-    city: "New York",
-    neighbourhood: "Greenwich Village",
-    lat: 40.7128,
-    lng: -74.0060,
-    category: "Bar",
-    type: "Nightlife",
-    tags: ["LGBTQ+", "Bar", "Drinks", "Social"],
-    lgbt_status: "Safe Space",
-    description: "A cozy and inclusive bar for the LGBTQ+ community.",
-    image_url: "https://example.com/lavenderlounge.jpg",
-    website: "https://lavenderlounge.com",
-    email: "info@lavenderlounge.com",
-    phone: "555-1234",
-    verified: true,
-    created_at: "2023-01-01T00:00:00Z",
-    updated_at: "2023-01-01T00:00:00Z",
-  },
-  {
-    id: "location2",
-    name: "Rainbow Community Center",
-    address: "456 Oak St",
-    city: "San Francisco",
-    neighbourhood: "Castro",
-    lat: 37.7749,
-    lng: -122.4194,
-    category: "Community Center",
-    type: "Community",
-    tags: ["LGBTQ+", "Community", "Support", "Events"],
-    lgbt_status: "Affirming",
-    description: "A community center providing resources and support for the LGBTQ+ community.",
-    image_url: "https://example.com/rainbowcenter.jpg",
-    website: "https://rainbowcenter.org",
-    email: "info@rainbowcenter.org",
-    phone: "555-5678",
-    verified: true,
-    created_at: "2023-01-01T00:00:00Z",
-    updated_at: "2023-01-01T00:00:00Z",
-  },
-  {
-    id: "location3",
-    name: "Pride Bookstore",
-    address: "789 Pine St",
-    city: "Seattle",
-    neighbourhood: "Capitol Hill",
-    lat: 47.6062,
-    lng: -122.3321,
-    category: "Bookstore",
-    type: "Shopping",
-    tags: ["LGBTQ+", "Bookstore", "Books", "Reading"],
-    lgbt_status: "Safe Space",
-    description: "A bookstore specializing in LGBTQ+ literature.",
-    image_url: "https://example.com/pridebookstore.jpg",
-    website: "https://pridebookstore.com",
-    email: "info@pridebookstore.com",
-    phone: "555-9012",
-    verified: true,
-    created_at: "2023-01-01T00:00:00Z",
-    updated_at: "2023-01-01T00:00:00Z",
-  },
-  {
-    id: "location4",
-    name: "Transcend Gym",
-    address: "101 Elm St",
-    city: "Los Angeles",
-    neighbourhood: "West Hollywood",
-    lat: 34.0522,
-    lng: -118.2437,
-    category: "Gym",
-    type: "Fitness",
-    tags: ["LGBTQ+", "Gym", "Fitness", "Health"],
-    lgbt_status: "Affirming",
-    description: "A gym that is trans-friendly and offers a safe space for all.",
-    image_url: "https://example.com/transcendgym.jpg",
-    website: "https://transcendgym.com",
-    email: "info@transcendgym.com",
-    phone: "555-3456",
-    verified: true,
-    created_at: "2023-01-01T00:00:00Z",
-    updated_at: "2023-01-01T00:00:00Z",
-  },
-  {
-    id: "location5",
-    name: "Equality Law Firm",
-    address: "222 Oak St",
-    city: "Chicago",
-    neighbourhood: "Uptown",
-    lat: 41.8781,
-    lng: -87.6298,
-    category: "Law Firm",
-    type: "Legal",
-    tags: ["LGBTQ+", "Law Firm", "Legal", "Support"],
-    lgbt_status: "Affirming",
-    description: "A law firm specializing in LGBTQ+ legal issues.",
-    image_url: "https://example.com/equalitylaw.jpg",
-    website: "https://equalitylaw.com",
-    email: "info@equalitylaw.com",
-    phone: "555-7890",
-    verified: true,
-    created_at: "2023-01-01T00:00:00Z",
-    updated_at: "2023-01-01T00:00:00Z",
-  },
-];
-
-export type UserProfile = {
-  id: string;
+export interface User {
+  id: number;
   name: string;
   username: string;
-  email: string;
-  pronouns: string;
-  gender: string;
+  avatar: string;
   bio: string;
-  location: string;
-  imageUrl: string;
-  coverImageUrl: string;
-  joinedDate: string;
+  city: string;
+  pronouns: string;
   interests: string[];
-  identity: string;
-  friends: number;
-  groups: number;
-  events: number;
-  socialLinks: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-    spotify?: string;
-    tiktok?: string;
-    linkedin?: string;
-    website?: string;
-  };
+  role: string;
 }
-
-export const mockUserProfile: UserProfile = {
-  id: "user1",
-  name: "Alex Rivera",
-  username: "alexrivera",
-  email: "alex@example.com",
-  pronouns: "they/them",
-  gender: "Non-Binary",
-  bio: "LGBTQ+ advocate and outdoor enthusiast",
-  location: "Auckland, New Zealand",
-  imageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
-  coverImageUrl: "https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=1000&auto=format&fit=crop",
-  joinedDate: "2023-04-15",
-  interests: ["hiking", "reading", "activism", "photography"],
-  identity: "non-binary",
-  friends: 142,
-  groups: 6,
-  events: 12,
-  socialLinks: {
-    instagram: "alex_rivera",
-    facebook: "alexrivera.fb",
-    twitter: "alexrivera",
-    spotify: "alex.rivera",
-    tiktok: "alexrivera.tiktok",
-    linkedin: "alexrivera-linkedin",
-    website: "https://alexrivera.com"
-  }
-};
 
 export const mockGroups: Group[] = [
   {
-    id: "group1",
-    name: "Rainbow Hikers",
-    category: "Outdoors",
-    description: "A group for LGBTQ+ individuals who enjoy hiking and outdoor activities.",
-    imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop",
-    memberCount: 42,
+    id: 1,
+    name: "Auckland LGBTQ+ Social Club",
+    category: "Community",
+    tags: ["social", "meetups", "friends"],
+    description: "A group for LGBTQ+ people in Auckland to socialize and make new friends.",
+    imageUrl: "https://picsum.photos/300/200?random=11",
     isPrivate: false,
-    tags: ["Outdoors", "Hiking", "Social", "LGBTQ+"],
-    members: ["user1", "user2", "user3"],
-    admins: ["user1"],
-    rules: "Be respectful and kind to other members\nNo hate speech or discriminatory content\nKeep discussions relevant to the group's purpose\nRespect privacy and confidentiality"
-  },
-  {
-    id: "group2",
-    name: "Queer Book Club",
-    category: "Culture",
-    description: "A book club for discussing LGBTQ+ literature and related topics.",
-    imageUrl: "https://images.unsplash.com/photo-1450107579224-2d9b2bf1adc8?q=80&w=1000&auto=format&fit=crop",
-    memberCount: 56,
-    isPrivate: false,
-    tags: ["Culture", "Books", "Discussion", "LGBTQ+"],
-    members: ["user2", "user3", "user4"],
-    admins: ["user2"],
-    rules: "Respect others' opinions\nFinish the book before discussions\nBe inclusive of all perspectives\nTake turns speaking"
-  },
-  {
-    id: "group3",
-    name: "Trans Support Network",
-    category: "Support",
-    description: "A support group for transgender individuals and their allies.",
-    imageUrl: "https://images.unsplash.com/photo-1557425955-df376b5903c8?q=80&w=1000&auto=format&fit=crop",
-    memberCount: 103,
-    isPrivate: true,
-    tags: ["Support", "Transgender", "Community", "LGBTQ+"],
-    members: ["user1", "user5", "user6"],
-    admins: ["user5"],
-    rules: "Confidentiality is paramount\nUse correct pronouns\nShare speaking time equally\nNo unsolicited advice"
-  },
-  {
-    id: "group4",
-    name: "Gaymer Group",
-    category: "Social",
-    description: "A social group for LGBTQ+ gamers to connect and play together.",
-    imageUrl: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
-    memberCount: 78,
-    isPrivate: false,
-    tags: ["Social", "Gaming", "Community", "LGBTQ+"],
-    members: ["user3", "user4", "user7"],
-    admins: ["user3"],
-    rules: "No toxic behavior\nBe supportive of all skill levels\nRespect preferred gaming platforms\nKeep discussions family-friendly"
-  },
-  {
-    id: "group5",
-    name: "Lesbian Art Collective",
-    category: "Art",
-    description: "A collective for lesbian artists to share their work and collaborate.",
-    imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop",
     memberCount: 35,
+    city: "Auckland"
+  },
+  {
+    id: 2,
+    name: "Wellington Queer Book Club",
+    category: "Books",
+    tags: ["books", "reading", "discussion"],
+    description: "A book club for queer people in Wellington to read and discuss queer literature.",
+    imageUrl: "https://picsum.photos/300/200?random=12",
     isPrivate: true,
-    tags: ["Art", "Community", "Collaboration", "LGBTQ+"],
-    members: ["user8", "user9", "user10"],
-    admins: ["user8"],
-    rules: "Give constructive feedback only\nRespect artistic styles and choices\nShare resources and opportunities\nCredit others' work appropriately"
-  },
-];
-
-export const mockEvents: Event[] = [
-  {
-    id: "event1",
-    title: "Pride Parade",
-    category: "Pride",
-    description: "Join us for the annual Pride Parade!",
-    imageUrl: "https://images.unsplash.com/photo-1570976447640-ac859a116aab?q=80&w=1000&auto=format&fit=crop",
-    date: "2024-08-20",
-    time: "12:00 PM",
-    location: {
-      name: "Downtown",
-      address: "Main Street",
-    },
-    price: "Free",
-    attendees: 500,
-    tags: ["Pride", "Parade", "Community", "Celebration"],
+    memberCount: 18,
+    city: "Wellington"
   },
   {
-    id: "event2",
-    title: "Queer Poetry Slam",
-    category: "Culture",
-    description: "An evening of queer poetry and spoken word.",
-    imageUrl: "https://images.unsplash.com/photo-1543337724-5030f4448294?q=80&w=1000&auto=format&fit=crop",
-    date: "2024-08-25",
-    time: "7:00 PM",
-    location: {
-      name: "The Bean Scene",
-      address: "123 Coffee St",
-    },
-    price: "$5",
-    attendees: 50,
-    tags: ["Culture", "Poetry", "LGBTQ+", "Art"],
+    id: 3,
+    name: "Christchurch Rainbow Hikers",
+    category: "Outdoors",
+    tags: ["hiking", "outdoors", "nature"],
+    description: "A group for LGBTQ+ people in Christchurch to go hiking and enjoy the outdoors.",
+    imageUrl: "https://picsum.photos/300/200?random=13",
+    isPrivate: false,
+    memberCount: 24,
+    city: "Christchurch"
   },
   {
-    id: "event3",
-    title: "Transgender Day of Remembrance",
-    category: "Activism",
-    description: "A vigil to honor transgender individuals who have lost their lives to violence.",
-    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Transgender_flag.svg/1200px-Transgender_flag.svg.png",
-    date: "2024-11-20",
-    time: "6:00 PM",
-    location: {
-      name: "Community Park",
-      address: "456 Park Ave",
-    },
-    price: "Free",
-    attendees: 100,
-    tags: ["Activism", "Transgender", "Remembrance", "Community"],
+    id: 4,
+    name: "Dunedin Queer Craft Collective",
+    category: "Arts",
+    tags: ["crafts", "art", "diy"],
+    description: "A group for LGBTQ+ people in Dunedin to create and share their crafts.",
+    imageUrl: "https://picsum.photos/300/200?random=14",
+    isPrivate: false,
+    memberCount: 12,
+    city: "Dunedin"
   },
   {
-    id: "event4",
-    title: "LGBTQ+ Board Game Night",
-    category: "Social",
-    description: "A fun night of board games and socializing for the LGBTQ+ community.",
-    imageUrl: "https://images.unsplash.com/photo-1549608078-145b58c46dd4?q=80&w=1000&auto=format&fit=crop",
-    date: "2024-09-10",
-    time: "7:30 PM",
-    location: {
-      name: "Gamezilla",
-      address: "789 Boardgame Blvd",
-    },
-    price: "$10",
-    attendees: 30,
-    tags: ["Social", "Gaming", "LGBTQ+", "Community"],
+    id: 5,
+    name: "Hamilton Rainbow Youth Group",
+    category: "Youth",
+    tags: ["youth", "support", "community"],
+    description: "A support group for LGBTQ+ youth in Hamilton.",
+    imageUrl: "https://picsum.photos/300/200?random=15",
+    isPrivate: true,
+    memberCount: 8,
+    city: "Hamilton"
   },
   {
-    id: "event5",
-    title: "Drag Show",
-    category: "Nightlife",
-    description: "An evening of fabulous drag performances!",
-    imageUrl: "https://images.unsplash.com/photo-1604318782944-71099352906b?q=80&w=1000&auto=format&fit=crop",
-    date: "2024-09-15",
-    time: "9:00 PM",
-    location: {
-      name: "The Glitterati Lounge",
-      address: "101 Sparkle St",
-    },
-    price: "$15",
-    attendees: 75,
-    tags: ["Nightlife", "Drag", "Performance", "LGBTQ+"],
-  },
-];
-
-export type PostContent = {
-  text?: string;
-  imageUrl?: string;
-  videoUrl?: string
-}
-
-export type Post = {
-  id: string;
-  userName: string;
-  userImageUrl: string;
-  createdAt: string;
-  content: PostContent;
-  likes: number;
-  comments: number;
-  shares: number;
-  tags: string[];
-}
-
-export const mockPosts: Post[] = [
-  {
-    id: "post1",
-    userName: "Alex Rivera",
-    userImageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
-    createdAt: "2024-08-15T10:30:00Z",
-    content: {
-      text: "Had an amazing time at the Pride Parade today! So much love and community spirit 🌈✨",
-      imageUrl: "https://images.unsplash.com/photo-1570976447640-ac859a116aab?q=80&w=1000&auto=format&fit=crop"
-    },
-    likes: 87,
-    comments: 12,
-    shares: 5,
-    tags: ["Pride", "Community", "Celebration"]
+    id: 6,
+    name: "Tauranga LGBTQ+ Board Games",
+    category: "Games",
+    tags: ["games", "board games", "social"],
+    description: "A group for LGBTQ+ people in Tauranga to play board games and socialize.",
+    imageUrl: "https://picsum.photos/300/200?random=16",
+    isPrivate: false,
+    memberCount: 20,
+    city: "Tauranga"
   },
   {
-    id: "post2",
-    userName: "Jamie Wong",
-    userImageUrl: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
-    createdAt: "2024-08-14T15:45:00Z",
-    content: {
-      text: "Just joined the Rainbow Hikers group! Looking forward to our first mountain adventure this weekend.",
-      imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop"
-    },
-    likes: 42,
-    comments: 8,
-    shares: 2,
-    tags: ["Outdoors", "Community", "GroupActivities"]
+    id: 7,
+    name: "Invercargill Queer Film Society",
+    category: "Film",
+    tags: ["film", "movies", "discussion"],
+    description: "A film society for queer people in Invercargill to watch and discuss queer films.",
+    imageUrl: "https://picsum.photos/300/200?random=17",
+    isPrivate: false,
+    memberCount: 15,
+    city: "Invercargill"
   },
   {
-    id: "post3",
-    userName: "Sam Taylor",
-    userImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1000&auto=format&fit=crop",
-    createdAt: "2024-08-13T09:15:00Z",
-    content: {
-      text: "Our local queer book club discussion about 'Giovanni's Room' was so insightful. Love these meaningful conversations!",
-      imageUrl: "https://images.unsplash.com/photo-1450107579224-2d9b2bf1adc8?q=80&w=1000&auto=format&fit=crop"
-    },
-    likes: 56,
-    comments: 23,
-    shares: 7,
-    tags: ["Culture", "Literature", "Discussion"]
+    id: 8,
+    name: "Napier-Hastings Rainbow Choir",
+    category: "Music",
+    tags: ["music", "choir", "singing"],
+    description: "A choir for LGBTQ+ people in Napier-Hastings to sing and perform together.",
+    imageUrl: "https://picsum.photos/300/200?random=18",
+    isPrivate: false,
+    memberCount: 22,
+    city: "Napier"
   },
   {
-    id: "post4",
-    userName: "Jordan Lee",
-    userImageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop",
-    createdAt: "2024-08-12T18:20:00Z",
-    content: {
-      text: "Advocacy workshop was super informative today. Learned so much about how we can better support our trans community members.",
-      imageUrl: "https://images.unsplash.com/photo-1557425955-df376b5903c8?q=80&w=1000&auto=format&fit=crop"
-    },
-    likes: 103,
-    comments: 31,
-    shares: 18,
-    tags: ["Activism", "Education", "Support"]
+    id: 9,
+    name: "Palmerston North Queer Writers",
+    category: "Writing",
+    tags: ["writing", "poetry", "stories"],
+    description: "A writing group for LGBTQ+ people in Palmerston North to share their writing.",
+    imageUrl: "https://picsum.photos/300/200?random=19",
+    isPrivate: true,
+    memberCount: 10,
+    city: "Palmerston North"
   },
   {
-    id: "post5",
-    userName: "Riley Johnson",
-    userImageUrl: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
-    createdAt: "2024-08-11T21:05:00Z",
-    content: {
-      text: "Check out my art installation at the downtown gallery! It's all about queer identity and expression through color.",
-      imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop"
-    },
-    likes: 78,
-    comments: 14,
-    shares: 9,
-    tags: ["Art", "Expression", "Identity"]
+    id: 10,
+    name: "Nelson LGBTQ+ Book Exchange",
+    category: "Books",
+    tags: ["books", "exchange", "reading"],
+    description: "A book exchange for LGBTQ+ people in Nelson to share their books.",
+    imageUrl: "https://picsum.photos/300/200?random=20",
+    isPrivate: false,
+    memberCount: 14,
+    city: "Nelson"
   }
 ];
 
-export const mockPlaces = [
+// Update mockPlaces to ensure they have featured flag
+export const mockPlaces: Place[] = [
   {
-    id: "place1",
-    name: "Rainbow Café",
+    id: 1,
+    name: "Rainbow Cafe",
+    type: "business",
+    category: "Cafes",
+    tags: ["coffee", "food", "wifi"],
+    featured: true,
+    description: "A welcoming cafe with great coffee and pastries",
     location: {
       address: "123 Main St",
+      neighbourhood: "Downtown",
       city: "Auckland",
-      neighbourhood: "Central",
-      lat: -36.848461,
-      lng: 174.763336
+      lat: -36.848,
+      lng: 174.763
     },
-    category: "Café",
-    type: "Food & Drink",
-    tags: ["Coffee", "LGBTQ+ Friendly", "Vegan Options"],
-    lgbt_status: "lgbt_owned",
-    description: "A cozy café with a welcoming atmosphere for the LGBTQ+ community.",
-    imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1000&auto=format&fit=crop",
     contact: {
-      website: "www.rainbowcafe.co.nz",
+      phone: "09 123 4567",
       email: "info@rainbowcafe.co.nz",
-      phone: "09-555-1234"
+      website: "https://rainbowcafe.example.com"
     },
-    verified: true
+    imageUrl: "https://picsum.photos/300/200?random=1",
+    verified: true,
+    lgbt_status: "lgbt_owned"
   },
   {
-    id: "place2",
-    name: "Pride Community Center",
+    id: 2,
+    name: "Queer Bar",
+    type: "business",
+    category: "Bars",
+    tags: ["drinks", "nightlife", "social"],
+    featured: false,
+    description: "A lively bar with a diverse crowd",
     location: {
-      address: "456 Oak Ave",
+      address: "456 Queen St",
+      neighbourhood: "Uptown",
       city: "Wellington",
-      neighbourhood: "Newtown",
-      lat: -41.286461,
-      lng: 174.773336
+      lat: -41.286,
+      lng: 174.776
     },
-    category: "Community Center",
-    type: "Services",
-    tags: ["Support", "LGBTQ+", "Resources", "Events"],
-    lgbt_status: "lgbt_managed",
-    description: "A community center providing resources and support for the LGBTQ+ community.",
-    imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000&auto=format&fit=crop",
     contact: {
-      website: "www.pridecenter.org.nz",
-      email: "contact@pridecenter.org.nz",
-      phone: "04-555-5678"
+      phone: "04 987 6543",
+      email: "events@queerbar.co.nz",
+      website: "https://queerbar.example.com"
     },
-    verified: true
+    imageUrl: "https://picsum.photos/300/200?random=2",
+    verified: true,
+    lgbt_status: "lgbt_managed"
   },
   {
-    id: "place3",
-    name: "Ally Bookstore",
+    id: 3,
+    name: "Rainbow Community Centre",
+    type: "resource",
+    category: "Community",
+    tags: ["support", "events", "groups"],
+    featured: true,
+    description: "A safe space for the LGBTQ+ community",
     location: {
-      address: "789 Pine St",
+      address: "789 High St",
+      neighbourhood: "Central",
       city: "Christchurch",
-      neighbourhood: "Riccarton",
-      lat: -43.531637,
-      lng: 172.636645
+      lat: -43.532,
+      lng: 172.630
     },
-    category: "Bookstore",
-    type: "Retail",
-    tags: ["Books", "LGBTQ+ Literature", "Inclusive"],
-    lgbt_status: "ally",
-    description: "An inclusive bookstore with a diverse selection of LGBTQ+ literature.",
-    imageUrl: "https://images.unsplash.com/photo-1526243741027-444d633d7365?q=80&w=1000&auto=format&fit=crop",
     contact: {
-      website: "www.allybookstore.co.nz",
-      email: "books@allybookstore.co.nz",
-      phone: "03-555-9012"
+      phone: "03 555 1212",
+      email: "info@rainbowcentre.org.nz",
+      website: "https://rainbowcentre.example.org"
     },
-    verified: true
-  }
-];
-
-export const mockResources: Resource[] = [
+    imageUrl: "https://picsum.photos/300/200?random=3",
+    verified: true,
+    lgbt_status: "ally"
+  },
   {
-    id: "resource1",
-    title: "LGBTQ+ Health Services",
-    provider: "Rainbow Health NZ",
-    category: "Health",
-    description: "Comprehensive health services catering specifically to LGBTQ+ individuals.",
-    imageUrl: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=1000&auto=format&fit=crop",
+    id: 4,
+    name: "Lavender Bookstore",
+    type: "business",
+    category: "Shopping",
+    tags: ["books", "gifts", "queer"],
+    featured: false,
+    description: "A bookstore specializing in LGBTQ+ literature",
     location: {
-      address: "123 Health St",
+      address: "101 Victoria St",
+      neighbourhood: "Downtown",
       city: "Auckland",
-      lat: -36.848461,
-      lng: 174.763336
+      lat: -36.848,
+      lng: 174.763
     },
     contact: {
-      phone: "0800-123-456",
-      email: "health@rainbowhealth.co.nz",
-      website: "www.rainbowhealth.co.nz"
+      phone: "09 333 4444",
+      email: "sales@lavenderbooks.co.nz",
+      website: "https://lavenderbooks.example.com"
     },
-    tags: ["Health", "Medical", "Mental Health", "LGBTQ+"]
+    imageUrl: "https://picsum.photos/300/200?random=4",
+    verified: true,
+    lgbt_status: "lgbt_owned"
   },
   {
-    id: "resource2",
-    title: "Trans Support Group",
-    provider: "Gender Diverse Collective",
-    category: "Support",
-    description: "A support group for transgender, non-binary, and gender diverse individuals.",
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
+    id: 5,
+    name: "QueerMed Clinic",
+    type: "business",
+    category: "Healthcare",
+    tags: ["health", "medical", "lgbtq+"],
+    featured: true,
+    description: "A healthcare clinic providing services for the LGBTQ+ community",
     location: {
-      address: "456 Community Ave",
+      address: "222 Lambton Quay",
+      neighbourhood: "Central",
       city: "Wellington",
-      lat: -41.286461,
-      lng: 174.773336
+      lat: -41.286,
+      lng: 174.776
     },
     contact: {
-      phone: "0800-789-012",
-      email: "support@gendercollective.org.nz",
-      website: "www.gendercollective.org.nz"
+      phone: "04 777 8888",
+      email: "info@queermed.co.nz",
+      website: "https://queermed.example.com"
     },
-    tags: ["Transgender", "Support", "Community", "LGBTQ+"]
+    imageUrl: "https://picsum.photos/300/200?random=5",
+    verified: true,
+    lgbt_status: "ally"
   },
   {
-    id: "resource3",
-    title: "LGBTQ+ Legal Aid",
-    provider: "Rainbow Rights",
-    category: "Legal",
-    description: "Legal assistance and advice for LGBTQ+ individuals facing discrimination.",
-    imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=1000&auto=format&fit=crop",
+    id: 6,
+    name: "Transcend Services",
+    type: "resource",
+    category: "Services",
+    tags: ["legal", "support", "transgender"],
+    featured: false,
+    description: "A service providing legal and support services for transgender people",
     location: {
-      address: "789 Justice Rd",
+      address: "333 Riccarton Rd",
+      neighbourhood: "Riccarton",
       city: "Christchurch",
-      lat: -43.531637,
-      lng: 172.636645
+      lat: -43.532,
+      lng: 172.630
     },
     contact: {
-      phone: "0800-345-678",
-      email: "legal@rainbowrights.org.nz",
-      website: "www.rainbowrights.org.nz"
+      phone: "03 999 0000",
+      email: "help@transcend.org.nz",
+      website: "https://transcend.example.org"
     },
-    tags: ["Legal", "Rights", "Discrimination", "LGBTQ+"]
+    imageUrl: "https://picsum.photos/300/200?random=6",
+    verified: true,
+    lgbt_status: null
+  },
+  {
+    id: 7,
+    name: "Gaynz.com",
+    type: "resource",
+    category: "Community",
+    tags: ["news", "community", "events"],
+    featured: false,
+    description: "New Zealand's gay and lesbian community website",
+    location: {
+      address: "Online",
+      neighbourhood: "N/A",
+      city: "Auckland",
+      lat: -36.848,
+      lng: 174.763
+    },
+    contact: {
+      phone: "N/A",
+      email: "info@gaynz.com",
+      website: "https://www.gaynz.com/"
+    },
+    imageUrl: "https://picsum.photos/300/200?random=7",
+    verified: true,
+    lgbt_status: null
+  },
+  {
+    id: 8,
+    name: "Ending HIV",
+    type: "resource",
+    category: "Healthcare",
+    tags: ["health", "hiv", "testing"],
+    featured: false,
+    description: "Ending HIV is a community-led initiative to eliminate new HIV transmissions in Aotearoa",
+    location: {
+      address: "Online",
+      neighbourhood: "N/A",
+      city: "National",
+      lat: -41.000,
+      lng: 174.000
+    },
+    contact: {
+      phone: "N/A",
+      email: "info@endinghiv.org.nz",
+      website: "https://endinghiv.org.nz/"
+    },
+    imageUrl: "https://picsum.photos/300/200?random=8",
+    verified: true,
+    lgbt_status: null
+  },
+  {
+    id: 9,
+    name: "Outline Aotearoa",
+    type: "resource",
+    category: "Services",
+    tags: ["support", "helpline", "lgbtq+"],
+    featured: false,
+    description: "Outline provides a free and confidential nationwide 0800 support line and online chat service for people of all ages",
+    location: {
+      address: "Online",
+      neighbourhood: "N/A",
+      city: "National",
+      lat: -41.000,
+      lng: 174.000
+    },
+    contact: {
+      phone: "0800 688 5463",
+      email: "support@outline.org.nz",
+      website: "https://outline.org.nz/"
+    },
+    imageUrl: "https://picsum.photos/300/200?random=9",
+    verified: true,
+    lgbt_status: null
+  },
+  {
+    id: 10,
+    name: "InsideOUT Kōaro",
+    type: "resource",
+    category: "Community",
+    tags: ["youth", "education", "lgbtq+"],
+    featured: false,
+    description: "InsideOUT Kōaro works to give rainbow young people in Aotearoa New Zealand a sense of safety, belonging, and community.",
+    location: {
+      address: "Wellington",
+      neighbourhood: "N/A",
+      city: "Wellington",
+      lat: -41.286,
+      lng: 174.776
+    },
+    contact: {
+      phone: "N/A",
+      email: "info@insideout.org.nz",
+      website: "https://insideout.org.nz/"
+    },
+    imageUrl: "https://picsum.photos/300/200?random=10",
+    verified: true,
+    lgbt_status: null
   }
 ];
 
-export const navItems = [
+// Add mockUsers export if it doesn't exist
+export const mockUsers: User[] = [
   {
-    label: "Discover",
-    path: "/",
-    icon: DiscoverIcon
+    id: 1,
+    name: "Alex Smith",
+    username: "alex",
+    avatar: "https://picsum.photos/200?random=1",
+    bio: "LGBT+ activist and community organizer",
+    city: "Auckland",
+    pronouns: "they/them",
+    interests: ["activism", "art", "music"],
+    role: "member"
   },
   {
-    label: "Connect",
-    path: "/connect",
-    icon: ConnectIcon
+    id: 2,
+    name: "Jamie Wong",
+    username: "jamie",
+    avatar: "https://picsum.photos/200?random=2",
+    bio: "Proud ally and volunteer",
+    city: "Wellington",
+    pronouns: "she/her",
+    interests: ["education", "politics", "reading"],
+    role: "member"
   },
   {
-    label: "Feed",
-    path: "/feed",
-    icon: FeedIcon
+    id: 3,
+    name: "Jordan Taylor",
+    username: "jordan",
+    avatar: "https://picsum.photos/200?random=3",
+    bio: "Writer and community builder",
+    city: "Christchurch",
+    pronouns: "he/him",
+    interests: ["writing", "poetry", "hiking"],
+    role: "admin"
   },
   {
-    label: "Events",
-    path: "/events",
-    icon: EventsIcon
+    id: 4,
+    name: "Sam Parker",
+    username: "sam",
+    avatar: "https://picsum.photos/200?random=4",
+    bio: "Queer artist and musician",
+    city: "Dunedin",
+    pronouns: "she/they",
+    interests: ["art", "music", "cooking"],
+    role: "member"
   },
   {
-    label: "Resources",
-    path: "/resources",
-    icon: ResourcesIcon
+    id: 5,
+    name: "Casey Wilson",
+    username: "casey",
+    avatar: "https://picsum.photos/200?random=5",
+    bio: "Healthcare worker and community volunteer",
+    city: "Hamilton",
+    pronouns: "he/him",
+    interests: ["health", "sports", "dogs"],
+    role: "member"
   }
 ];
