@@ -17,6 +17,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [magicLinkSent, setMagicLinkSent] = useState(false);
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -78,27 +79,30 @@ export default function AdminPage() {
 
     setAuthError(null);
     setIsSigningIn(true);
+    setMagicLinkSent(false);
     
     try {
-      // Use signInWithOtp without redirect URL to avoid the localhost issue
+      // Use signInWithOtp with no redirects to avoid the localhost issue
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          // Explicitly don't use redirectTo
+          // Explicitly disable redirects
+          shouldCreateUser: true,
           emailRedirectTo: undefined
         }
       });
       
       if (error) throw error;
       
+      setMagicLinkSent(true);
       toast({
         title: "Check your email",
-        description: "We've sent you a login link. Please check your spam folder if you don't see it.",
+        description: "We've sent you a magic link. Enter the code from the email below when you receive it.",
       });
     } catch (error: any) {
       setAuthError(error.message || "An error occurred during sign in");
       toast({
-        title: "Error sending login link",
+        title: "Error sending magic link",
         description: error.message || "An error occurred during sign in",
         variant: "destructive",
       });
@@ -160,24 +164,34 @@ export default function AdminPage() {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)} 
-                  placeholder="Your password" 
-                />
-              </div>
+              {magicLinkSent ? (
+                <Alert>
+                  <InfoIcon className="h-4 w-4" />
+                  <AlertTitle>Magic Link Sent</AlertTitle>
+                  <AlertDescription>
+                    Check your email for the magic link. If you don't see it, check your spam folder.
+                  </AlertDescription>
+                </Alert>
+              ) : (
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={password} 
+                    onChange={(e) => setPassword(e.target.value)} 
+                    placeholder="Your password" 
+                  />
+                </div>
+              )}
             </form>
           </CardContent>
           <CardFooter className="flex justify-between">
             <Button 
               onClick={handleMagicLinkSignIn} 
               variant="outline" 
-              disabled={isSigningIn || !email}>
-              {isSigningIn ? "Sending..." : "Sign in with Magic Link"}
+              disabled={isSigningIn || !email || magicLinkSent}>
+              {isSigningIn ? "Sending..." : magicLinkSent ? "Link Sent" : "Sign in with Magic Link"}
             </Button>
             <Button 
               onClick={handlePasswordSignIn} 
