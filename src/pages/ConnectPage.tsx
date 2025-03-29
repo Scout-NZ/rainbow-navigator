@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MessageCircle, Plus, Search, Users } from "lucide-react";
+import { MessageCircle, Plus, Search, Users, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GroupCard } from "@/components/groups/GroupCard";
 import { ChatBot } from "@/components/ai/ChatBot";
@@ -12,10 +12,32 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { CreateGroupForm } from "@/components/groups/CreateGroupForm";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { FriendData, FriendDetails } from "@/components/friends/FriendDetails";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ConnectPage() {
   const [filter, setFilter] = useState("");
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [friendFilter, setFriendFilter] = useState("");
+  const { toast } = useToast();
+  
+  // Mock data for friend suggestions and existing friends
+  const friendSuggestions: FriendData[] = [
+    { id: "f1", name: "Jamie Kim", imageUrl: "https://randomuser.me/api/portraits/women/1.jpg", status: "online", mutualGroups: 3 },
+    { id: "f2", name: "Ray Garcia", imageUrl: "https://randomuser.me/api/portraits/men/2.jpg", status: "none", mutualGroups: 1 },
+    { id: "f3", name: "Taylor Wong", imageUrl: "https://randomuser.me/api/portraits/women/3.jpg", status: "none", mutualGroups: 4 },
+    { id: "f4", name: "Jordan Smith", imageUrl: "https://randomuser.me/api/portraits/men/4.jpg", status: "online", mutualGroups: 2 },
+    { id: "f5", name: "Sam Rivera", imageUrl: "https://randomuser.me/api/portraits/women/5.jpg", status: "none", mutualGroups: 3 },
+  ];
+  
+  const existingFriends: FriendData[] = [
+    { id: "f6", name: "Riley Johnson", imageUrl: "https://randomuser.me/api/portraits/women/11.jpg", status: "online", mutualGroups: 2 },
+    { id: "f7", name: "Casey Martinez", imageUrl: "https://randomuser.me/api/portraits/men/12.jpg", status: "offline", mutualGroups: 1 },
+    { id: "f8", name: "Quinn Chen", imageUrl: "https://randomuser.me/api/portraits/women/13.jpg", status: "online", mutualGroups: 3 },
+    { id: "f9", name: "Drew Patel", imageUrl: "https://randomuser.me/api/portraits/men/14.jpg", status: "offline", mutualGroups: 2 },
+  ];
   
   const filteredGroups = mockGroups.filter(group => 
     group.name.toLowerCase().includes(filter.toLowerCase()) ||
@@ -23,6 +45,31 @@ export default function ConnectPage() {
     group.description.toLowerCase().includes(filter.toLowerCase()) ||
     group.tags.some(tag => tag.toLowerCase().includes(filter.toLowerCase()))
   );
+
+  const filteredFriends = existingFriends.filter(friend => 
+    friend.name.toLowerCase().includes(friendFilter.toLowerCase())
+  );
+  
+  const handleConnectFriend = (friendId: string) => {
+    const friend = friendSuggestions.find(f => f.id === friendId);
+    if (friend) {
+      toast({
+        title: "Friend request sent",
+        description: `Connection request sent to ${friend.name}`,
+      });
+    }
+  };
+  
+  const handleSendMessage = (friendId: string) => {
+    const friend = existingFriends.find(f => f.id === friendId) || 
+                  friendSuggestions.find(f => f.id === friendId);
+    if (friend) {
+      toast({
+        title: "Message started",
+        description: `Started a conversation with ${friend.name}`,
+      });
+    }
+  };
   
   return (
     <div className="pb-4">
@@ -133,6 +180,8 @@ export default function ConnectPage() {
                 type="search" 
                 placeholder="Search friends..." 
                 className="pl-9"
+                value={friendFilter}
+                onChange={(e) => setFriendFilter(e.target.value)}
               />
             </div>
             
@@ -140,24 +189,36 @@ export default function ConnectPage() {
               <h3 className="text-sm font-medium mb-2 text-white">Friend Suggestions</h3>
               <ScrollArea className="w-full whitespace-nowrap pb-4">
                 <div className="flex gap-3">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <Card key={i} className="card-hover min-w-[150px]">
-                      <CardContent className="p-3 flex flex-col items-center gap-2 text-center">
-                        <AvatarWithStatus 
-                          src={`https://randomuser.me/api/portraits/${i % 2 ? 'women' : 'men'}/${i}.jpg`}
-                          fallback={`Friend ${i}`}
-                          size="lg"
-                          status={i % 3 === 0 ? "online" : "none"}
-                        />
-                        <div>
-                          <h4 className="font-medium text-sm">Jamie Kim</h4>
-                          <p className="text-xs text-muted-foreground">3 mutual groups</p>
-                        </div>
-                        <Button size="sm" variant="outline" className="w-full">
-                          <Plus className="h-3 w-3 mr-1" /> Connect
-                        </Button>
-                      </CardContent>
-                    </Card>
+                  {friendSuggestions.map(friend => (
+                    <HoverCard key={friend.id}>
+                      <HoverCardTrigger asChild>
+                        <Card className="card-hover min-w-[150px] cursor-pointer">
+                          <CardContent className="p-3 flex flex-col items-center gap-2 text-center">
+                            <AvatarWithStatus 
+                              src={friend.imageUrl}
+                              fallback={friend.name.charAt(0)}
+                              size="lg"
+                              status={friend.status}
+                            />
+                            <div>
+                              <h4 className="font-medium text-sm">{friend.name}</h4>
+                              <p className="text-xs text-muted-foreground">{friend.mutualGroups} mutual groups</p>
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="w-full"
+                              onClick={() => handleConnectFriend(friend.id)}
+                            >
+                              <UserPlus className="h-3 w-3 mr-1" /> Connect
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </HoverCardTrigger>
+                      <HoverCardContent className="w-64">
+                        <FriendDetails friend={friend} onSendMessage={handleSendMessage} />
+                      </HoverCardContent>
+                    </HoverCard>
                   ))}
                 </div>
               </ScrollArea>
@@ -166,27 +227,34 @@ export default function ConnectPage() {
             <div>
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-medium text-white">Your Friends</h3>
-                <span className="text-xs text-muted-foreground">12 total</span>
+                <span className="text-xs text-muted-foreground">{filteredFriends.length} shown</span>
               </div>
               
               <div className="grid grid-cols-2 gap-2">
-                {[1, 2, 3, 4].map(i => (
-                  <Card key={i} className="card-hover">
-                    <CardContent className="p-3 flex items-center gap-3">
-                      <AvatarWithStatus 
-                        src={`https://randomuser.me/api/portraits/${i % 2 ? 'women' : 'men'}/${i + 10}.jpg`}
-                        fallback={`Friend ${i}`}
-                        status={i % 2 === 0 ? "online" : "offline"}
-                      />
-                      <div>
-                        <h4 className="font-medium text-sm">Alex Chen</h4>
-                        <div className="flex items-center text-xs text-muted-foreground">
-                          <Users className="h-3 w-3 mr-1" />
-                          <span>2 groups</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                {filteredFriends.map(friend => (
+                  <Popover key={friend.id}>
+                    <PopoverTrigger asChild>
+                      <Card className="card-hover cursor-pointer">
+                        <CardContent className="p-3 flex items-center gap-3">
+                          <AvatarWithStatus 
+                            src={friend.imageUrl}
+                            fallback={friend.name.charAt(0)}
+                            status={friend.status}
+                          />
+                          <div>
+                            <h4 className="font-medium text-sm">{friend.name}</h4>
+                            <div className="flex items-center text-xs text-muted-foreground">
+                              <Users className="h-3 w-3 mr-1" />
+                              <span>{friend.mutualGroups} groups</span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-72">
+                      <FriendDetails friend={friend} onSendMessage={handleSendMessage} />
+                    </PopoverContent>
+                  </Popover>
                 ))}
               </div>
             </div>
