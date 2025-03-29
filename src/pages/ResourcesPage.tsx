@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { BookOpen, Filter, Phone, Plus } from "lucide-react";
+import { BookOpen, Filter, Phone, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,6 +9,25 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type CombinedResource = {
   id: string;
@@ -32,9 +51,27 @@ type CombinedResource = {
   imageUrl?: string;
 };
 
+const healthcareTags = [
+  "All", 
+  "GP", 
+  "Health Network", 
+  "Health Centre", 
+  "Sexual Health Clinic", 
+  "Voice Therapy", 
+  "Mental Health", 
+  "Counselor", 
+  "Psychotherapist", 
+  "Clinical Psychologist", 
+  "Endocrinologist", 
+  "Laser Clinic and Hair", 
+  "Other"
+];
+
 export default function ResourcesPage() {
   const [resources, setResources] = useState<CombinedResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedHealthcareTag, setSelectedHealthcareTag] = useState<string>("All");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     async function fetchHealthcareLocations() {
@@ -108,12 +145,24 @@ export default function ResourcesPage() {
     return groups;
   }, {} as Record<string, CombinedResource[]>);
 
+  const filteredHealthcareResources = resourcesByCategory["Healthcare"] ? 
+    resourcesByCategory["Healthcare"].filter(resource => {
+      if (selectedHealthcareTag === "All") return true;
+      return resource.tags.some(tag => 
+        tag.toLowerCase() === selectedHealthcareTag.toLowerCase());
+    }) : [];
+
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold rainbow-text">Resources</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="rounded-full">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="rounded-full"
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+          >
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
@@ -156,27 +205,98 @@ export default function ResourcesPage() {
               <p className="text-muted-foreground">Loading resources...</p>
             </div>
           ) : (
-            Object.entries(resourcesByCategory).map(([category, categoryResources]) => (
-              <div key={category}>
-                <h2 className="text-lg font-semibold mb-3 flex items-center">
-                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
-                  {category} Resources
-                </h2>
-                {categoryResources.length > 0 ? (
+            <>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-lg font-semibold flex items-center">
+                    <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                    Healthcare Resources
+                  </h2>
+                  
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-8 gap-1">
+                        <Filter className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">Filter by Type</span>
+                        {selectedHealthcareTag !== "All" && (
+                          <Badge className="ml-1 bg-primary/20 text-primary border-0 text-xs">
+                            {selectedHealthcareTag}
+                          </Badge>
+                        )}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 bg-popover">
+                      {healthcareTags.map(tag => (
+                        <DropdownMenuCheckboxItem
+                          key={tag}
+                          checked={selectedHealthcareTag === tag}
+                          onCheckedChange={() => setSelectedHealthcareTag(tag)}
+                          className="cursor-pointer"
+                        >
+                          {tag}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                
+                {selectedHealthcareTag !== "All" && (
+                  <div className="mb-3 flex items-center">
+                    <Badge className="bg-primary/10 text-primary border-0 flex gap-1 items-center">
+                      {selectedHealthcareTag}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => setSelectedHealthcareTag("All")}
+                      />
+                    </Badge>
+                  </div>
+                )}
+                
+                {filteredHealthcareResources.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {categoryResources.map(resource => (
+                    {filteredHealthcareResources.map(resource => (
                       <ResourceCard key={resource.id} resource={resource} />
                     ))}
                   </div>
                 ) : (
                   <Card className="mb-4">
                     <CardContent className="py-6 text-center">
-                      <p className="text-muted-foreground">No {category.toLowerCase()} resources found.</p>
+                      <p className="text-muted-foreground">
+                        {selectedHealthcareTag === "All" 
+                          ? "No healthcare resources found." 
+                          : `No healthcare resources found with tag: ${selectedHealthcareTag}`
+                        }
+                      </p>
                     </CardContent>
                   </Card>
                 )}
               </div>
-            ))
+              
+              {Object.entries(resourcesByCategory)
+                .filter(([category]) => category.toLowerCase() !== "healthcare")
+                .map(([category, categoryResources]) => (
+                  <div key={category}>
+                    <h2 className="text-lg font-semibold mb-3 flex items-center">
+                      <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                      {category} Resources
+                    </h2>
+                    {categoryResources.length > 0 ? (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {categoryResources.map(resource => (
+                          <ResourceCard key={resource.id} resource={resource} />
+                        ))}
+                      </div>
+                    ) : (
+                      <Card className="mb-4">
+                        <CardContent className="py-6 text-center">
+                          <p className="text-muted-foreground">No {category.toLowerCase()} resources found.</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                ))
+              }
+            </>
           )}
         </TabsContent>
         
