@@ -50,7 +50,7 @@ export type Event = {
   price: string;
   attendees: number;
   tags: string[];
-}
+};
 
 export type Resource = {
   id: string;
@@ -181,6 +181,62 @@ export const mockLocations: Location[] = [
     updated_at: "2023-01-01T00:00:00Z",
   },
 ];
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  pronouns: string;
+  gender: string;
+  bio: string;
+  location: string;
+  imageUrl: string;
+  coverImageUrl: string;
+  joinedDate: string;
+  interests: string[];
+  identity: string;
+  friends: number;
+  groups: number;
+  events: number;
+  socialLinks: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    spotify?: string;
+    tiktok?: string;
+    linkedin?: string;
+    website?: string;
+  };
+}
+
+export const mockUserProfile: UserProfile = {
+  id: "user1",
+  name: "Alex Rivera",
+  username: "alexrivera",
+  email: "alex@example.com",
+  pronouns: "they/them",
+  gender: "Non-Binary",
+  bio: "LGBTQ+ advocate and outdoor enthusiast",
+  location: "Auckland, New Zealand",
+  imageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
+  coverImageUrl: "https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=1000&auto=format&fit=crop",
+  joinedDate: "2023-04-15",
+  interests: ["hiking", "reading", "activism", "photography"],
+  identity: "non-binary",
+  friends: 142,
+  groups: 6,
+  events: 12,
+  socialLinks: {
+    instagram: "alex_rivera",
+    facebook: "alexrivera.fb",
+    twitter: "alexrivera",
+    spotify: "alex.rivera",
+    tiktok: "alexrivera.tiktok",
+    linkedin: "alexrivera-linkedin",
+    website: "https://alexrivera.com"
+  }
+};
 
 export const mockGroups: Group[] = [
   {
@@ -418,24 +474,6 @@ export const mockPosts: Post[] = [
     tags: ["Art", "Expression", "Identity"]
   }
 ];
-
-export const mockUserProfile = {
-  id: "user1",
-  name: "Alex Rivera",
-  email: "alex@example.com",
-  pronouns: "they/them",
-  bio: "LGBTQ+ advocate and outdoor enthusiast",
-  location: "Auckland, New Zealand",
-  imageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
-  coverImageUrl: "https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=1000&auto=format&fit=crop",
-  joinedDate: "2023-04-15",
-  interests: ["hiking", "reading", "activism", "photography"],
-  socialLinks: {
-    instagram: "alex_rivera",
-    twitter: "alexrivera",
-    website: "https://alexrivera.com"
-  }
-};
 
 export const mockPlaces = [
   {
