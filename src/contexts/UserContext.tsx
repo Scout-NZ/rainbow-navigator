@@ -11,6 +11,9 @@ type UserContextType = {
   isGroupMember: (groupId: string) => boolean;
   isGroupAdmin: (groupId: string) => boolean;
   createGroup: (groupId: string) => void;
+  // Add profile management
+  userProfile: typeof mockUserProfile;
+  updateUserProfile: (updatedProfile: Partial<typeof mockUserProfile>) => void;
 };
 
 const defaultUserContext: UserContextType = {
@@ -22,6 +25,9 @@ const defaultUserContext: UserContextType = {
   isGroupMember: () => false,
   isGroupAdmin: () => false,
   createGroup: () => {},
+  // Add default profile
+  userProfile: mockUserProfile,
+  updateUserProfile: () => {},
 };
 
 const UserContext = createContext<UserContextType>(defaultUserContext);
@@ -32,6 +38,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [joinedGroups, setJoinedGroups] = useState<string[]>([]);
   const [adminGroups, setAdminGroups] = useState<string[]>([]);
   const currentUser = { id: mockUserProfile.id, name: mockUserProfile.name };
+  
+  // Add user profile state
+  const [userProfile, setUserProfile] = useState(mockUserProfile);
 
   // Load initial joined groups from mockData
   useEffect(() => {
@@ -48,6 +57,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setAdminGroups(userAdminGroups);
     });
   }, [currentUser.id]);
+
+  // Load profile from localStorage on initial load
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      try {
+        setUserProfile(JSON.parse(savedProfile));
+      } catch (error) {
+        console.error('Error parsing saved profile:', error);
+      }
+    }
+  }, []);
 
   const joinGroup = (groupId: string) => {
     if (!joinedGroups.includes(groupId)) {
@@ -95,6 +116,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isGroupMember = (groupId: string) => joinedGroups.includes(groupId);
   const isGroupAdmin = (groupId: string) => adminGroups.includes(groupId);
 
+  // Add profile update function
+  const updateUserProfile = (updatedProfile: Partial<typeof mockUserProfile>) => {
+    const newProfile = { ...userProfile, ...updatedProfile };
+    setUserProfile(newProfile);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem('userProfile', JSON.stringify(newProfile));
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -106,6 +136,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isGroupMember,
         isGroupAdmin,
         createGroup,
+        userProfile,
+        updateUserProfile,
       }}
     >
       {children}

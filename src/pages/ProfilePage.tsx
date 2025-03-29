@@ -2,7 +2,7 @@ import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram,
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockUserProfile, mockEvents, mockGroups, mockPosts } from "@/data/mockData";
+import { mockPosts } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { PostCard } from "@/components/feed/PostCard";
@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useUser } from "@/contexts/UserContext";
 
 interface ProfileFormValues {
   name: string;
@@ -41,38 +42,27 @@ export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [profile, setProfile] = useState({
-    ...mockUserProfile,
-    pronouns: mockUserProfile.pronouns || "",
-    gender: mockUserProfile.gender || "",
-    socialLinks: mockUserProfile.socialLinks || {
-      instagram: "",
-      facebook: "",
-      twitter: "",
-      spotify: "",
-      tiktok: "",
-      linkedin: ""
-    }
-  });
+  const { userProfile, updateUserProfile } = useUser();
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
-      name: profile.name,
-      username: profile.username,
-      bio: profile.bio || "",
-      location: profile.location || "",
-      interests: profile.interests.join(", "),
-      identity: profile.identity || "",
-      pronouns: profile.pronouns || "",
-      gender: profile.gender || "",
+      name: userProfile.name,
+      username: userProfile.username || "",
+      bio: userProfile.bio || "",
+      location: userProfile.location || "",
+      interests: userProfile.interests.join(", "),
+      identity: userProfile.identity || "",
+      pronouns: userProfile.pronouns || "",
+      gender: userProfile.gender || "",
       socialLinks: {
-        instagram: profile.socialLinks?.instagram || "",
-        facebook: profile.socialLinks?.facebook || "",
-        twitter: profile.socialLinks?.twitter || "",
-        spotify: profile.socialLinks?.spotify || "",
-        tiktok: profile.socialLinks?.tiktok || "",
-        linkedin: profile.socialLinks?.linkedin || ""
+        instagram: userProfile.socialLinks?.instagram || "",
+        facebook: userProfile.socialLinks?.facebook || "",
+        twitter: userProfile.socialLinks?.twitter || "",
+        spotify: userProfile.socialLinks?.spotify || "",
+        tiktok: userProfile.socialLinks?.tiktok || "",
+        linkedin: userProfile.socialLinks?.linkedin || ""
       }
     },
   });
@@ -86,18 +76,17 @@ export default function ProfilePage() {
     linkedin: string;
   }>({
     defaultValues: {
-      instagram: profile.socialLinks?.instagram || "",
-      facebook: profile.socialLinks?.facebook || "",
-      twitter: profile.socialLinks?.twitter || "",
-      spotify: profile.socialLinks?.spotify || "",
-      tiktok: profile.socialLinks?.tiktok || "",
-      linkedin: profile.socialLinks?.linkedin || ""
+      instagram: userProfile.socialLinks?.instagram || "",
+      facebook: userProfile.socialLinks?.facebook || "",
+      twitter: userProfile.socialLinks?.twitter || "",
+      spotify: userProfile.socialLinks?.spotify || "",
+      tiktok: userProfile.socialLinks?.tiktok || "",
+      linkedin: userProfile.socialLinks?.linkedin || ""
     }
   });
 
   const onSubmit = (values: ProfileFormValues) => {
     const updatedProfile = {
-      ...profile,
       name: values.name,
       username: values.username,
       bio: values.bio,
@@ -108,7 +97,7 @@ export default function ProfilePage() {
       gender: values.gender,
     };
     
-    setProfile(updatedProfile);
+    updateUserProfile(updatedProfile);
     setIsDialogOpen(false);
     
     toast({
@@ -125,12 +114,10 @@ export default function ProfilePage() {
     tiktok: string;
     linkedin: string;
   }) => {
-    const updatedProfile = {
-      ...profile,
+    updateUserProfile({
       socialLinks: values
-    };
+    });
     
-    setProfile(updatedProfile);
     setIsSocialDialogOpen(false);
     
     toast({
@@ -148,8 +135,7 @@ export default function ProfilePage() {
     if (!file) return;
 
     const imageUrl = URL.createObjectURL(file);
-    setProfile({
-      ...profile,
+    updateUserProfile({
       imageUrl,
     });
 
@@ -159,9 +145,9 @@ export default function ProfilePage() {
     });
   };
 
-  const headerGradient = getIdentityGradient(profile.identity);
+  const headerGradient = getIdentityGradient(userProfile.identity);
 
-  const hasAnySocialLink = profile.socialLinks && Object.values(profile.socialLinks).some(link => !!link);
+  const hasAnySocialLink = userProfile.socialLinks && Object.values(userProfile.socialLinks).some(link => !!link);
 
   return (
     <div className="pb-4">
@@ -184,11 +170,11 @@ export default function ProfilePage() {
             <div className="absolute -top-12 group">
               <Avatar className="h-24 w-24 border-4 border-background relative">
                 <AvatarImage
-                  src={profile.imageUrl} 
-                  alt={profile.name}
+                  src={userProfile.imageUrl} 
+                  alt={userProfile.name}
                   className="object-cover"
                 />
-                <AvatarFallback>{profile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                 
                 <button 
                   className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center"
@@ -209,10 +195,10 @@ export default function ProfilePage() {
             
             <div className="pt-16 flex justify-between items-start">
               <div>
-                <h2 className="text-xl font-bold">{profile.name}</h2>
-                <p className="text-muted-foreground text-sm">{profile.username}</p>
-                {profile.pronouns && <p className="text-sm text-muted-foreground">{profile.pronouns}</p>}
-                {profile.gender && <p className="text-sm text-muted-foreground">{profile.gender}</p>}
+                <h2 className="text-xl font-bold">{userProfile.name}</h2>
+                <p className="text-muted-foreground text-sm">{userProfile.username}</p>
+                {userProfile.pronouns && <p className="text-sm text-muted-foreground">{userProfile.pronouns}</p>}
+                {userProfile.gender && <p className="text-sm text-muted-foreground">{userProfile.gender}</p>}
               </div>
               <Button 
                 variant="outline" 
@@ -224,25 +210,25 @@ export default function ProfilePage() {
               </Button>
             </div>
             
-            <p className="mt-3 text-sm">{profile.bio}</p>
+            <p className="mt-3 text-sm">{userProfile.bio}</p>
             
-            {profile.location && (
+            {userProfile.location && (
               <div className="flex items-center mt-2 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4 mr-2" />
-                <span>{profile.location}</span>
+                <span>{userProfile.location}</span>
               </div>
             )}
             
-            {profile.identity && (
+            {userProfile.identity && (
               <div className="flex items-center mt-2 text-sm">
                 <Badge className="bg-rainbow-gradient text-white">
-                  {prideIdentities.find(i => i.id === profile.identity)?.label || profile.identity}
+                  {prideIdentities.find(i => i.id === userProfile.identity)?.label || userProfile.identity}
                 </Badge>
               </div>
             )}
             
             <div className="flex gap-2 mt-3 flex-wrap">
-              {profile.interests.map(interest => (
+              {userProfile.interests.map(interest => (
                 <Badge key={interest} variant="secondary" className="text-xs">
                   #{interest}
                 </Badge>
@@ -264,9 +250,9 @@ export default function ProfilePage() {
               
               {hasAnySocialLink ? (
                 <div className="flex flex-wrap gap-3">
-                  {profile.socialLinks?.instagram && (
+                  {userProfile.socialLinks?.instagram && (
                     <a 
-                      href={profile.socialLinks.instagram.startsWith('http') ? profile.socialLinks.instagram : `https://${profile.socialLinks.instagram}`} 
+                      href={userProfile.socialLinks.instagram.startsWith('http') ? userProfile.socialLinks.instagram : `https://${userProfile.socialLinks.instagram}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -276,9 +262,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {profile.socialLinks?.facebook && (
+                  {userProfile.socialLinks?.facebook && (
                     <a 
-                      href={profile.socialLinks.facebook.startsWith('http') ? profile.socialLinks.facebook : `https://${profile.socialLinks.facebook}`} 
+                      href={userProfile.socialLinks.facebook.startsWith('http') ? userProfile.socialLinks.facebook : `https://${userProfile.socialLinks.facebook}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -288,9 +274,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {profile.socialLinks?.twitter && (
+                  {userProfile.socialLinks?.twitter && (
                     <a 
-                      href={profile.socialLinks.twitter.startsWith('http') ? profile.socialLinks.twitter : `https://${profile.socialLinks.twitter}`} 
+                      href={userProfile.socialLinks.twitter.startsWith('http') ? userProfile.socialLinks.twitter : `https://${userProfile.socialLinks.twitter}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -300,9 +286,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {profile.socialLinks?.spotify && (
+                  {userProfile.socialLinks?.spotify && (
                     <a 
-                      href={profile.socialLinks.spotify.startsWith('http') ? profile.socialLinks.spotify : `https://${profile.socialLinks.spotify}`} 
+                      href={userProfile.socialLinks.spotify.startsWith('http') ? userProfile.socialLinks.spotify : `https://${userProfile.socialLinks.spotify}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -312,9 +298,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {profile.socialLinks?.tiktok && (
+                  {userProfile.socialLinks?.tiktok && (
                     <a 
-                      href={profile.socialLinks.tiktok.startsWith('http') ? profile.socialLinks.tiktok : `https://${profile.socialLinks.tiktok}`} 
+                      href={userProfile.socialLinks.tiktok.startsWith('http') ? userProfile.socialLinks.tiktok : `https://${userProfile.socialLinks.tiktok}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -324,9 +310,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {profile.socialLinks?.linkedin && (
+                  {userProfile.socialLinks?.linkedin && (
                     <a 
-                      href={profile.socialLinks.linkedin.startsWith('http') ? profile.socialLinks.linkedin : `https://${profile.socialLinks.linkedin}`} 
+                      href={userProfile.socialLinks.linkedin.startsWith('http') ? userProfile.socialLinks.linkedin : `https://${userProfile.socialLinks.linkedin}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -343,15 +329,15 @@ export default function ProfilePage() {
             
             <div className="grid grid-cols-3 gap-2 mt-4 text-center">
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{profile.friends}</div>
+                <div className="text-lg font-bold">{userProfile.friends}</div>
                 <div className="text-xs text-muted-foreground">Friends</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{profile.groups}</div>
+                <div className="text-lg font-bold">{userProfile.groups}</div>
                 <div className="text-xs text-muted-foreground">Groups</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{profile.events}</div>
+                <div className="text-lg font-bold">{userProfile.events}</div>
                 <div className="text-xs text-muted-foreground">Events</div>
               </div>
             </div>

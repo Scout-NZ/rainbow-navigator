@@ -7,14 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChatBot } from "@/components/ai/ChatBot";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { mockUserProfile } from "@/data/mockData";
 import { cn } from "@/lib/utils";
+import { useUser } from "@/contexts/UserContext";
 
 export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
+  const { userProfile } = useUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -57,10 +58,10 @@ export function AppLayout() {
             <Link to="/profile" className="relative flex items-center">
               <Avatar className="h-9 w-9 border-2 border-white">
                 <AvatarImage 
-                  src={mockUserProfile.imageUrl}
-                  alt={mockUserProfile.name} 
+                  src={userProfile.imageUrl}
+                  alt={userProfile.name} 
                 />
-                <AvatarFallback>{mockUserProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
             </Link>
             
