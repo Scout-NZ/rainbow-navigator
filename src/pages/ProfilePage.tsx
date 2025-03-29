@@ -26,6 +26,7 @@ interface ProfileFormValues {
   interests: string;
   identity: string;
   pronouns: string;
+  gender: string;
 }
 
 export default function ProfilePage() {
@@ -34,7 +35,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState({
     ...mockUserProfile,
     identity: mockUserProfile.identity || "",
-    pronouns: mockUserProfile.pronouns || ""
+    pronouns: mockUserProfile.pronouns || "",
+    gender: mockUserProfile.gender || ""
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -47,6 +49,7 @@ export default function ProfilePage() {
       interests: profile.interests.join(", "),
       identity: profile.identity || "",
       pronouns: profile.pronouns || "",
+      gender: profile.gender || "",
     },
   });
 
@@ -60,6 +63,7 @@ export default function ProfilePage() {
       interests: values.interests.split(",").map(tag => tag.trim()).filter(Boolean),
       identity: values.identity,
       pronouns: values.pronouns,
+      gender: values.gender,
     };
     
     setProfile(updatedProfile);
@@ -142,6 +146,7 @@ export default function ProfilePage() {
                 <h2 className="text-xl font-bold">{profile.name}</h2>
                 <p className="text-muted-foreground text-sm">{profile.username}</p>
                 {profile.pronouns && <p className="text-sm text-muted-foreground">{profile.pronouns}</p>}
+                {profile.gender && <p className="text-sm text-muted-foreground">{profile.gender}</p>}
               </div>
               <Button 
                 variant="outline" 
@@ -401,6 +406,75 @@ export default function ProfilePage() {
                             </FormControl>
                             <FormLabel className="font-normal cursor-pointer">
                               ey/em
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              None/Unspecified
+                            </FormLabel>
+                          </FormItem>
+                        </div>
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="gender"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Gender</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <div className="flex items-center space-x-6 flex-wrap gap-y-2">
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Man" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              Man
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Trans Man" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              Trans Man
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Woman" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              Woman
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Trans Woman" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              Trans Woman
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="Non-Binary" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              Non-Binary
                             </FormLabel>
                           </FormItem>
                           <FormItem className="flex items-center space-x-2 space-y-0">
