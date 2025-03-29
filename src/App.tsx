@@ -12,6 +12,7 @@ import ResourcesPage from "./pages/ResourcesPage";
 import ProfilePage from "./pages/ProfilePage";
 import FeedPage from "./pages/FeedPage";
 import NotFound from "./pages/NotFound";
+import GroupDetailPage from "./pages/GroupDetailPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route element={<AppLayout />}>
             <Route path="/" element={<DiscoverPage />} />
             <Route path="/connect" element={<ConnectPage />} />
+            <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/resources" element={<ResourcesPage />} />
             <Route path="/profile" element={<ProfilePage />} />

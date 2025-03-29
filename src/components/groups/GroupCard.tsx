@@ -4,8 +4,17 @@ import { Group } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 
 export function GroupCard({ group }: { group: Group }) {
+  const navigate = useNavigate();
+
+  const handleViewGroup = () => {
+    console.log("Viewing group:", group.name);
+    // Navigate to a group detail page with the group id
+    navigate(`/connect/groups/${group.id}`);
+  };
+
   return (
     <Card className="card-hover overflow-hidden">
       <div 
@@ -51,7 +60,14 @@ export function GroupCard({ group }: { group: Group }) {
       </CardContent>
       
       <CardFooter className="p-3 pt-0 flex justify-between">
-        <Button variant="outline" size="sm" className="w-1/2">View</Button>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          className="w-1/2"
+          onClick={handleViewGroup}
+        >
+          View
+        </Button>
         <Button size="sm" className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover">Join</Button>
       </CardFooter>
     </Card>
