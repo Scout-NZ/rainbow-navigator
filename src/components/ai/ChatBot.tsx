@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { mockUserProfile } from "@/data/mockData";
+import { mockResources } from "@/data/mockData";
 
 type Message = {
   id: string;
@@ -32,15 +33,100 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Bot responses with NZ tone
-  const botResponses = [
-    { keywords: ["hello", "hi", "hey"], response: "Kia ora! How can I help you today, mate?" },
-    { keywords: ["event", "events"], response: "Looking for some choice events? You can find upcoming LGBTQ+ events in the Events tab. Would you like me to recommend some that are sweet as?" },
-    { keywords: ["resource", "resources", "help"], response: "We've got heaps of community resources available. Are you looking for healthcare, legal aid, housing support, or something else, whānau?" },
-    { keywords: ["group", "community", "communities"], response: "Our Connect section has many community groups you can join, eh. What sorts of interests or support are you keen on?" },
-    { keywords: ["business", "shop", "store"], response: "You can find LGBTQ+ friendly businesses in the Discover section. Want recommendations for a specific category? They're all good as gold." },
-    { keywords: ["safe", "safety"], response: "Your safety is tumeke important. Rainbow Navigator only lists verified safe spaces. You can also check user reviews and ratings for a bit more peace of mind." },
-  ];
+  // App content for the AI to search through
+  const appContent = {
+    resources: mockResources,
+    events: [
+      { id: 1, title: "Pride Parade", date: "2023-07-15", location: "Auckland CBD", description: "Annual Pride Parade celebrating the LGBTQ+ community." },
+      { id: 2, title: "Rainbow Youth Workshop", date: "2023-07-20", location: "Wellington", description: "Workshop for LGBTQ+ youth focusing on mental health and wellbeing." },
+      { id: 3, title: "Trans Support Group", date: "2023-07-25", location: "Christchurch", description: "Monthly support group for transgender individuals." }
+    ],
+    commonQuestions: {
+      "what is rainbow navigator": "Rainbow Navigator is a vibrant, user-friendly queer community hub designed to connect LGBTQ+ individuals with safe spaces, events, community groups, and essential resources throughout New Zealand.",
+      "how do i find resources": "You can find resources by going to the Resources tab where you'll see categories like Healthcare, Legal, Housing, and more. You can filter by category or type to find what you need.",
+      "how do i join a community group": "Head to the Connect section where you'll find various community groups. You can browse, view details, and join groups that interest you.",
+      "where can i find lgbtq friendly healthcare": "In the Resources section, select the Healthcare category and you'll see a list of LGBTQ+ friendly healthcare providers across New Zealand.",
+      "is my data safe": "Sweet as! Your privacy is tumeke important to us. We only collect information needed to provide our services and never share your personal data with third parties without your consent."
+    }
+  };
+
+  // Advanced search function to find relevant content in the app
+  const searchAppContent = (query: string) => {
+    query = query.toLowerCase();
+    let results = [];
+    
+    // First check if we have a direct answer to the question
+    for (const [question, answer] of Object.entries(appContent.commonQuestions)) {
+      if (query.includes(question) || question.includes(query)) {
+        return {
+          type: "direct_answer",
+          content: answer
+        };
+      }
+    }
+    
+    // Search resources
+    const resourceMatches = appContent.resources.filter(resource => 
+      resource.title.toLowerCase().includes(query) || 
+      resource.description.toLowerCase().includes(query) ||
+      resource.category.toLowerCase().includes(query)
+    );
+    
+    if (resourceMatches.length > 0) {
+      results.push({
+        type: "resources",
+        items: resourceMatches.slice(0, 3),
+        content: `I found ${resourceMatches.length} resources that might help you. Here are a few: ${resourceMatches.slice(0, 3).map(r => r.title).join(", ")}. You can find these in the Resources section.`
+      });
+    }
+    
+    // Search events
+    const eventMatches = appContent.events.filter(event => 
+      event.title.toLowerCase().includes(query) || 
+      event.description.toLowerCase().includes(query) ||
+      event.location.toLowerCase().includes(query)
+    );
+    
+    if (eventMatches.length > 0) {
+      results.push({
+        type: "events",
+        items: eventMatches,
+        content: `There are ${eventMatches.length} events that match your query: ${eventMatches.map(e => e.title).join(", ")}. Check them out in the Events section.`
+      });
+    }
+    
+    if (results.length > 0) {
+      return results;
+    }
+    
+    // NZ-flavored responses with Māori words for common topics
+    if (query.includes("healthcare") || query.includes("doctor") || query.includes("medical")) {
+      return {
+        type: "topic_response",
+        content: "For hauora (health) services, we've got heaps of LGBTQ+ friendly healthcare providers listed in our Resources tab. You can filter by 'Healthcare' to find GPs, mental health professionals, and sexual health clinics across Aotearoa."
+      };
+    }
+    
+    if (query.includes("legal") || query.includes("lawyer") || query.includes("rights")) {
+      return {
+        type: "topic_response",
+        content: "Looking for ture (legal) help? Our Resources section has a category for legal services where you can find LGBTQ+ friendly lawyers and legal aid. They can help with name changes, discrimination issues, and other legal matters, eh."
+      };
+    }
+    
+    if (query.includes("mental health") || query.includes("depression") || query.includes("anxiety")) {
+      return {
+        type: "topic_response",
+        content: "Your hinengaro (mental wellbeing) is important to our whānau. We have mental health resources in the Resources section, and community support groups in the Connect section. If it's urgent, check out the Emergency tab in Resources for crisis support lines."
+      };
+    }
+    
+    // Default response if no matches found
+    return {
+      type: "no_results",
+      content: "I'm not quite sure how to help with that yet, but our whānau is always here to support you. Would you like to check out any specific sections of the app like Resources, Events, or Connect?"
+    };
+  };
 
   const handleSendMessage = () => {
     if (!input.trim()) return;
@@ -57,21 +143,22 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
     setInput("");
     setIsLoading(true);
     
-    // Simulate bot thinking and then respond
+    // Process the query and generate a response
     setTimeout(() => {
-      // Find a matching response based on keywords
-      const matchingResponse = botResponses.find(resp => 
-        resp.keywords.some(keyword => 
-          input.toLowerCase().includes(keyword.toLowerCase())
-        )
-      );
+      const searchResults = searchAppContent(input);
+      let botResponse = "";
       
-      // Default response if no keyword matches
+      if (Array.isArray(searchResults)) {
+        // Multiple result types
+        botResponse = "Kia ora! " + searchResults.map(result => result.content).join(" Also, ");
+      } else {
+        // Single result type
+        botResponse = searchResults.content;
+      }
+      
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: matchingResponse 
-          ? matchingResponse.response 
-          : "I'm not quite sure how to help with that yet, but our whānau is always here to support you. Would you like to check out any specific sections of the app?",
+        content: botResponse,
         sender: "bot",
         timestamp: new Date(),
       };
