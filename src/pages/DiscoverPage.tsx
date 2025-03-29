@@ -14,7 +14,6 @@ import { toast } from "@/components/ui/use-toast";
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
 export default function DiscoverPage() {
-  const [showChat, setShowChat] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<typeof mockPlaces[0] | null>(null);
   const [showLocationDetails, setShowLocationDetails] = useState(false);
@@ -100,9 +99,6 @@ export default function DiscoverPage() {
       
       <div className="flex justify-between items-center mb-4 relative z-10">
         <h1 className="text-2xl font-bold text-white">Discover</h1>
-        <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowChat(prev => !prev)}>
-          Ask AI
-        </Button>
       </div>
       
       <InteractiveMap 
