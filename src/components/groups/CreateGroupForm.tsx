@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -52,6 +53,7 @@ type FormValues = z.infer<typeof formSchema> & {
 export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUrl, setImageUrl] = useState("");
+  const { userId, createGroup } = useUser();
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -80,6 +82,8 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         tags: values.tags, // This is now correctly typed as string[] after transformation
         memberCount: 1,
         imageUrl: imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}`,
+        members: [userId], // Initialize with current user as the first member
+        admins: [userId], // Initialize with current user as the admin
       };
       
       // Add the new group to the mock data
@@ -91,7 +95,6 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
       });
       
       // After creating the group, set the current user as admin
-      const { createGroup } = useUser();
       createGroup(newGroup.id);
       
       setIsSubmitting(false);
@@ -107,7 +110,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
         <div className="space-y-4">
           <div className="flex justify-center">
             <div 
