@@ -1,4 +1,3 @@
-
 import { Calendar, Compass, Heart, MessageSquare, Settings, User } from "lucide-react";
 
 export type NavItem = {
@@ -413,6 +412,61 @@ export const mockGroups: Group[] = [
     isPrivate: true,
     location: "New York",
     tags: ["support", "trans", "mental-health"]
+  },
+  {
+    id: "6",
+    name: "Rainbow Artists Collective",
+    category: "Creative",
+    memberCount: 112,
+    description: "A community of LGBTQ+ artists, musicians, and creators sharing their work and collaborating on projects.",
+    imageUrl: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b",
+    isPrivate: false,
+    location: "Wellington",
+    tags: ["art", "music", "creative", "expression"]
+  },
+  {
+    id: "7",
+    name: "Queer Tech Alliance",
+    category: "Professional",
+    memberCount: 205,
+    description: "Networking group for LGBTQ+ professionals in tech, digital media, and related fields.",
+    imageUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998",
+    isPrivate: false,
+    location: "Auckland",
+    tags: ["tech", "career", "networking", "professional"]
+  },
+  {
+    id: "8",
+    name: "Pride Parents",
+    category: "Family",
+    memberCount: 76,
+    description: "Support and social group for LGBTQ+ parents, guardians, and their families.",
+    imageUrl: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e",
+    isPrivate: false,
+    location: "Christchurch",
+    tags: ["parents", "family", "children", "support"]
+  },
+  {
+    id: "9",
+    name: "Queer Film Club",
+    category: "Entertainment",
+    memberCount: 108,
+    description: "Monthly screenings and discussions of LGBTQ+ cinema from around the world.",
+    imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c",
+    isPrivate: false,
+    location: "Auckland",
+    tags: ["film", "cinema", "discussion", "entertainment"]
+  },
+  {
+    id: "10",
+    name: "Rainbow Sports Collective",
+    category: "Sports",
+    memberCount: 135,
+    description: "Inclusive sports teams and fitness groups for LGBTQ+ community members of all skill levels.",
+    imageUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b",
+    isPrivate: false,
+    location: "Wellington",
+    tags: ["sports", "fitness", "teams", "active"]
   }
 ];
 
