@@ -22,6 +22,7 @@ export type Database = {
           lat: number | null
           lng: number | null
           name: string
+          neighbourhood: string | null
           phone: string | null
           tags: string[] | null
           type: string
@@ -41,6 +42,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name: string
+          neighbourhood?: string | null
           phone?: string | null
           tags?: string[] | null
           type: string
@@ -60,6 +62,7 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           name?: string
+          neighbourhood?: string | null
           phone?: string | null
           tags?: string[] | null
           type?: string

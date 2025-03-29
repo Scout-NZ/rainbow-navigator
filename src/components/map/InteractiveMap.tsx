@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -61,6 +60,7 @@ const transformLocation = (location: any) => {
     description: location.description || '',
     location: {
       address: location.address || '',
+      neighbourhood: location.neighbourhood || '',
       city: location.city || '',
       lat: location.lat || DEFAULT_LOCATION.lat,
       lng: location.lng || DEFAULT_LOCATION.lng

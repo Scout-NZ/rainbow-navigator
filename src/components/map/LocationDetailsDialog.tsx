@@ -43,9 +43,19 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
           
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Location</h4>
-            <div className="flex items-center gap-2 text-sm">
-              <MapPin className="h-4 w-4 text-primary" />
-              <span>{location.location.address}, {location.location.city}</span>
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-sm">
+                <MapPin className="h-4 w-4 text-primary" />
+                <span>{location.location.address}</span>
+              </div>
+              {location.location.neighbourhood && (
+                <div className="flex items-center gap-2 text-sm ml-6">
+                  <span>{location.location.neighbourhood}</span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 text-sm ml-6">
+                <span>{location.location.city}</span>
+              </div>
             </div>
           </div>
           
