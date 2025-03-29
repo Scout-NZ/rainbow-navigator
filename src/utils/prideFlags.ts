@@ -56,10 +56,15 @@ export const prideIdentities: PrideIdentity[] = [
 
 export const getIdentityById = (id: string | undefined): PrideIdentity | undefined => {
   if (!id) return undefined;
+  if (id === "none") return undefined;
   return prideIdentities.find(identity => identity.id === id);
 };
 
 export const getIdentityGradient = (id: string | undefined): string => {
+  if (id === "none" || !id) {
+    // Default rainbow gradient for no selection or "none" value
+    return "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
+  }
   const identity = getIdentityById(id);
   return identity?.flagGradient || "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
 };

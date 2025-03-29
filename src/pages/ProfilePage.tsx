@@ -1,4 +1,3 @@
-
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,7 +46,6 @@ export default function ProfilePage() {
   });
 
   const onSubmit = (values: ProfileFormValues) => {
-    // In a real app, this would call an API to update the profile
     const updatedProfile = {
       ...profile,
       name: values.name,
@@ -75,8 +73,6 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // In a real app, you'd upload the file to a server
-    // For now, we'll use a local URL
     const imageUrl = URL.createObjectURL(file);
     setProfile({
       ...profile,
@@ -89,7 +85,6 @@ export default function ProfilePage() {
     });
   };
 
-  // Get the pride flag gradient based on identity
   const headerGradient = getIdentityGradient(profile.identity);
 
   return (
@@ -285,7 +280,6 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
       
-      {/* Edit Profile Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
@@ -370,7 +364,7 @@ export default function ProfilePage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No selection</SelectItem>
+                        <SelectItem value="none">No selection</SelectItem>
                         {prideIdentities.map((identity) => (
                           <SelectItem key={identity.id} value={identity.id}>
                             {identity.label}
