@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { BookOpen, Filter, Phone, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -158,15 +157,6 @@ export default function ResourcesPage() {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-white">Resources</h1>
         <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="rounded-full"
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-          >
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
           <Button 
             size="sm"
             className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
