@@ -20,7 +20,7 @@ export const prideIdentities: PrideIdentity[] = [
   {
     id: "achillean",
     label: "Achillean",
-    flagGradient: "linear-gradient(180deg, #078434 20%, #A9D9BA 20% 40%, #FFFFFF 40% 60%, #7ACDDE 60% 80%, #3B1E82 80%)",
+    flagGradient: "url('/lovable-uploads/7ef3739a-342a-4ca8-b8ef-bdb0402ed40f.png')",
   },
   {
     id: "agender",
