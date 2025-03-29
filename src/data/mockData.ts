@@ -29,6 +29,8 @@ export type Group = {
   memberCount: number;
   isPrivate: boolean;
   tags: string[];
+  members: string[];
+  admins: string[];
 }
 
 export type Event = {
@@ -47,6 +49,28 @@ export type Event = {
   attendees: number;
   tags: string[];
 }
+
+export type Resource = {
+  id: string;
+  title: string;
+  provider: string;
+  category: string;
+  description: string;
+  imageUrl?: string;
+  location?: {
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+    neighbourhood?: string;
+  };
+  contact: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  tags: string[];
+};
 
 export const mockLocations: Location[] = [
   {
@@ -166,6 +190,8 @@ export const mockGroups: Group[] = [
     memberCount: 42,
     isPrivate: false,
     tags: ["Outdoors", "Hiking", "Social", "LGBTQ+"],
+    members: ["user1", "user2", "user3"],
+    admins: ["user1"],
   },
   {
     id: "group2",
@@ -176,6 +202,8 @@ export const mockGroups: Group[] = [
     memberCount: 56,
     isPrivate: false,
     tags: ["Culture", "Books", "Discussion", "LGBTQ+"],
+    members: ["user2", "user3", "user4"],
+    admins: ["user2"],
   },
   {
     id: "group3",
@@ -186,6 +214,8 @@ export const mockGroups: Group[] = [
     memberCount: 103,
     isPrivate: true,
     tags: ["Support", "Transgender", "Community", "LGBTQ+"],
+    members: ["user1", "user5", "user6"],
+    admins: ["user5"],
   },
   {
     id: "group4",
@@ -196,6 +226,8 @@ export const mockGroups: Group[] = [
     memberCount: 78,
     isPrivate: false,
     tags: ["Social", "Gaming", "Community", "LGBTQ+"],
+    members: ["user3", "user4", "user7"],
+    admins: ["user3"],
   },
   {
     id: "group5",
@@ -206,6 +238,8 @@ export const mockGroups: Group[] = [
     memberCount: 35,
     isPrivate: true,
     tags: ["Art", "Community", "Collaboration", "LGBTQ+"],
+    members: ["user8", "user9", "user10"],
+    admins: ["user8"],
   },
 ];
 
@@ -292,7 +326,6 @@ export const mockEvents: Event[] = [
   },
 ];
 
-// Feed post types
 export type PostContent = {
   text?: string;
   imageUrl?: string;
@@ -311,7 +344,6 @@ export type Post = {
   tags: string[];
 }
 
-// Mock posts data
 export const mockPosts: Post[] = [
   {
     id: "post1",
@@ -382,5 +414,216 @@ export const mockPosts: Post[] = [
     comments: 14,
     shares: 9,
     tags: ["Art", "Expression", "Identity"]
+  }
+];
+
+export const mockUserProfile = {
+  id: "user1",
+  name: "Alex Rivera",
+  email: "alex@example.com",
+  pronouns: "they/them",
+  bio: "LGBTQ+ advocate and outdoor enthusiast",
+  location: "Auckland, New Zealand",
+  imageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
+  coverImageUrl: "https://images.unsplash.com/photo-1531306728370-e2ebd9d7bb99?q=80&w=1000&auto=format&fit=crop",
+  joinedDate: "2023-04-15",
+  interests: ["hiking", "reading", "activism", "photography"],
+  socialLinks: {
+    instagram: "alex_rivera",
+    twitter: "alexrivera",
+    website: "https://alexrivera.com"
+  }
+};
+
+export const mockPlaces = [
+  {
+    id: "place1",
+    name: "Rainbow Café",
+    location: {
+      address: "123 Main St",
+      city: "Auckland",
+      neighbourhood: "Central",
+      lat: -36.848461,
+      lng: 174.763336
+    },
+    category: "Café",
+    type: "Food & Drink",
+    tags: ["Coffee", "LGBTQ+ Friendly", "Vegan Options"],
+    lgbt_status: "lgbt_owned",
+    description: "A cozy café with a welcoming atmosphere for the LGBTQ+ community.",
+    imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=1000&auto=format&fit=crop",
+    contact: {
+      website: "www.rainbowcafe.co.nz",
+      email: "info@rainbowcafe.co.nz",
+      phone: "09-555-1234"
+    },
+    verified: true
+  },
+  {
+    id: "place2",
+    name: "Pride Community Center",
+    location: {
+      address: "456 Oak Ave",
+      city: "Wellington",
+      neighbourhood: "Newtown",
+      lat: -41.286461,
+      lng: 174.773336
+    },
+    category: "Community Center",
+    type: "Services",
+    tags: ["Support", "LGBTQ+", "Resources", "Events"],
+    lgbt_status: "lgbt_managed",
+    description: "A community center providing resources and support for the LGBTQ+ community.",
+    imageUrl: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?q=80&w=1000&auto=format&fit=crop",
+    contact: {
+      website: "www.pridecenter.org.nz",
+      email: "contact@pridecenter.org.nz",
+      phone: "04-555-5678"
+    },
+    verified: true
+  },
+  {
+    id: "place3",
+    name: "Ally Bookstore",
+    location: {
+      address: "789 Pine St",
+      city: "Christchurch",
+      neighbourhood: "Riccarton",
+      lat: -43.531637,
+      lng: 172.636645
+    },
+    category: "Bookstore",
+    type: "Retail",
+    tags: ["Books", "LGBTQ+ Literature", "Inclusive"],
+    lgbt_status: "ally",
+    description: "An inclusive bookstore with a diverse selection of LGBTQ+ literature.",
+    imageUrl: "https://images.unsplash.com/photo-1526243741027-444d633d7365?q=80&w=1000&auto=format&fit=crop",
+    contact: {
+      website: "www.allybookstore.co.nz",
+      email: "books@allybookstore.co.nz",
+      phone: "03-555-9012"
+    },
+    verified: true
+  }
+];
+
+export const mockResources: Resource[] = [
+  {
+    id: "resource1",
+    title: "LGBTQ+ Health Services",
+    provider: "Rainbow Health NZ",
+    category: "Health",
+    description: "Comprehensive health services catering specifically to LGBTQ+ individuals.",
+    imageUrl: "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?q=80&w=1000&auto=format&fit=crop",
+    location: {
+      address: "123 Health St",
+      city: "Auckland",
+      lat: -36.848461,
+      lng: 174.763336
+    },
+    contact: {
+      phone: "0800-123-456",
+      email: "health@rainbowhealth.co.nz",
+      website: "www.rainbowhealth.co.nz"
+    },
+    tags: ["Health", "Medical", "Mental Health", "LGBTQ+"]
+  },
+  {
+    id: "resource2",
+    title: "Trans Support Group",
+    provider: "Gender Diverse Collective",
+    category: "Support",
+    description: "A support group for transgender, non-binary, and gender diverse individuals.",
+    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=1000&auto=format&fit=crop",
+    location: {
+      address: "456 Community Ave",
+      city: "Wellington",
+      lat: -41.286461,
+      lng: 174.773336
+    },
+    contact: {
+      phone: "0800-789-012",
+      email: "support@gendercollective.org.nz",
+      website: "www.gendercollective.org.nz"
+    },
+    tags: ["Transgender", "Support", "Community", "LGBTQ+"]
+  },
+  {
+    id: "resource3",
+    title: "LGBTQ+ Legal Aid",
+    provider: "Rainbow Rights",
+    category: "Legal",
+    description: "Legal assistance and advice for LGBTQ+ individuals facing discrimination.",
+    imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?q=80&w=1000&auto=format&fit=crop",
+    location: {
+      address: "789 Justice Rd",
+      city: "Christchurch",
+      lat: -43.531637,
+      lng: 172.636645
+    },
+    contact: {
+      phone: "0800-345-678",
+      email: "legal@rainbowrights.org.nz",
+      website: "www.rainbowrights.org.nz"
+    },
+    tags: ["Legal", "Rights", "Discrimination", "LGBTQ+"]
+  }
+];
+
+export const navItems = [
+  {
+    label: "Discover",
+    path: "/",
+    icon: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <circle cx="12" cy="12" r="10" />
+        <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+      </svg>
+    )
+  },
+  {
+    label: "Connect",
+    path: "/connect",
+    icon: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </svg>
+    )
+  },
+  {
+    label: "Feed",
+    path: "/feed",
+    icon: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+      </svg>
+    )
+  },
+  {
+    label: "Events",
+    path: "/events",
+    icon: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+      </svg>
+    )
+  },
+  {
+    label: "Resources",
+    path: "/resources",
+    icon: () => (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+      </svg>
+    )
   }
 ];
