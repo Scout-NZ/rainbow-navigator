@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown } from "lucide-react";
+import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mockGroups, mockUserProfile } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
 import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 // Add an interface for discussion messages
 interface DiscussionMessage {
@@ -22,6 +24,17 @@ interface DiscussionMessage {
   createdAt: string;
 }
 
+// Add an interface for group members
+interface GroupMember {
+  id: string;
+  name: string;
+  imageUrl: string;
+  pronouns: string;
+  status: "online" | "offline";
+  joinDate: string;
+  isAdmin?: boolean;
+}
+
 export default function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
@@ -29,6 +42,8 @@ export default function GroupDetailPage() {
   const { joinGroup, leaveGroup, isGroupMember, isGroupAdmin, currentUser } = useUser();
   const [discussionMessage, setDiscussionMessage] = useState("");
   const [discussions, setDiscussions] = useState<DiscussionMessage[]>([]);
+  const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
+  const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null);
   
   const group = mockGroups.find(g => g.id === groupId);
   
@@ -46,6 +61,45 @@ export default function GroupDetailPage() {
 
   const isMember = isGroupMember(group.id);
   const isAdmin = isGroupAdmin(group.id);
+
+  // Initialize group members on component mount
+  useEffect(() => {
+    // Create a mock list of members based on the group data
+    // In a real app, this would fetch from an API
+    
+    const mockMembers: GroupMember[] = [];
+    
+    // Add the current user if they are a member
+    if (isMember) {
+      mockMembers.push({
+        id: currentUser.id,
+        name: mockUserProfile.name,
+        imageUrl: mockUserProfile.imageUrl,
+        pronouns: "they/them", // Assuming this data would come from profile
+        status: "online",
+        joinDate: "Since Oct 2023",
+        isAdmin: isAdmin
+      });
+    }
+    
+    // Add some placeholder members
+    const placeholderNames = ["Alex Chen", "Jordan Smith", "Taylor Kim", "Sam Rodriguez", "Quinn Patel"];
+    const placeholderPronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
+    
+    for (let i = 0; i < Math.min(5, group.memberCount - (isMember ? 1 : 0)); i++) {
+      mockMembers.push({
+        id: `member-${i + 1}`,
+        name: placeholderNames[i] || `Member ${i + 1}`,
+        imageUrl: `https://randomuser.me/api/portraits/${i % 2 ? 'women' : 'men'}/${i + 1}.jpg`,
+        pronouns: placeholderPronouns[i] || "they/them",
+        status: i % 3 === 0 ? "online" : "offline",
+        joinDate: i === 0 ? "Since Oct 2023" : "Joined recently",
+        isAdmin: i === 0 && !isAdmin // Make the first placeholder an admin if the user isn't
+      });
+    }
+    
+    setGroupMembers(mockMembers);
+  }, [groupId, isMember, isAdmin, currentUser.id, group.memberCount]);
 
   const handleJoinGroup = () => {
     console.log("Joining group:", group.name);
@@ -121,6 +175,23 @@ export default function GroupDetailPage() {
     }
     
     return date.toLocaleDateString();
+  };
+
+  // Function to view a member's profile
+  const viewMemberProfile = (member: GroupMember) => {
+    setSelectedMember(member);
+  };
+
+  // Function to remove a member from the group
+  const removeMember = (memberId: string) => {
+    // In a real app, this would call an API to remove the member
+    const updatedMembers = groupMembers.filter(member => member.id !== memberId);
+    setGroupMembers(updatedMembers);
+    
+    toast({
+      title: "Member removed",
+      description: "The member has been removed from the group",
+    });
   };
   
   return (
@@ -317,52 +388,116 @@ export default function GroupDetailPage() {
         </TabsContent>
         
         <TabsContent value="members" className="mt-0 space-y-4">
-          <h3 className="text-sm font-medium text-white">Members ({group.memberCount})</h3>
+          <h3 className="text-sm font-medium text-white">Members ({groupMembers.length})</h3>
           <div className="grid grid-cols-2 gap-2">
-            {/* Only show the current user as a member if they've joined */}
-            {isMember && (
-              <Card className="card-hover">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <AvatarWithStatus 
-                    src={mockUserProfile.imageUrl}
-                    fallback={mockUserProfile.name}
-                    status="online"
-                  />
-                  <div>
-                    <h4 className="font-medium text-sm text-white">
-                      {isAdmin ? `${mockUserProfile.name} (Admin)` : mockUserProfile.name}
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      You
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Show other members if needed - in a real app we would fetch the actual members */}
-            {group.memberCount > (isMember ? 1 : 0) && (
-              // Only show placeholder members if memberCount is higher than current user
-              Array.from({ length: Math.min(5, group.memberCount - (isMember ? 1 : 0)) }).map((_, i) => (
-                <Card key={i} className="card-hover">
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <AvatarWithStatus 
-                      src={`https://randomuser.me/api/portraits/${i % 2 ? 'women' : 'men'}/${i + 1}.jpg`}
-                      fallback={`Member ${i + 1}`}
-                      status={i % 3 === 0 ? "online" : "offline"}
-                    />
-                    <div>
-                      <h4 className="font-medium text-sm text-white">
-                        {i === 0 && isAdmin ? "Alex Chen (Admin)" : `Member ${i + 1}`}
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        {i === 0 ? "Since Oct 2023" : "Joined recently"}
-                      </p>
+            {groupMembers.map((member) => (
+              <Dialog key={member.id}>
+                <Card className="card-hover">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between">
+                      <DialogTrigger className="flex items-center gap-3 flex-grow" asChild>
+                        <Button variant="ghost" className="p-0 h-auto w-full justify-start">
+                          <AvatarWithStatus 
+                            src={member.imageUrl}
+                            fallback={member.name}
+                            status={member.status}
+                          />
+                          <div className="text-left">
+                            <div className="flex items-center gap-1">
+                              <h4 className="font-medium text-sm text-white">
+                                {member.name}
+                              </h4>
+                              {member.isAdmin && (
+                                <Crown className="h-3 w-3 text-yellow-500" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">{member.pronouns}</p>
+                          </div>
+                        </Button>
+                      </DialogTrigger>
+                      
+                      {isAdmin && !member.isAdmin && member.id !== currentUser.id && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="ml-2 text-red-500 hover:bg-red-500/10 h-8 w-8"
+                            >
+                              <UserX className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove member?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to remove {member.name} from this group? 
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600 text-white"
+                                onClick={() => removeMember(member.id)}
+                              >
+                                Remove
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
-              ))
-            )}
+                
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Member Profile</DialogTitle>
+                    <DialogDescription>
+                      View {member.name}'s profile information
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="flex flex-col items-center py-4">
+                    <AvatarWithStatus 
+                      src={member.imageUrl}
+                      fallback={member.name}
+                      status={member.status}
+                      size="lg"
+                      className="mb-4"
+                    />
+                    
+                    <h2 className="text-xl font-bold flex items-center gap-2">
+                      {member.name}
+                      {member.isAdmin && (
+                        <span className="flex items-center gap-1 text-xs bg-yellow-500/20 text-yellow-500 px-2 py-1 rounded">
+                          <Crown className="h-3 w-3" /> Admin
+                        </span>
+                      )}
+                    </h2>
+                    
+                    <p className="text-muted-foreground mb-4">{member.pronouns}</p>
+                    
+                    <div className="grid grid-cols-2 gap-2 w-full text-center mb-4">
+                      <div className="p-2 rounded-md bg-muted/30">
+                        <div className="text-sm font-medium">Member Since</div>
+                        <div className="text-xs text-muted-foreground">{member.joinDate}</div>
+                      </div>
+                      <div className="p-2 rounded-md bg-muted/30">
+                        <div className="text-sm font-medium">Status</div>
+                        <div className="text-xs text-muted-foreground capitalize">{member.status}</div>
+                      </div>
+                    </div>
+                    
+                    <Button className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover w-full">
+                      <User className="h-4 w-4 mr-2" />
+                      View Full Profile
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            ))}
           </div>
         </TabsContent>
       </Tabs>
