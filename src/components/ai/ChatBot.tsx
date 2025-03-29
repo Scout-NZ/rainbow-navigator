@@ -17,7 +17,7 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
-      content: "Hi there! I'm Rainbow Navigator's AI assistant. How can I help you today?",
+      content: "Kia ora! I'm your Rainbow Navigator assistant. How can I help you today, mate?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -32,14 +32,14 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Bot responses based on keywords
+  // Bot responses with NZ tone
   const botResponses = [
-    { keywords: ["hello", "hi", "hey"], response: "Hello! How can I help you today?" },
-    { keywords: ["event", "events"], response: "Looking for events? You can find upcoming LGBTQ+ events in the Events tab. Would you like me to recommend some based on your interests?" },
-    { keywords: ["resource", "resources", "help"], response: "We have many community resources available. Are you looking for healthcare, legal aid, housing support, or something else?" },
-    { keywords: ["group", "community", "communities"], response: "Our Connect section has many community groups you can join. What kinds of interests or support are you looking for?" },
-    { keywords: ["business", "shop", "store"], response: "You can find LGBTQ+ friendly businesses in the Discover section. Would you like recommendations for a specific category?" },
-    { keywords: ["safe", "safety"], response: "Your safety is important. Rainbow Navigator only lists verified safe spaces. You can also check user reviews and ratings for additional peace of mind." },
+    { keywords: ["hello", "hi", "hey"], response: "Kia ora! How can I help you today, mate?" },
+    { keywords: ["event", "events"], response: "Looking for some choice events? You can find upcoming LGBTQ+ events in the Events tab. Would you like me to recommend some that are sweet as?" },
+    { keywords: ["resource", "resources", "help"], response: "We've got heaps of community resources available. Are you looking for healthcare, legal aid, housing support, or something else, whānau?" },
+    { keywords: ["group", "community", "communities"], response: "Our Connect section has many community groups you can join, eh. What sorts of interests or support are you keen on?" },
+    { keywords: ["business", "shop", "store"], response: "You can find LGBTQ+ friendly businesses in the Discover section. Want recommendations for a specific category? They're all good as gold." },
+    { keywords: ["safe", "safety"], response: "Your safety is tumeke important. Rainbow Navigator only lists verified safe spaces. You can also check user reviews and ratings for a bit more peace of mind." },
   ];
 
   const handleSendMessage = () => {
@@ -71,7 +71,7 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
         id: (Date.now() + 1).toString(),
         content: matchingResponse 
           ? matchingResponse.response 
-          : "I'm not sure how to help with that yet, but our community is always here to support you. Would you like to check out any specific sections of the app?",
+          : "I'm not quite sure how to help with that yet, but our whānau is always here to support you. Would you like to check out any specific sections of the app?",
         sender: "bot",
         timestamp: new Date(),
       };
@@ -95,7 +95,7 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
             <AvatarImage src="/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png" />
             <AvatarFallback>RN</AvatarFallback>
           </Avatar>
-          <span className="font-semibold">Rainbow Assistant</span>
+          <span className="font-semibold">Tautoko Assistant</span>
         </div>
         <Button variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/20">
           <X className="h-5 w-5" />
