@@ -4,6 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile, mockGroups, mockEvents } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 
+// Define a more comprehensive SocialLinks type
+interface SocialLinks {
+  instagram: string;
+  twitter: string;
+  website: string;
+  facebook: string;
+  spotify: string;
+  tiktok: string;
+  linkedin: string;
+}
+
 interface UserProfile {
   id: string;
   name: string;
@@ -18,11 +29,7 @@ interface UserProfile {
   interests: string[];
   joinDate: string;
   badges: string[];
-  socialLinks: {
-    instagram: string;
-    twitter: string;
-    website: string;
-  };
+  socialLinks: SocialLinks;
   settings: {
     privacy: string;
     notifications: boolean;
@@ -32,6 +39,8 @@ interface UserProfile {
   groups: string[];
   events: string[];
   imageUrl?: string; // Added for compatibility with existing components
+  identity?: string; // Added for compatibility with existing components
+  gender?: string; // Added for compatibility with existing components
 }
 
 interface AuthSession {
@@ -66,6 +75,7 @@ interface UserContextType {
   
   // For backward compatibility with existing components
   userProfile: UserProfile | null;
+  updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
   currentUser: { id: string };
   isGroupMember: (groupId: string | number) => boolean;
   isGroupAdmin: (groupId: string | number) => boolean;
@@ -73,6 +83,17 @@ interface UserContextType {
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
+
+// Create default social links object
+const defaultSocialLinks: SocialLinks = {
+  instagram: "",
+  twitter: "",
+  website: "",
+  facebook: "",
+  spotify: "",
+  tiktok: "",
+  linkedin: ""
+};
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -94,12 +115,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     interests: mockUserProfile.interests,
     joinDate: mockUserProfile.joinDate,
     badges: mockUserProfile.badges,
-    socialLinks: mockUserProfile.socialLinks,
+    socialLinks: {
+      ...defaultSocialLinks,
+      instagram: mockUserProfile.socialLinks?.instagram || "",
+      twitter: mockUserProfile.socialLinks?.twitter || "",
+      website: mockUserProfile.socialLinks?.website || ""
+    },
     settings: mockUserProfile.settings,
     friends: ["2", "3"],
     groups: ["1", "4"],
     events: ["1", "3"],
-    imageUrl: mockUserProfile.avatar // Add imageUrl for compatibility
+    imageUrl: mockUserProfile.avatar, // Add imageUrl for compatibility
+    identity: mockUserProfile.identities[0] || "", // Add identity for compatibility
+    gender: "Non-Binary" // Default gender
   };
 
   useEffect(() => {
@@ -128,6 +156,23 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("No profile found, using mock data for development");
             setUser(mockUser); // For development, use mock data
           } else {
+            // Parse sociallinks from JSON if it exists
+            let socialLinks = defaultSocialLinks;
+            if (profileData.sociallinks) {
+              try {
+                const parsedLinks = typeof profileData.sociallinks === 'object' 
+                  ? profileData.sociallinks 
+                  : JSON.parse(profileData.sociallinks as string);
+                
+                socialLinks = {
+                  ...defaultSocialLinks,
+                  ...parsedLinks
+                };
+              } catch (e) {
+                console.error("Error parsing social links:", e);
+              }
+            }
+
             // Convert Supabase profile to our UserProfile format
             const userProfile: UserProfile = {
               id: profileData.id,
@@ -141,14 +186,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
               location: profileData.location || "",
               pronouns: profileData.pronouns || "",
               identities: [profileData.identity || ""].filter(Boolean),
+              identity: profileData.identity || "", // For compatibility
+              gender: profileData.gender || "", // For compatibility
               interests: profileData.interests || [],
               joinDate: profileData.created_at || new Date().toISOString(),
               badges: [],
-              socialLinks: profileData.sociallinks || { instagram: "", twitter: "", website: "" },
+              socialLinks: socialLinks,
               settings: { privacy: "public", notifications: true, theme: "light" },
-              friends: (profileData.friends > 0) ? ["2", "3"] : [],
-              groups: (profileData.groups > 0) ? ["1", "4"] : [],
-              events: (profileData.events > 0) ? ["1", "3"] : []
+              friends: profileData.friends > 0 ? ["2", "3"] : [],
+              groups: profileData.groups > 0 ? ["1", "4"] : [],
+              events: profileData.events > 0 ? ["1", "3"] : []
             };
             setUser(userProfile);
           }
@@ -183,6 +230,23 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("No profile found or error:", profileError?.message);
             setUser(mockUser); // For development, use mock data
           } else {
+            // Parse sociallinks from JSON if it exists
+            let socialLinks = defaultSocialLinks;
+            if (profileData.sociallinks) {
+              try {
+                const parsedLinks = typeof profileData.sociallinks === 'object' 
+                  ? profileData.sociallinks 
+                  : JSON.parse(profileData.sociallinks as string);
+                
+                socialLinks = {
+                  ...defaultSocialLinks,
+                  ...parsedLinks
+                };
+              } catch (e) {
+                console.error("Error parsing social links:", e);
+              }
+            }
+
             // Convert Supabase profile to our UserProfile format
             const userProfile: UserProfile = {
               id: profileData.id,
@@ -196,14 +260,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
               location: profileData.location || "",
               pronouns: profileData.pronouns || "",
               identities: [profileData.identity || ""].filter(Boolean),
+              identity: profileData.identity || "", // For compatibility
+              gender: profileData.gender || "", // For compatibility
               interests: profileData.interests || [],
               joinDate: profileData.created_at || new Date().toISOString(),
               badges: [],
-              socialLinks: profileData.sociallinks || { instagram: "", twitter: "", website: "" },
+              socialLinks: socialLinks,
               settings: { privacy: "public", notifications: true, theme: "light" },
-              friends: (profileData.friends > 0) ? ["2", "3"] : [],
-              groups: (profileData.groups > 0) ? ["1", "4"] : [],
-              events: (profileData.events > 0) ? ["1", "3"] : []
+              friends: profileData.friends > 0 ? ["2", "3"] : [],
+              groups: profileData.groups > 0 ? ["1", "4"] : [],
+              events: profileData.events > 0 ? ["1", "3"] : []
             };
             setUser(userProfile);
           }
@@ -254,6 +320,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
     }
   };
+
+  // Legacy alias for updateProfile
+  const updateUserProfile = updateProfile;
 
   const joinGroup = async (groupId: string) => {
     if (!user) return;
@@ -433,6 +502,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // For backward compatibility
     userProfile: user,
+    updateUserProfile,
     currentUser: { id: user?.id || "1" },
     isGroupMember,
     isGroupAdmin,

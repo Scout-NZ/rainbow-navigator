@@ -42,27 +42,36 @@ export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { userProfile, updateUserProfile, signOut } = useUser();
+  const { user, updateProfile, signOut } = useUser();
+  
+  // If user is null, return a loading state to prevent errors
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
-      name: userProfile.name,
-      username: userProfile.username || "",
-      bio: userProfile.bio || "",
-      location: userProfile.location || "",
-      interests: userProfile.interests.join(", "),
-      identity: userProfile.identity || "",
-      pronouns: userProfile.pronouns || "",
-      gender: userProfile.gender || "",
+      name: user.name || "",
+      username: user.username || "",
+      bio: user.bio || "",
+      location: user.location || "",
+      interests: user.interests.join(", ") || "",
+      identity: user.identity || "",
+      pronouns: user.pronouns || "",
+      gender: user.gender || "",
       socialLinks: {
-        instagram: userProfile.socialLinks?.instagram || "",
-        facebook: userProfile.socialLinks?.facebook || "",
-        twitter: userProfile.socialLinks?.twitter || "",
-        spotify: userProfile.socialLinks?.spotify || "",
-        tiktok: userProfile.socialLinks?.tiktok || "",
-        linkedin: userProfile.socialLinks?.linkedin || ""
+        instagram: user.socialLinks?.instagram || "",
+        facebook: user.socialLinks?.facebook || "",
+        twitter: user.socialLinks?.twitter || "",
+        spotify: user.socialLinks?.spotify || "",
+        tiktok: user.socialLinks?.tiktok || "",
+        linkedin: user.socialLinks?.linkedin || ""
       }
     },
   });
@@ -76,12 +85,12 @@ export default function ProfilePage() {
     linkedin: string;
   }>({
     defaultValues: {
-      instagram: userProfile.socialLinks?.instagram || "",
-      facebook: userProfile.socialLinks?.facebook || "",
-      twitter: userProfile.socialLinks?.twitter || "",
-      spotify: userProfile.socialLinks?.spotify || "",
-      tiktok: userProfile.socialLinks?.tiktok || "",
-      linkedin: userProfile.socialLinks?.linkedin || ""
+      instagram: user.socialLinks?.instagram || "",
+      facebook: user.socialLinks?.facebook || "",
+      twitter: user.socialLinks?.twitter || "",
+      spotify: user.socialLinks?.spotify || "",
+      tiktok: user.socialLinks?.tiktok || "",
+      linkedin: user.socialLinks?.linkedin || ""
     }
   });
 
@@ -97,7 +106,7 @@ export default function ProfilePage() {
       gender: values.gender,
     };
     
-    updateUserProfile(updatedProfile);
+    updateProfile(updatedProfile);
     setIsDialogOpen(false);
     
     toast({
@@ -114,8 +123,11 @@ export default function ProfilePage() {
     tiktok: string;
     linkedin: string;
   }) => {
-    updateUserProfile({
-      socialLinks: values
+    updateProfile({
+      socialLinks: {
+        ...user.socialLinks,
+        ...values
+      }
     });
     
     setIsSocialDialogOpen(false);
@@ -135,7 +147,7 @@ export default function ProfilePage() {
     if (!file) return;
 
     const imageUrl = URL.createObjectURL(file);
-    updateUserProfile({
+    updateProfile({
       imageUrl,
     });
 
@@ -149,10 +161,16 @@ export default function ProfilePage() {
     await signOut();
   };
 
-  const headerGradient = getIdentityGradient(userProfile.identity);
+  const headerGradient = getIdentityGradient(user.identity || "");
 
-  const hasAnySocialLink = userProfile.socialLinks && Object.values(userProfile.socialLinks).some(link => !!link);
+  const hasAnySocialLink = user.socialLinks && Object.values(user.socialLinks).some(link => !!link);
 
+  // Compute these values to avoid errors when used in the JSX
+  const friendsCount = typeof user.friends === 'number' ? user.friends : user.friends?.length || 0;
+  const groupsCount = typeof user.groups === 'number' ? user.groups : user.groups?.length || 0;
+  const eventsCount = typeof user.events === 'number' ? user.events : user.events?.length || 0;
+
+  
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
@@ -180,11 +198,11 @@ export default function ProfilePage() {
             <div className="absolute -top-12 group">
               <Avatar className="h-24 w-24 border-4 border-background relative">
                 <AvatarImage
-                  src={userProfile.imageUrl} 
-                  alt={userProfile.name}
+                  src={user.imageUrl || user.avatar} 
+                  alt={user.name}
                   className="object-cover"
                 />
-                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                <AvatarFallback>{user.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
                 
                 <button 
                   className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center"
@@ -205,10 +223,10 @@ export default function ProfilePage() {
             
             <div className="pt-16 flex justify-between items-start">
               <div>
-                <h2 className="text-xl font-bold">{userProfile.name}</h2>
-                <p className="text-muted-foreground text-sm">{userProfile.username}</p>
-                {userProfile.pronouns && <p className="text-sm text-muted-foreground">{userProfile.pronouns}</p>}
-                {userProfile.gender && <p className="text-sm text-muted-foreground">{userProfile.gender}</p>}
+                <h2 className="text-xl font-bold">{user.name}</h2>
+                <p className="text-muted-foreground text-sm">{user.username}</p>
+                {user.pronouns && <p className="text-sm text-muted-foreground">{user.pronouns}</p>}
+                {user.gender && <p className="text-sm text-muted-foreground">{user.gender}</p>}
               </div>
               <Button 
                 variant="outline" 
@@ -220,26 +238,26 @@ export default function ProfilePage() {
               </Button>
             </div>
             
-            <p className="mt-3 text-sm">{userProfile.bio}</p>
+            <p className="mt-3 text-sm">{user.bio}</p>
             
-            {userProfile.location && (
+            {user.location && (
               <div className="flex items-center mt-2 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4 mr-2" />
-                <span>{userProfile.location}</span>
+                <span>{user.location}</span>
               </div>
             )}
             
-            {userProfile.identity && (
+            {user.identity && (
               <div className="flex items-center mt-2 text-sm">
                 <Badge className="bg-rainbow-gradient text-white">
-                  {prideIdentities.find(i => i.id === userProfile.identity)?.label || userProfile.identity}
+                  {prideIdentities.find(i => i.id === user.identity)?.label || user.identity}
                 </Badge>
               </div>
             )}
             
             <div className="flex gap-2 mt-3 flex-wrap">
-              {userProfile.interests.map(interest => (
-                <Badge key={interest} variant="secondary" className="text-xs">
+              {user.interests.map((interest, idx) => (
+                <Badge key={interest + idx} variant="secondary" className="text-xs">
                   #{interest}
                 </Badge>
               ))}
@@ -260,9 +278,9 @@ export default function ProfilePage() {
               
               {hasAnySocialLink ? (
                 <div className="flex flex-wrap gap-3">
-                  {userProfile.socialLinks?.instagram && (
+                  {user.socialLinks?.instagram && (
                     <a 
-                      href={userProfile.socialLinks.instagram.startsWith('http') ? userProfile.socialLinks.instagram : `https://${userProfile.socialLinks.instagram}`} 
+                      href={user.socialLinks.instagram.startsWith('http') ? user.socialLinks.instagram : `https://${user.socialLinks.instagram}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -272,9 +290,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {userProfile.socialLinks?.facebook && (
+                  {user.socialLinks?.facebook && (
                     <a 
-                      href={userProfile.socialLinks.facebook.startsWith('http') ? userProfile.socialLinks.facebook : `https://${userProfile.socialLinks.facebook}`} 
+                      href={user.socialLinks.facebook.startsWith('http') ? user.socialLinks.facebook : `https://${user.socialLinks.facebook}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -284,9 +302,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {userProfile.socialLinks?.twitter && (
+                  {user.socialLinks?.twitter && (
                     <a 
-                      href={userProfile.socialLinks.twitter.startsWith('http') ? userProfile.socialLinks.twitter : `https://${userProfile.socialLinks.twitter}`} 
+                      href={user.socialLinks.twitter.startsWith('http') ? user.socialLinks.twitter : `https://${user.socialLinks.twitter}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -296,9 +314,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {userProfile.socialLinks?.spotify && (
+                  {user.socialLinks?.spotify && (
                     <a 
-                      href={userProfile.socialLinks.spotify.startsWith('http') ? userProfile.socialLinks.spotify : `https://${userProfile.socialLinks.spotify}`} 
+                      href={user.socialLinks.spotify.startsWith('http') ? user.socialLinks.spotify : `https://${user.socialLinks.spotify}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -308,9 +326,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {userProfile.socialLinks?.tiktok && (
+                  {user.socialLinks?.tiktok && (
                     <a 
-                      href={userProfile.socialLinks.tiktok.startsWith('http') ? userProfile.socialLinks.tiktok : `https://${userProfile.socialLinks.tiktok}`} 
+                      href={user.socialLinks.tiktok.startsWith('http') ? user.socialLinks.tiktok : `https://${user.socialLinks.tiktok}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -320,9 +338,9 @@ export default function ProfilePage() {
                     </a>
                   )}
                   
-                  {userProfile.socialLinks?.linkedin && (
+                  {user.socialLinks?.linkedin && (
                     <a 
-                      href={userProfile.socialLinks.linkedin.startsWith('http') ? userProfile.socialLinks.linkedin : `https://${userProfile.socialLinks.linkedin}`} 
+                      href={user.socialLinks.linkedin.startsWith('http') ? user.socialLinks.linkedin : `https://${user.socialLinks.linkedin}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -339,15 +357,15 @@ export default function ProfilePage() {
             
             <div className="grid grid-cols-3 gap-2 mt-4 text-center">
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{userProfile.friends}</div>
+                <div className="text-lg font-bold">{friendsCount}</div>
                 <div className="text-xs text-muted-foreground">Friends</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{userProfile.groups}</div>
+                <div className="text-lg font-bold">{groupsCount}</div>
                 <div className="text-xs text-muted-foreground">Groups</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{userProfile.events}</div>
+                <div className="text-lg font-bold">{eventsCount}</div>
                 <div className="text-xs text-muted-foreground">Events</div>
               </div>
             </div>
@@ -446,6 +464,7 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
       
+      
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px] max-h-[80vh]">
           <DialogHeader>
@@ -458,6 +477,7 @@ export default function ProfilePage() {
           <ScrollArea className="h-[60vh] pr-4">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                
                 <FormField
                   control={form.control}
                   name="name"
@@ -754,6 +774,7 @@ export default function ProfilePage() {
           <ScrollArea className="h-[50vh] pr-4">
             <Form {...socialForm}>
               <form onSubmit={socialForm.handleSubmit(onSocialSubmit)} className="space-y-4">
+                
                 <FormField
                   control={socialForm.control}
                   name="instagram"
