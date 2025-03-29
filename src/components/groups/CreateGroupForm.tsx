@@ -72,7 +72,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         description: values.description,
         isPrivate: values.isPrivate,
         location: values.location,
-        tags: values.tags,
+        tags: Array.isArray(values.tags) ? values.tags : values.tags.split(",").map(tag => tag.trim().toLowerCase()).filter(Boolean),
         memberCount: 1,
         imageUrl: imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}`,
       };
