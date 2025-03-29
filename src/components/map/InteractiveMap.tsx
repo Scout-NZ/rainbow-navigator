@@ -40,12 +40,24 @@ const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
 // Transform Supabase location to app location format
 const transformLocation = (location: any) => {
+  // Ensure that type and category are included in tags
+  let tags = location.tags || [];
+  
+  // Add type and category to tags if they don't already exist
+  if (location.type && !tags.includes(location.type.toLowerCase())) {
+    tags.push(location.type.toLowerCase());
+  }
+  
+  if (location.category && !tags.includes(location.category.toLowerCase())) {
+    tags.push(location.category.toLowerCase());
+  }
+  
   return {
     id: location.id,
     name: location.name,
     type: location.type || 'business',
     category: location.category,
-    tags: location.tags || [],
+    tags: tags,
     description: location.description || '',
     location: {
       address: location.address || '',

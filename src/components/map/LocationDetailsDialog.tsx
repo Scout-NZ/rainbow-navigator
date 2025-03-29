@@ -83,11 +83,24 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Tags</h4>
             <div className="flex flex-wrap gap-1">
-              {location.tags.map(tag => (
+              {location.tags && location.tags.map(tag => (
                 <Badge key={tag} variant="secondary" className="text-xs">
                   #{tag}
                 </Badge>
               ))}
+              
+              {/* Always show type and category as tags if they aren't already in the tags array */}
+              {!location.tags?.includes(location.type.toLowerCase()) && (
+                <Badge variant="secondary" className="text-xs">
+                  #{location.type.toLowerCase()}
+                </Badge>
+              )}
+              
+              {!location.tags?.includes(location.category.toLowerCase()) && (
+                <Badge variant="secondary" className="text-xs">
+                  #{location.category.toLowerCase()}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
