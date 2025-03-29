@@ -119,7 +119,12 @@ export default function GroupDetailPage() {
     const placeholderNames = ["Alex Chen", "Jordan Smith", "Taylor Kim", "Sam Rodriguez", "Quinn Patel"];
     const placeholderPronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
     
-    for (let i = 0; i < Math.min(5, groupData.memberCount - (isMember ? 1 : 0)); i++) {
+    const additionalMembersCount = Math.min(
+      groupData.memberCount - (isMember ? 1 : 0),
+      placeholderNames.length
+    );
+    
+    for (let i = 0; i < additionalMembersCount; i++) {
       mockMembers.push({
         id: `member-${i + 1}`,
         name: placeholderNames[i] || `Member ${i + 1}`,
@@ -132,7 +137,14 @@ export default function GroupDetailPage() {
     }
     
     setGroupMembers(mockMembers);
-  }, [groupId, isMember, isAdmin, currentUser.id, groupData.memberCount, userProfile]);
+    
+    if (groupData) {
+      setGroupData({
+        ...groupData,
+        memberCount: mockMembers.length
+      });
+    }
+  }, [groupId, isMember, isAdmin, currentUser.id, groupData?.memberCount, userProfile]);
 
   const handleJoinGroup = () => {
     console.log("Joining group:", groupData.name);
@@ -391,7 +403,7 @@ export default function GroupDetailPage() {
           <h1 className="text-2xl font-bold text-white">{groupData.name}</h1>
           <div className="flex items-center text-white/80 text-sm mt-1">
             <Users className="h-4 w-4 mr-1" />
-            <span>{groupData.memberCount} members</span>
+            <span>{groupMembers.length} members</span>
           </div>
         </div>
       </div>

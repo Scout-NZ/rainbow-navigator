@@ -7,13 +7,24 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
+import { useEffect, useState } from "react";
 
 export function GroupCard({ group }: { group: Group }) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { joinGroup, isGroupMember } = useUser();
+  const { joinGroup, isGroupMember, currentUser } = useUser();
   const isMember = isGroupMember(group.id);
-
+  const [memberCount, setMemberCount] = useState(group.memberCount);
+  
+  // Ensure the member count reflects if the current user is a member
+  useEffect(() => {
+    // Check if the member count should be updated based on local state
+    const storedMemberCount = localStorage.getItem(`group-${group.id}-member-count`);
+    if (storedMemberCount) {
+      setMemberCount(parseInt(storedMemberCount));
+    }
+  }, [group.id]);
+  
   const handleViewGroup = () => {
     console.log("Viewing group:", group.name);
     navigate(`/connect/groups/${group.id}`);
@@ -24,6 +35,11 @@ export function GroupCard({ group }: { group: Group }) {
     console.log("Joining group:", group.name);
     
     joinGroup(group.id);
+    
+    // Update the member count in local storage
+    const newMemberCount = memberCount + 1;
+    setMemberCount(newMemberCount);
+    localStorage.setItem(`group-${group.id}-member-count`, newMemberCount.toString());
     
     toast({
       title: "Group joined!",
@@ -60,7 +76,7 @@ export function GroupCard({ group }: { group: Group }) {
           </Badge>
           <div className="flex items-center text-xs text-muted-foreground">
             <Users className="h-3 w-3 mr-1" />
-            <span>{group.memberCount} members</span>
+            <span>{memberCount} members</span>
           </div>
         </div>
         
