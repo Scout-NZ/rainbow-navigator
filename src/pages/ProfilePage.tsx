@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 
 interface ProfileFormValues {
   name: string;
@@ -21,12 +23,16 @@ interface ProfileFormValues {
   bio: string;
   location: string;
   interests: string;
+  identity: string;
 }
 
 export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
-  const [profile, setProfile] = useState(mockUserProfile);
+  const [profile, setProfile] = useState({
+    ...mockUserProfile,
+    identity: mockUserProfile.identity || ""
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
@@ -36,6 +42,7 @@ export default function ProfilePage() {
       bio: profile.bio,
       location: profile.location || "",
       interests: profile.interests.join(", "),
+      identity: profile.identity || "",
     },
   });
 
@@ -48,6 +55,7 @@ export default function ProfilePage() {
       bio: values.bio,
       location: values.location,
       interests: values.interests.split(",").map(tag => tag.trim()).filter(Boolean),
+      identity: values.identity,
     };
     
     setProfile(updatedProfile);
@@ -81,6 +89,9 @@ export default function ProfilePage() {
     });
   };
 
+  // Get the pride flag gradient based on identity
+  const headerGradient = getIdentityGradient(profile.identity);
+
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
@@ -92,7 +103,10 @@ export default function ProfilePage() {
       </div>
       
       <Card className="mb-6 overflow-hidden">
-        <div className="h-32 bg-rainbow-gradient relative" />
+        <div 
+          className="h-32 relative" 
+          style={{ background: headerGradient }}
+        />
         
         <CardContent className="p-0">
           <div className="px-4 pb-4 pt-0 relative">
@@ -143,6 +157,14 @@ export default function ProfilePage() {
               <div className="flex items-center mt-2 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4 mr-2" />
                 <span>{profile.location}</span>
+              </div>
+            )}
+            
+            {profile.identity && (
+              <div className="flex items-center mt-2 text-sm">
+                <Badge className="bg-rainbow-gradient text-white">
+                  {prideIdentities.find(i => i.id === profile.identity)?.label || profile.identity}
+                </Badge>
               </div>
             )}
             
@@ -330,6 +352,32 @@ export default function ProfilePage() {
                     <FormControl>
                       <Input {...field} placeholder="Where are you based?" />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="identity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>LGBT+ Identity</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select your identity" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No selection</SelectItem>
+                        {prideIdentities.map((identity) => (
+                          <SelectItem key={identity.id} value={identity.id}>
+                            {identity.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}

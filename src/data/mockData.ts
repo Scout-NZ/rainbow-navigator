@@ -147,6 +147,7 @@ export type UserProfile = {
   groups: number;
   events: number;
   joined: string;
+  identity: string;
 };
 
 export const mockPlaces: Place[] = [
@@ -770,15 +771,15 @@ export const mockPosts: Post[] = [
 ];
 
 export const mockUserProfile: UserProfile = {
-  id: "user1",
-  name: "Alex Rivera",
-  username: "@alexrivera",
-  bio: "Queer artist and advocate passionate about community building and inclusive spaces.",
-  imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-  location: "New York, NY",
-  interests: ["art", "activism", "nature", "books"],
-  friends: 186,
+  id: "1",
+  name: "Alex Chen",
+  username: "@alexchen",
+  bio: "Passionate about creating inclusive spaces and connecting communities. Happy to be part of Rainbow Navigator!",
+  imageUrl: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
+  interests: ["lgbtq", "community", "technology", "inclusion"],
+  friends: 142,
   groups: 5,
   events: 12,
-  joined: "2022-03-15"
+  location: "Auckland, New Zealand",
+  identity: ""
 };
