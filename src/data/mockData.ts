@@ -298,10 +298,16 @@ export const mockResources = [
     category: "Support",
     tags: ["youth", "support", "mental health"],
     url: "https://example.com/youth-support",
-    imageUrl: "https://picsum.photos/600/400?random=7",
+    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     source: "Rainbow Youth NZ",
     featured: true,
-    createdAt: "2023-08-10T00:00:00Z"
+    createdAt: "2023-08-10T00:00:00Z",
+    provider: "Rainbow Youth NZ",
+    contact: {
+      phone: "0800 123 456",
+      email: "support@rainbowyouth.org.nz",
+      website: "https://example.com/youth-support"
+    }
   },
   {
     id: 2,
@@ -310,10 +316,16 @@ export const mockResources = [
     category: "Education",
     tags: ["coming out", "guide", "advice"],
     url: "https://example.com/coming-out-guide",
-    imageUrl: "https://picsum.photos/600/400?random=8",
+    imageUrl: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     source: "OutLine NZ",
     featured: true,
-    createdAt: "2023-07-15T00:00:00Z"
+    createdAt: "2023-07-15T00:00:00Z",
+    provider: "OutLine NZ",
+    contact: {
+      phone: "0800 688 5463",
+      email: "info@outline.org.nz",
+      website: "https://example.com/coming-out-guide"
+    }
   },
   {
     id: 3,
@@ -322,10 +334,16 @@ export const mockResources = [
     category: "Healthcare",
     tags: ["transgender", "healthcare", "directory"],
     url: "https://example.com/trans-healthcare",
-    imageUrl: "https://picsum.photos/600/400?random=9",
+    imageUrl: "https://images.unsplash.com/photo-1631815588090-d1bcbe9b4b01?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     source: "Gender Minorities Aotearoa",
     featured: false,
-    createdAt: "2023-06-20T00:00:00Z"
+    createdAt: "2023-06-20T00:00:00Z",
+    provider: "Gender Minorities Aotearoa",
+    contact: {
+      phone: "04 385 0611",
+      email: "info@genderminorities.com",
+      website: "https://example.com/trans-healthcare"
+    }
   }
 ];
 
@@ -463,7 +481,7 @@ export const mockPlaces: Place[] = [
       email: "info@rainbowcafe.co.nz",
       website: "https://rainbowcafe.example.com"
     },
-    imageUrl: "https://picsum.photos/300/200?random=1",
+    imageUrl: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: "lgbt_owned"
   },
@@ -487,7 +505,7 @@ export const mockPlaces: Place[] = [
       email: "events@queerbar.co.nz",
       website: "https://queerbar.example.com"
     },
-    imageUrl: "https://picsum.photos/300/200?random=2",
+    imageUrl: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: "lgbt_managed"
   },
@@ -511,7 +529,7 @@ export const mockPlaces: Place[] = [
       email: "info@rainbowcentre.org.nz",
       website: "https://rainbowcentre.example.org"
     },
-    imageUrl: "https://picsum.photos/300/200?random=3",
+    imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: "ally"
   },
@@ -535,7 +553,7 @@ export const mockPlaces: Place[] = [
       email: "sales@lavenderbooks.co.nz",
       website: "https://lavenderbooks.example.com"
     },
-    imageUrl: "https://picsum.photos/300/200?random=4",
+    imageUrl: "https://images.unsplash.com/photo-1507842217343-583bb7270b66?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: "lgbt_owned"
   },
@@ -559,7 +577,7 @@ export const mockPlaces: Place[] = [
       email: "info@queermed.co.nz",
       website: "https://queermed.example.com"
     },
-    imageUrl: "https://picsum.photos/300/200?random=5",
+    imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: "ally"
   },
@@ -583,7 +601,7 @@ export const mockPlaces: Place[] = [
       email: "help@transcend.org.nz",
       website: "https://transcend.example.org"
     },
-    imageUrl: "https://picsum.photos/300/200?random=6",
+    imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: null
   },
@@ -607,7 +625,7 @@ export const mockPlaces: Place[] = [
       email: "info@gaynz.com",
       website: "https://www.gaynz.com/"
     },
-    imageUrl: "https://picsum.photos/300/200?random=7",
+    imageUrl: "https://images.unsplash.com/photo-1569937756447-1d44f657cd7b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: null
   },
@@ -631,7 +649,7 @@ export const mockPlaces: Place[] = [
       email: "info@endinghiv.org.nz",
       website: "https://endinghiv.org.nz/"
     },
-    imageUrl: "https://picsum.photos/300/200?random=8",
+    imageUrl: "https://images.unsplash.com/photo-1584982751601-97dcc096659c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: null
   },
@@ -655,7 +673,7 @@ export const mockPlaces: Place[] = [
       email: "support@outline.org.nz",
       website: "https://outline.org.nz/"
     },
-    imageUrl: "https://picsum.photos/300/200?random=9",
+    imageUrl: "https://images.unsplash.com/photo-1521791136064-7986c2920216?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: null
   },
@@ -679,7 +697,7 @@ export const mockPlaces: Place[] = [
       email: "info@insideout.org.nz",
       website: "https://insideout.org.nz/"
     },
-    imageUrl: "https://picsum.photos/300/200?random=10",
+    imageUrl: "https://images.unsplash.com/photo-1582213782179-e0d4d3cce817?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80",
     verified: true,
     lgbt_status: null
   }
