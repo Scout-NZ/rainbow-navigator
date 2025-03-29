@@ -35,11 +35,13 @@ export function AppLayout() {
       >
         <div className="container px-4 py-3 mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png" 
-              alt="Rainbow Navigator" 
-              className="h-10"
-            />
+            <Link to="/">
+              <img 
+                src="/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png" 
+                alt="Rainbow Navigator" 
+                className="h-10"
+              />
+            </Link>
             <h1 className={cn(
               "text-xl font-bold sr-only md:not-sr-only",
               isHomePage || isScrolled ? "rainbow-text" : "text-white"
