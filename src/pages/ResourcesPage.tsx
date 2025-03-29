@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { BookOpen, Filter, Phone, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -155,7 +156,7 @@ export default function ResourcesPage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Resources</h1>
+        <h1 className="text-2xl font-bold text-white">Resources</h1>
         <div className="flex gap-2">
           <Button 
             variant="outline" 

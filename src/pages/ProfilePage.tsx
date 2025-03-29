@@ -12,7 +12,7 @@ export default function ProfilePage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Profile</h1>
+        <h1 className="text-2xl font-bold text-white">Profile</h1>
         <Button variant="outline" size="sm" className="rounded-full">
           <Settings className="h-4 w-4 mr-2" />
           Settings

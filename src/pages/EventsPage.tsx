@@ -42,7 +42,7 @@ export default function EventsPage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Events</h1>
+        <h1 className="text-2xl font-bold text-white">Events</h1>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="rounded-full">
             <Filter className="h-4 w-4 mr-2" />
