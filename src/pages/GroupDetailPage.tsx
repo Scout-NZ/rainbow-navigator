@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X, Edit, Trash2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { mockGroups, mockUserProfile } from "@/data/mockData";
+import { mockGroups, mockUserProfile, mockEvents } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { GroupEditForm } from "@/components/groups/GroupEditForm";
+import { EventCreationForm } from "@/components/events/EventCreationForm";
+import { EventCard } from "@/components/events/EventCard";
 
 interface DiscussionMessage {
   id: string;
@@ -54,6 +56,8 @@ export default function GroupDetailPage() {
     "Keep discussions relevant to the group's purpose",
     "Respect privacy and confidentiality"
   ]);
+  const [isCreateEventDialogOpen, setIsCreateEventDialogOpen] = useState(false);
+  const [groupEvents, setGroupEvents] = useState<typeof mockEvents>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   useEffect(() => {
@@ -62,14 +66,26 @@ export default function GroupDetailPage() {
       if (savedDiscussions) {
         setDiscussions(JSON.parse(savedDiscussions));
       }
+      
+      // Load group-specific events from localStorage
+      const savedEvents = localStorage.getItem(`group-${groupId}-events`);
+      if (savedEvents) {
+        setGroupEvents(JSON.parse(savedEvents));
+      }
     }
   }, [groupId]);
   
   useEffect(() => {
-    if (discussions.length > 0) {
+    if (discussions.length > 0 && groupId) {
       localStorage.setItem(`group-${groupId}-discussions`, JSON.stringify(discussions));
     }
   }, [discussions, groupId]);
+  
+  useEffect(() => {
+    if (groupEvents.length > 0 && groupId) {
+      localStorage.setItem(`group-${groupId}-events`, JSON.stringify(groupEvents));
+    }
+  }, [groupEvents, groupId]);
 
   if (!groupData) {
     return (
@@ -276,6 +292,45 @@ export default function GroupDetailPage() {
     toast({
       title: "Group updated",
       description: "The group details have been successfully updated.",
+    });
+  };
+
+  const handleCreateEvent = (eventData: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    location: {
+      name: string;
+      address: string;
+    };
+    category: string;
+  }) => {
+    const newEvent = {
+      id: `event-${Date.now()}`,
+      title: eventData.title,
+      description: eventData.description,
+      date: eventData.date,
+      time: eventData.time,
+      location: eventData.location,
+      organizer: {
+        id: currentUser.id,
+        name: userProfile.name,
+        imageUrl: userProfile.imageUrl
+      },
+      attendees: [currentUser.id],
+      capacity: 50,
+      category: eventData.category,
+      imageUrl: null,
+      groupId: groupId
+    };
+    
+    setGroupEvents([...groupEvents, newEvent]);
+    setIsCreateEventDialogOpen(false);
+    
+    toast({
+      title: "Event created",
+      description: `${eventData.title} has been created successfully`,
     });
   };
   
@@ -579,20 +634,61 @@ export default function GroupDetailPage() {
         </TabsContent>
         
         <TabsContent value="events" className="mt-0">
-          <Card className="text-center p-8">
-            <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold text-white mb-2">No upcoming events</h3>
-            <p className="text-muted-foreground mb-4">
-              There are no upcoming events for this group
-            </p>
-            {isAdmin && (
-              <Button 
-                className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-              >
-                Create Event
-              </Button>
-            )}
-          </Card>
+          {groupEvents.length > 0 ? (
+            <div className="space-y-4">
+              {isAdmin && (
+                <div className="flex justify-end mb-4">
+                  <Button 
+                    className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                    onClick={() => setIsCreateEventDialogOpen(true)}
+                  >
+                    Create Event
+                  </Button>
+                </div>
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {groupEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <Card className="text-center p-8">
+              <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold text-white mb-2">No upcoming events</h3>
+              <p className="text-muted-foreground mb-4">
+                There are no upcoming events for this group
+              </p>
+              {isAdmin && (
+                <Button 
+                  className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                  onClick={() => setIsCreateEventDialogOpen(true)}
+                >
+                  Create Event
+                </Button>
+              )}
+            </Card>
+          )}
+          
+          <Dialog 
+            open={isCreateEventDialogOpen} 
+            onOpenChange={setIsCreateEventDialogOpen}
+          >
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Create New Event</DialogTitle>
+                <DialogDescription>
+                  Create an event for {groupData?.name}
+                </DialogDescription>
+              </DialogHeader>
+              <EventCreationForm 
+                groupId={groupId || ""}
+                groupName={groupData?.name || ""}
+                onSubmit={handleCreateEvent}
+                onCancel={() => setIsCreateEventDialogOpen(false)}
+              />
+            </DialogContent>
+          </Dialog>
         </TabsContent>
         
         <TabsContent value="members" className="mt-0 space-y-4">
