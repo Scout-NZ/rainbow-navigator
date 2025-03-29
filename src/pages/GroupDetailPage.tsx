@@ -1,5 +1,6 @@
+
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X } from "lucide-react";
+import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X, Edit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mockGroups, mockUserProfile } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { GroupEditForm } from "@/components/groups/GroupEditForm";
 
 interface DiscussionMessage {
   id: string;
@@ -44,11 +46,17 @@ export default function GroupDetailPage() {
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [groupData, setGroupData] = useState(mockGroups.find(g => g.id === groupId) || null);
+  const [groupRules, setGroupRules] = useState<string[]>([
+    "Be respectful and kind to other members",
+    "No hate speech or discriminatory content",
+    "Keep discussions relevant to the group's purpose",
+    "Respect privacy and confidentiality"
+  ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const group = mockGroups.find(g => g.id === groupId);
-  
-  if (!group) {
+  if (!groupData) {
     return (
       <div className="text-center p-8">
         <h1 className="text-2xl font-bold text-white mb-4">Group Not Found</h1>
@@ -60,8 +68,8 @@ export default function GroupDetailPage() {
     );
   }
 
-  const isMember = isGroupMember(group.id);
-  const isAdmin = isGroupAdmin(group.id);
+  const isMember = isGroupMember(groupData.id);
+  const isAdmin = isGroupAdmin(groupData.id);
 
   useEffect(() => {
     const mockMembers: GroupMember[] = [];
@@ -81,7 +89,7 @@ export default function GroupDetailPage() {
     const placeholderNames = ["Alex Chen", "Jordan Smith", "Taylor Kim", "Sam Rodriguez", "Quinn Patel"];
     const placeholderPronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
     
-    for (let i = 0; i < Math.min(5, group.memberCount - (isMember ? 1 : 0)); i++) {
+    for (let i = 0; i < Math.min(5, groupData.memberCount - (isMember ? 1 : 0)); i++) {
       mockMembers.push({
         id: `member-${i + 1}`,
         name: placeholderNames[i] || `Member ${i + 1}`,
@@ -94,27 +102,27 @@ export default function GroupDetailPage() {
     }
     
     setGroupMembers(mockMembers);
-  }, [groupId, isMember, isAdmin, currentUser.id, group.memberCount, userProfile]);
+  }, [groupId, isMember, isAdmin, currentUser.id, groupData.memberCount, userProfile]);
 
   const handleJoinGroup = () => {
-    console.log("Joining group:", group.name);
+    console.log("Joining group:", groupData.name);
     
-    joinGroup(group.id);
+    joinGroup(groupData.id);
     
     toast({
       title: "Group joined!",
-      description: `You have successfully joined ${group.name}`,
+      description: `You have successfully joined ${groupData.name}`,
     });
   };
 
   const handleLeaveGroup = () => {
-    console.log("Leaving group:", group.name);
+    console.log("Leaving group:", groupData.name);
     
-    leaveGroup(group.id);
+    leaveGroup(groupData.id);
     
     toast({
       title: "Group left",
-      description: `You have left ${group.name}`,
+      description: `You have left ${groupData.name}`,
     });
   };
 
@@ -209,6 +217,29 @@ export default function GroupDetailPage() {
       description: "The member has been removed from the group",
     });
   };
+
+  const handleSaveGroupEdit = (updatedGroupData: Partial<typeof groupData>) => {
+    // Update the local state with the edited group data
+    setGroupData({
+      ...groupData,
+      ...updatedGroupData
+    });
+    
+    // Convert rules string to array if it exists
+    if (updatedGroupData.rules) {
+      const rulesArray = updatedGroupData.rules
+        .split('\n')
+        .filter(rule => rule.trim().length > 0);
+      setGroupRules(rulesArray);
+    }
+    
+    setIsEditing(false);
+    
+    toast({
+      title: "Group updated",
+      description: "The group details have been successfully updated.",
+    });
+  };
   
   return (
     <div className="pb-6">
@@ -225,64 +256,91 @@ export default function GroupDetailPage() {
       <div 
         className="h-48 md:h-64 rounded-lg bg-muted bg-cover bg-center relative mb-4"
         style={{ 
-          backgroundImage: group.imageUrl 
-            ? `url(${group.imageUrl})` 
+          backgroundImage: groupData.imageUrl 
+            ? `url(${groupData.imageUrl})` 
             : undefined 
         }}
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent rounded-lg"></div>
         
         <div className="absolute bottom-4 left-4 right-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Badge variant="outline" className="bg-background/80">
-              {group.category}
-            </Badge>
-            {group.isPrivate && (
-              <span className="flex items-center gap-1 text-white text-xs bg-black/60 px-2 py-1 rounded">
-                <Lock className="h-3 w-3" /> Private
-              </span>
-            )}
-            {isAdmin && (
-              <span className="flex items-center gap-1 text-white text-xs bg-yellow-500/80 px-2 py-1 rounded">
-                <Crown className="h-3 w-3" /> Admin
-              </span>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-background/80">
+                {groupData.category}
+              </Badge>
+              {groupData.isPrivate && (
+                <span className="flex items-center gap-1 text-white text-xs bg-black/60 px-2 py-1 rounded">
+                  <Lock className="h-3 w-3" /> Private
+                </span>
+              )}
+              {isAdmin && (
+                <span className="flex items-center gap-1 text-white text-xs bg-yellow-500/80 px-2 py-1 rounded">
+                  <Crown className="h-3 w-3" /> Admin
+                </span>
+              )}
+            </div>
+            
+            {isAdmin && !isEditing && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="bg-background/20 hover:bg-background/30 text-white"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="h-3.5 w-3.5 mr-1" />
+                Edit Group
+              </Button>
             )}
           </div>
-          <h1 className="text-2xl font-bold text-white">{group.name}</h1>
+          
+          <h1 className="text-2xl font-bold text-white">{groupData.name}</h1>
           <div className="flex items-center text-white/80 text-sm mt-1">
             <Users className="h-4 w-4 mr-1" />
-            <span>{group.memberCount} members</span>
+            <span>{groupData.memberCount} members</span>
           </div>
         </div>
       </div>
       
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex gap-2 flex-wrap">
-          {group.tags.slice(0, 4).map(tag => (
-            <Badge key={tag} variant="secondary">
-              #{tag}
-            </Badge>
-          ))}
+      {isEditing ? (
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <GroupEditForm 
+              group={groupData}
+              onSave={handleSaveGroupEdit}
+              onCancel={() => setIsEditing(false)}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="flex justify-between items-center mb-4">
+          <div className="flex gap-2 flex-wrap">
+            {groupData.tags.slice(0, 4).map(tag => (
+              <Badge key={tag} variant="secondary">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+          {isMember ? (
+            <Button 
+              variant="outline"
+              className="text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-500"
+              onClick={handleLeaveGroup}
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Leave Group
+            </Button>
+          ) : (
+            <Button 
+              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+              onClick={handleJoinGroup}
+            >
+              <UserPlus className="h-4 w-4 mr-2" />
+              Join Group
+            </Button>
+          )}
         </div>
-        {isMember ? (
-          <Button 
-            variant="outline"
-            className="text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-500"
-            onClick={handleLeaveGroup}
-          >
-            <LogOut className="h-4 w-4 mr-2" />
-            Leave Group
-          </Button>
-        ) : (
-          <Button 
-            className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-            onClick={handleJoinGroup}
-          >
-            <UserPlus className="h-4 w-4 mr-2" />
-            Join Group
-          </Button>
-        )}
-      </div>
+      )}
       
       <Tabs defaultValue="about">
         <TabsList className="w-full mb-4">
@@ -296,7 +354,7 @@ export default function GroupDetailPage() {
           <Card>
             <CardContent className="p-4">
               <h3 className="font-semibold text-white mb-2">Description</h3>
-              <p className="text-muted-foreground">{group.description}</p>
+              <p className="text-muted-foreground">{groupData.description}</p>
             </CardContent>
           </Card>
           
@@ -304,10 +362,9 @@ export default function GroupDetailPage() {
             <CardContent className="p-4">
               <h3 className="font-semibold text-white mb-2">Group Rules</h3>
               <ul className="list-disc pl-5 text-muted-foreground space-y-1">
-                <li>Be respectful and kind to other members</li>
-                <li>No hate speech or discriminatory content</li>
-                <li>Keep discussions relevant to the group's purpose</li>
-                <li>Respect privacy and confidentiality</li>
+                {groupRules.map((rule, index) => (
+                  <li key={index}>{rule}</li>
+                ))}
               </ul>
             </CardContent>
           </Card>
