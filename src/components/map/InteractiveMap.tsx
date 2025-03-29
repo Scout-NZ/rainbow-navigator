@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -113,19 +114,27 @@ const transformLocation = (location: any) => {
       website: location.website || ''
     },
     imageUrl: location.image_url || '',
-    verified: location.verified || false
+    verified: location.verified || false,
+    lgbt_status: location.lgbt_status || null
   };
 };
 
 // Custom marker icons based on place type
-const getMarkerIcon = (type: string) => {
+const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
+  // If the location has an LGBT+ status, use a different icon class
+  let iconClassName = `marker-${type.toLowerCase()}`;
+  
+  if (lgbtStatus) {
+    iconClassName += ` marker-${lgbtStatus}`;
+  }
+  
   return L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-    className: `marker-${type.toLowerCase()}`
+    className: iconClassName
   });
 };
 
@@ -144,6 +153,7 @@ type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
   categoryFilter?: string | null;
+  lgbtStatusFilter?: string | null;
   onLocationSelect?: (location: any) => void;
 };
 
@@ -151,6 +161,7 @@ export function InteractiveMap({
   className, 
   defaultLocation = DEFAULT_LOCATION, 
   categoryFilter,
+  lgbtStatusFilter,
   onLocationSelect 
 }: MapProps) {
   const [filter, setFilter] = useState("");
@@ -181,11 +192,12 @@ export function InteractiveMap({
   
   console.log("All locations with coordinates:", locations);
   console.log("Category filter:", categoryFilter);
+  console.log("LGBT+ status filter:", lgbtStatusFilter);
   
   // Use mockPlaces as fallback while loading or if there's an error
   const places = locations.length > 0 ? locations : mockPlaces;
   
-  // Filter places based on search text AND category filter if provided
+  // Filter places based on search text, category filter, and LGBT+ status filter
   const filteredPlaces = places.filter(place => {
     // Apply search text filter
     const matchesSearch = 
@@ -211,7 +223,13 @@ export function InteractiveMap({
       }
     }
     
-    return matchesSearch && matchesCategory;
+    // Apply LGBT+ status filter if it exists
+    let matchesLgbtStatus = true;
+    if (lgbtStatusFilter) {
+      matchesLgbtStatus = place.lgbt_status === lgbtStatusFilter;
+    }
+    
+    return matchesSearch && matchesCategory && matchesLgbtStatus;
   });
 
   console.log("Filtered places:", filteredPlaces);
@@ -364,34 +382,8 @@ export function InteractiveMap({
             />
           )}
           
-          {/* Render markers for each place */}
-          {places.filter(place => {
-            // Apply search text filter
-            const matchesSearch = 
-              place.name.toLowerCase().includes(filter.toLowerCase()) || 
-              place.category.toLowerCase().includes(filter.toLowerCase()) || 
-              (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
-            
-            // Apply category filter if it exists - check in both the category field and tags
-            let matchesCategory = true;
-            if (categoryFilter) {
-              const normalizedCategory = categoryFilter.toLowerCase();
-              matchesCategory = 
-                place.category.toLowerCase() === normalizedCategory ||
-                (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === normalizedCategory));
-              
-              // Special case for "healthcare" category since it might be capitalized differently
-              if (normalizedCategory === "healthcare") {
-                matchesCategory = 
-                  place.category.toLowerCase() === "healthcare" ||
-                  (place.tags && place.tags.some((tag: string) => 
-                    tag?.toLowerCase() === "healthcare" || tag?.toLowerCase() === "health" || tag?.toLowerCase() === "medical"
-                  ));
-              }
-            }
-            
-            return matchesSearch && matchesCategory;
-          }).map((place) => {
+          {/* Apply filters here for rendering markers */}
+          {filteredPlaces.map((place) => {
             const position: LatLngExpression = [place.location.lat, place.location.lng];
             return (
               <Marker
@@ -399,7 +391,7 @@ export function InteractiveMap({
                 // Fix the Marker props
                 {...{
                   position: position,
-                  icon: getMarkerIcon(place.type),
+                  icon: getMarkerIcon(place.type, place.lgbt_status),
                   eventHandlers: {
                     click: () => handleMarkerClick(place),
                   }
@@ -410,6 +402,13 @@ export function InteractiveMap({
                     <h3 className="font-semibold text-sm">{place.name}</h3>
                     <p className="text-xs text-muted-foreground mt-1">{place.category}</p>
                     <p className="text-xs mt-1">{place.location.address}, {place.location.city}</p>
+                    {place.lgbt_status && (
+                      <p className="text-xs mt-1 font-medium">
+                        {place.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
+                        {place.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
+                        {place.lgbt_status === 'ally' && '❤️ Ally'}
+                      </p>
+                    )}
                     <Button 
                       size="sm" 
                       variant="link" 
@@ -467,6 +466,12 @@ export function InteractiveMap({
         .user-location-marker {
           border-radius: 50%;
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
+        }
+        .marker-lgbt_owned, .marker-lgbt_managed {
+          filter: hue-rotate(300deg);
+        }
+        .marker-ally {
+          filter: hue-rotate(60deg);
         }
       `}} />
     </div>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { LocationDetailsDialog } from "@/components/map/LocationDetailsDialog";
 import { toast } from "@/components/ui/use-toast";
+import { 
+  DropdownMenu, 
+  DropdownMenuTrigger, 
+  DropdownMenuContent, 
+  DropdownMenuRadioGroup, 
+  DropdownMenuRadioItem 
+} from "@/components/ui/dropdown-menu";
 
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
@@ -17,6 +25,7 @@ export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedLocation, setSelectedLocation] = useState<typeof mockPlaces[0] | null>(null);
   const [showLocationDetails, setShowLocationDetails] = useState(false);
+  const [lgbtFilter, setLgbtFilter] = useState<string | null>(null);
   
   // Filter businesses only
   const businesses = mockPlaces.filter(place => place.type === 'business');
@@ -51,26 +60,52 @@ export default function DiscoverPage() {
     setShowLocationDetails(true);
   };
 
-  // Filter businesses by category if a category is selected - using lowercase for consistent comparison
-  const filteredBusinesses = selectedCategory 
-    ? businesses.filter(business => {
-        const businessCategory = business.category.toLowerCase();
-        const selectedCategoryLower = selectedCategory.toLowerCase();
-        
-        // Special case for healthcare to ensure consistent results
-        if (selectedCategoryLower === "healthcare") {
-          return businessCategory === "healthcare" || 
-                 business.tags.some(tag => 
-                   tag?.toLowerCase() === "healthcare" || 
-                   tag?.toLowerCase() === "health" || 
-                   tag?.toLowerCase() === "medical"
-                 );
-        }
-        
-        return businessCategory === selectedCategoryLower || 
-               business.tags.some(tag => tag?.toLowerCase() === selectedCategoryLower);
-      })
-    : businesses;
+  // Function to handle LGBT+ status filter
+  const handleLgbtFilterChange = (value: string) => {
+    if (value === "all") {
+      setLgbtFilter(null);
+      toast({
+        title: "Showing all locations",
+        description: "LGBT+ status filter cleared",
+      });
+    } else {
+      setLgbtFilter(value);
+      
+      let filterLabel = "";
+      switch(value) {
+        case "lgbt_owned":
+          filterLabel = "LGBT+ Owned";
+          break;
+        case "lgbt_managed":
+          filterLabel = "LGBT+ Managed";
+          break;
+        case "ally":
+          filterLabel = "Allies";
+          break;
+      }
+      
+      toast({
+        title: `Showing ${filterLabel}`,
+        description: "Filter applied to map and listings",
+      });
+    }
+  };
+
+  // Filter businesses by category and LGBT+ status
+  const filteredBusinesses = businesses.filter(business => {
+    // Category filter
+    const matchesCategory = selectedCategory 
+      ? (business.category.toLowerCase() === selectedCategory.toLowerCase() || 
+         business.tags.some(tag => tag?.toLowerCase() === selectedCategory.toLowerCase()))
+      : true;
+    
+    // LGBT+ status filter
+    const matchesLgbtStatus = lgbtFilter 
+      ? business.lgbt_status === lgbtFilter
+      : true;
+    
+    return matchesCategory && matchesLgbtStatus;
+  });
   
   // Get appropriate icon for each category
   const getCategoryIcon = (category: string) => {
@@ -99,12 +134,37 @@ export default function DiscoverPage() {
       
       <div className="flex justify-between items-center mb-4 relative z-10">
         <h1 className="text-2xl font-bold text-white">Discover</h1>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" size="sm" className="rounded-full flex items-center gap-1">
+              <Heart className="h-4 w-4" />
+              {lgbtFilter ? (
+                <>
+                  {lgbtFilter === "lgbt_owned" && "LGBT+ Owned"}
+                  {lgbtFilter === "lgbt_managed" && "LGBT+ Managed"}
+                  {lgbtFilter === "ally" && "Allies"}
+                </>
+              ) : (
+                "All"
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuRadioGroup value={lgbtFilter || "all"} onValueChange={handleLgbtFilterChange}>
+              <DropdownMenuRadioItem value="all">All Locations</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="lgbt_owned">LGBT+ Owned</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="lgbt_managed">LGBT+ Managed</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="ally">Allies</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       <InteractiveMap 
         className="h-64 mb-6 relative z-10" 
         defaultLocation={DEFAULT_LOCATION} 
         categoryFilter={selectedCategory}
+        lgbtStatusFilter={lgbtFilter}
         onLocationSelect={handleOpenLocationDetails}
       />
       
@@ -130,10 +190,23 @@ export default function DiscoverPage() {
                     style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
                   >
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                    <div className="absolute top-2 right-2">
+                    <div className="absolute top-2 right-2 flex gap-1 flex-col items-end">
                       <Badge variant="outline" className="bg-white/90 text-black border-none">
                         {business.category}
                       </Badge>
+                      {business.lgbt_status && (
+                        <Badge 
+                          variant="outline" 
+                          className={business.lgbt_status === 'ally' 
+                            ? 'bg-primary/20 text-primary border-none' 
+                            : 'bg-rainbow-gradient text-white border-none'
+                          }
+                        >
+                          {business.lgbt_status === 'lgbt_owned' && 'LGBT+ Owned'}
+                          {business.lgbt_status === 'lgbt_managed' && 'LGBT+ Managed'}
+                          {business.lgbt_status === 'ally' && 'Ally'}
+                        </Badge>
+                      )}
                     </div>
                     <div className="absolute bottom-2 left-2">
                       <h3 className="text-white font-semibold">{business.name}</h3>
@@ -221,7 +294,22 @@ export default function DiscoverPage() {
                     style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold">{business.name}</h3>
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold">{business.name}</h3>
+                      {business.lgbt_status && (
+                        <Badge 
+                          variant="outline" 
+                          className={business.lgbt_status === 'ally' 
+                            ? 'text-xs bg-primary/10 text-primary border-0' 
+                            : 'text-xs bg-rainbow-gradient text-white border-0'
+                          }
+                        >
+                          {business.lgbt_status === 'lgbt_owned' && 'LGBT+ Owned'}
+                          {business.lgbt_status === 'lgbt_managed' && 'LGBT+ Managed'}
+                          {business.lgbt_status === 'ally' && 'Ally'}
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{business.description}</p>
                     <div className="flex items-center text-xs text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3 mr-1" />
@@ -248,7 +336,22 @@ export default function DiscoverPage() {
                     style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
                   />
                   <div className="flex-1">
-                    <h3 className="font-semibold">{business.name}</h3>
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-semibold">{business.name}</h3>
+                      {business.lgbt_status && (
+                        <Badge 
+                          variant="outline" 
+                          className={business.lgbt_status === 'ally' 
+                            ? 'text-xs bg-primary/10 text-primary border-0' 
+                            : 'text-xs bg-rainbow-gradient text-white border-0'
+                          }
+                        >
+                          {business.lgbt_status === 'lgbt_owned' && 'LGBT+ Owned'}
+                          {business.lgbt_status === 'lgbt_managed' && 'LGBT+ Managed'}
+                          {business.lgbt_status === 'ally' && 'Ally'}
+                        </Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground line-clamp-1">{business.description}</p>
                     <div className="flex items-center text-xs text-muted-foreground mt-1">
                       <MapPin className="h-3 w-3 mr-1" />

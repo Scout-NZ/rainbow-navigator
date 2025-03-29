@@ -20,6 +20,7 @@ export type Database = {
           id: string
           image_url: string | null
           lat: number | null
+          lgbt_status: string | null
           lng: number | null
           name: string
           neighbourhood: string | null
@@ -40,6 +41,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lat?: number | null
+          lgbt_status?: string | null
           lng?: number | null
           name: string
           neighbourhood?: string | null
@@ -60,6 +62,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           lat?: number | null
+          lgbt_status?: string | null
           lng?: number | null
           name?: string
           neighbourhood?: string | null

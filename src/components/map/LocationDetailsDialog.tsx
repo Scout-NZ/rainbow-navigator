@@ -2,7 +2,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Mail, MapPin, Phone } from "lucide-react";
+import { ExternalLink, Mail, MapPin, Phone, Heart } from "lucide-react";
 import { mockPlaces } from "@/data/mockData";
 
 type LocationDetailsProps = {
@@ -20,14 +20,47 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
     window.open(websiteUrl, '_blank', 'noopener,noreferrer');
   };
 
+  // Function to get the LGBT+ status badge
+  const getLgbtStatusBadge = () => {
+    if (!location.lgbt_status) return null;
+    
+    let badgeText = '';
+    let badgeClass = '';
+    
+    switch(location.lgbt_status) {
+      case 'lgbt_owned':
+        badgeText = 'LGBT+ Owned';
+        badgeClass = 'bg-rainbow-gradient text-white border-0';
+        break;
+      case 'lgbt_managed':
+        badgeText = 'LGBT+ Managed';
+        badgeClass = 'bg-rainbow-gradient text-white border-0';
+        break;
+      case 'ally':
+        badgeText = 'Ally';
+        badgeClass = 'bg-primary/20 text-primary border-0';
+        break;
+      default:
+        return null;
+    }
+    
+    return (
+      <Badge className={`${badgeClass} flex items-center gap-1`}>
+        <Heart className="h-3 w-3" />
+        {badgeText}
+      </Badge>
+    );
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl">{location.name}</DialogTitle>
-          <DialogDescription className="flex items-center gap-2 text-sm">
+          <DialogDescription className="flex items-center gap-2 text-sm flex-wrap">
             <Badge variant="outline">{location.category}</Badge>
             <Badge variant="secondary">{location.type}</Badge>
+            {getLgbtStatusBadge()}
           </DialogDescription>
         </DialogHeader>
         
