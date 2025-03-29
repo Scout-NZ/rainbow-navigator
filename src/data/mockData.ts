@@ -57,6 +57,7 @@ export type Place = {
     email?: string;
     website?: string;
   };
+  lgbt_status?: "lgbt_owned" | "lgbt_managed" | "ally" | null;
 };
 
 export type Group = {
@@ -168,7 +169,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 4 123 4567",
       email: "info@rainbowcafe.co.nz",
       website: "rainbowcafe.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_owned"
   },
   {
     id: "2",
@@ -190,7 +192,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 9 987 6543",
       email: "books@unitybooks.co.nz",
       website: "unitybooks.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_managed"
   },
   {
     id: "3",
@@ -212,7 +215,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 9 876 5432",
       email: "care@rainbowhealth.org.nz",
       website: "rainbowhealth.org.nz"
-    }
+    },
+    lgbt_status: "lgbt_owned"
   },
   {
     id: "4",
@@ -234,7 +238,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 3 345 6789",
       email: "shop@proudthreads.co.nz",
       website: "proudthreads.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_managed"
   },
   {
     id: "5",
@@ -256,7 +261,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 9 234 5678",
       email: "info@familybar.co.nz",
       website: "familybar.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_owned"
   },
   {
     id: "6",
@@ -278,7 +284,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 3 456 7890",
       email: "hello@queenstownpride.org.nz",
       website: "queenstownpride.org.nz"
-    }
+    },
+    lgbt_status: "lgbt_owned"
   },
   {
     id: "7",
@@ -300,7 +307,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 3 567 8901",
       email: "brew@arohacoffee.co.nz",
       website: "arohacoffee.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_owned"
   },
   {
     id: "8",
@@ -322,7 +330,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 4 891 2345",
       email: "hello@scottyandmals.co.nz",
       website: "scottyandmals.co.nz"
-    }
+    },
+    lgbt_status: "ally"
   },
   {
     id: "9",
@@ -344,7 +353,8 @@ export const mockPlaces: Place[] = [
       phone: "+64 4 385 6754",
       email: "contact@ivybarwellington.co.nz",
       website: "ivybarwellington.co.nz"
-    }
+    },
+    lgbt_status: "lgbt_managed"
   }
 ];
 
