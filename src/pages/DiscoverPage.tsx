@@ -52,6 +52,7 @@ export default function DiscoverPage() {
   const getCategoryIcon = (category: string) => {
     switch(category.toLowerCase()) {
       case 'cafés':
+      case 'cafes':
         return <Coffee className="h-5 w-5" />;
       case 'nightlife':
         return <Music className="h-5 w-5" />;

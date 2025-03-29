@@ -125,6 +125,9 @@ export function InteractiveMap({
     }
   });
   
+  console.log("All locations:", locations);
+  console.log("Category filter:", categoryFilter);
+  
   // Use mockPlaces as fallback while loading or if there's an error
   const places = locations.length > 0 ? locations : mockPlaces;
   
@@ -134,16 +137,18 @@ export function InteractiveMap({
     const matchesSearch = 
       place.name.toLowerCase().includes(filter.toLowerCase()) || 
       place.category.toLowerCase().includes(filter.toLowerCase()) || 
-      place.tags.some((tag: string) => tag.toLowerCase().includes(filter.toLowerCase()));
+      (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
     
     // Apply category filter if it exists
     const matchesCategory = categoryFilter 
       ? place.category.toLowerCase() === categoryFilter.toLowerCase() ||
-        place.tags.some((tag: string) => tag.toLowerCase() === categoryFilter.toLowerCase())
+        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === categoryFilter.toLowerCase()))
       : true;
     
     return matchesSearch && matchesCategory;
   });
+
+  console.log("Filtered places:", filteredPlaces);
 
   const handleMarkerClick = (place: any) => {
     setSelectedPlace(place);
