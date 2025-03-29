@@ -66,11 +66,17 @@ export function AppLayout() {
           
           <div className="flex items-center gap-3">
             <div className="relative max-w-xs w-full">
-              <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
               <Input 
                 type="search" 
                 placeholder="Ask Navigator..." 
-                className="pl-9 rounded-full bg-white border-none" 
+                className="pl-9 rounded-full border-none bg-white shadow-sm"
+                style={{
+                  backgroundImage: "linear-gradient(to right, rgba(255,255,255,0.9), rgba(255,255,255,0.9)), linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)",
+                  backgroundOrigin: "border-box",
+                  backgroundClip: "padding-box, border-box",
+                  border: "2px solid transparent",
+                }}
                 onClick={() => setShowChat(true)}
               />
             </div>
