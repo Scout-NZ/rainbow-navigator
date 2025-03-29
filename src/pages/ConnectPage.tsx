@@ -173,14 +173,6 @@ export default function ConnectPage() {
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-white">Connect</h1>
-        <Button 
-          size="sm" 
-          className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-          onClick={() => setOpenCreateDialog(true)}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Group
-        </Button>
       </div>
       
       {activeChat ? (
