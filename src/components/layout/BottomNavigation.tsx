@@ -2,7 +2,37 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { navItems } from "@/data/mockData";
+import { DiscoverIcon, ConnectIcon, FeedIcon, EventsIcon, ResourcesIcon } from "@/components/navigation/NavIcons";
+import { User } from "lucide-react";
+
+// Define navigation items
+const navItems = [
+  {
+    label: "Discover",
+    path: "/",
+    icon: DiscoverIcon
+  },
+  {
+    label: "Connect",
+    path: "/connect",
+    icon: ConnectIcon
+  },
+  {
+    label: "Feed",
+    path: "/feed",
+    icon: FeedIcon
+  },
+  {
+    label: "Events",
+    path: "/events",
+    icon: EventsIcon
+  },
+  {
+    label: "Profile",
+    path: "/profile",
+    icon: () => <User />
+  }
+];
 
 export function BottomNavigation() {
   const location = useLocation();
