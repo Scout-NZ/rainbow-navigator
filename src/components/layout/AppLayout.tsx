@@ -41,7 +41,7 @@ export function AppLayout() {
       >
         <div className="container px-4 py-3 mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link to="/" className="flex items-center">
+            <Link to="/profile" className="flex items-center">
               <Avatar className="h-10 w-10 border-2 border-white">
                 <AvatarImage 
                   src={userProfile.imageUrl}

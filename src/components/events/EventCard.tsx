@@ -1,25 +1,30 @@
-
-import { Calendar, Clock, MapPin } from "lucide-react";
-import { Event } from "@/data/mockData";
-import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, MapPin, Heart, Share2, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Event } from "@/integrations/supabase/types";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { formatDistanceToNow, format } from "date-fns";
 
-export function EventCard({ event }: { event: Event }) {
-  // Format date to display month and day
+const getAttendeeCount = (attendees: any): number => {
+  if (typeof attendees === 'number') {
+    return attendees;
+  }
+  if (Array.isArray(attendees)) {
+    return attendees.length;
+  }
+  return 0;
+};
+
+export const EventCard = ({ event }: { event: Event }) => {
+  const [saved, setSaved] = useState(false);
+  const attendeeCount = getAttendeeCount(event.attendees);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  };
-
-  // Helper function to safely display attendee count
-  const getAttendeeCount = () => {
-    if (typeof event.attendees === 'number') {
-      return event.attendees;
-    } else if (Array.isArray(event.attendees)) {
-      return event.attendees.length;
-    }
-    return 0; // Fallback value if attendees is undefined or an unexpected type
   };
 
   return (
@@ -82,9 +87,9 @@ export function EventCard({ event }: { event: Event }) {
       <CardFooter className="p-3 pt-0 flex justify-between gap-2">
         <Button variant="outline" size="sm" className="w-1/2">Details</Button>
         <Button size="sm" className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
-          Attend ({getAttendeeCount()})
+          Attend ({attendeeCount})
         </Button>
       </CardFooter>
     </Card>
   );
-}
+};
