@@ -781,5 +781,6 @@ export const mockUserProfile: UserProfile = {
   groups: 5,
   events: 12,
   location: "Auckland, New Zealand",
-  identity: ""
+  identity: "",
+  joined: "2023-01-15"
 };
