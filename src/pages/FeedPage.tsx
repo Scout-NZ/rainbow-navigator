@@ -23,7 +23,7 @@ export default function FeedPage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Feed</h1>
+        <h1 className="text-2xl font-bold text-white">Feed</h1>
         <Button 
           size="sm"
           className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
