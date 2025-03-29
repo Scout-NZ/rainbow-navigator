@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
-import { Search, Settings } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -54,16 +54,6 @@ export function AppLayout() {
                 className="pl-9 rounded-full bg-white border-none" 
               />
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              asChild
-              className="ml-2"
-            >
-              <Link to="/admin">
-                <Settings className="h-5 w-5" />
-              </Link>
-            </Button>
           </div>
         </div>
       </header>
