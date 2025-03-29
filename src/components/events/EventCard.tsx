@@ -1,9 +1,10 @@
+
 import { Calendar, Clock, MapPin, Heart, Share2, Users, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Event } from "@/integrations/supabase/types";
+import { Event } from "@/data/mockData";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow, format } from "date-fns";
