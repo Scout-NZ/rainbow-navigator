@@ -20,6 +20,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authInProgress, setAuthInProgress] = useState(false);
 
   // If user is already logged in, redirect to home
   if (!loading && user) {
@@ -90,11 +91,27 @@ export default function AuthPage() {
   };
 
   const handleGoogleSignIn = async () => {
+    if (authInProgress) {
+      toast({
+        title: 'Authentication in progress',
+        description: 'Please wait for the current authentication process to complete.',
+      });
+      return;
+    }
+    
+    setAuthInProgress(true);
+    
     try {
+      // Get the current URL for the redirect
+      const currentOrigin = window.location.origin;
+      const redirectUrl = `${currentOrigin}/auth/callback`;
+      
+      console.log(`Initiating Google sign-in with redirect to: ${redirectUrl}`);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -104,19 +121,24 @@ export default function AuthPage() {
 
       if (error) throw error;
       
-      // Success will redirect automatically, no need to handle here
+      // Success will redirect automatically
       console.log('Google auth initialized:', data);
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Could not sign in with Google.',
+        description: error.message || 'Could not sign in with Google. Please check your network connection and try again.',
         variant: 'destructive',
       });
+      setAuthInProgress(false);
     }
   };
 
   const handleAppleSignIn = async () => {
+    if (authInProgress) return;
+    
+    setAuthInProgress(true);
+    
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
@@ -133,6 +155,7 @@ export default function AuthPage() {
         description: error.message || 'Could not sign in with Apple.',
         variant: 'destructive',
       });
+      setAuthInProgress(false);
     }
   };
 
@@ -152,6 +175,7 @@ export default function AuthPage() {
               className="w-full" 
               type="button"
               onClick={handleGoogleSignIn}
+              disabled={authInProgress}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -176,13 +200,16 @@ export default function AuthPage() {
                   d="M130.55 50.479c24.514 0 41.05 10.589 50.479 19.438l36.844-35.974C195.245 12.91 165.798 0 130.55 0 79.49 0 35.393 29.301 13.925 71.947l42.211 32.783c10.59-31.477 39.891-54.251 74.414-54.251"
                 />
               </svg>
-              Continue with Google
+              {authInProgress 
+                ? 'Connecting to Google...' 
+                : 'Continue with Google'}
             </Button>
             <Button 
               variant="outline" 
               className="w-full"
               type="button"
               onClick={handleAppleSignIn}
+              disabled={authInProgress}
             >
               <Apple className="h-5 w-5 mr-2" />
               Continue with Apple
