@@ -17,11 +17,14 @@ interface GroupCardProps {
 export function GroupCard({ group, isCompact = false }: GroupCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useUser();
+  const { joinGroup, isGroupMember } = useUser();
   const [isMember, setIsMember] = useState(false);
   const [memberCount, setMemberCount] = useState(group.memberCount);
   
   useEffect(() => {
+    // Check if user is a member directly from context
+    setIsMember(isGroupMember(String(group.id)));
+    
     const syncMemberCount = () => {
       const storedMemberCount = localStorage.getItem(`group-${group.id}-member-count`);
       
@@ -44,7 +47,7 @@ export function GroupCard({ group, isCompact = false }: GroupCardProps) {
     
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, [group.id, group.memberCount, isMember, memberCount]);
+  }, [group.id, group.memberCount, isMember, memberCount, isGroupMember]);
   
   const handleViewGroup = () => {
     console.log("Viewing group:", group.name);
@@ -55,7 +58,8 @@ export function GroupCard({ group, isCompact = false }: GroupCardProps) {
     e.stopPropagation();
     console.log("Joining group:", group.name);
     
-    // Simple mock for joining group since we don't have the joinGroup function anymore
+    // Call joinGroup from context and update local state
+    joinGroup(String(group.id));
     setIsMember(true);
     
     const newMemberCount = memberCount + 1;

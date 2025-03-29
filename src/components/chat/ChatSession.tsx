@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Send, ArrowLeft, ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,7 @@ interface ChatSessionProps {
 }
 
 export function ChatSession({ contact, onBack }: ChatSessionProps) {
-  const { userProfile } = useUser();
+  const { user } = useUser();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -191,8 +190,8 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
             </div>
             {message.sender === "user" && (
               <Avatar className="h-8 w-8 ml-2 flex-shrink-0">
-                <AvatarImage src={userProfile.imageUrl} />
-                <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={user?.avatar} />
+                <AvatarFallback>{user?.name.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
             )}
           </div>

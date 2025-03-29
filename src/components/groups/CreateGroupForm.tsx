@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -73,17 +72,15 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
     setTimeout(() => {
       // In a real app, this would be an API call to create the group
       const newGroup = {
-        id: (mockGroups.length + 1).toString(),
+        id: (mockGroups.length + 1),
         name: values.name,
         category: values.category,
         description: values.description,
         isPrivate: values.isPrivate,
-        location: values.location,
+        city: values.location, // Set city from location
         tags: values.tags, // This is now correctly typed as string[] after transformation
         memberCount: 1,
         imageUrl: imageUrl || `https://images.unsplash.com/photo-${Math.floor(Math.random() * 1000000)}`,
-        members: [currentUser.id], // Use currentUser.id instead of userId
-        admins: [currentUser.id], // Use currentUser.id instead of userId
       };
       
       // Add the new group to the mock data
@@ -95,7 +92,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
       });
       
       // After creating the group, set the current user as admin
-      createGroup(newGroup.id);
+      createGroup(String(newGroup.id));
       
       setIsSubmitting(false);
       onSuccess();
