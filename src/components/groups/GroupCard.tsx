@@ -6,14 +6,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useUser } from "@/contexts/UserContext";
 
 export function GroupCard({ group }: { group: Group }) {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { joinGroup, isGroupMember } = useUser();
+  const isMember = isGroupMember(group.id);
 
   const handleViewGroup = () => {
     console.log("Viewing group:", group.name);
-    // Navigate to a group detail page with the group id
     navigate(`/connect/groups/${group.id}`);
   };
 
@@ -21,7 +23,8 @@ export function GroupCard({ group }: { group: Group }) {
     e.stopPropagation(); // Prevent navigation when clicking the join button
     console.log("Joining group:", group.name);
     
-    // In a real app, this would be an API call to join the group
+    joinGroup(group.id);
+    
     toast({
       title: "Group joined!",
       description: `You have successfully joined ${group.name}`,
@@ -81,13 +84,24 @@ export function GroupCard({ group }: { group: Group }) {
         >
           View
         </Button>
-        <Button 
-          size="sm" 
-          className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-          onClick={handleJoinGroup}
-        >
-          Join
-        </Button>
+        {isMember ? (
+          <Button 
+            size="sm" 
+            className="w-1/2"
+            variant="secondary"
+            onClick={handleViewGroup}
+          >
+            View Group
+          </Button>
+        ) : (
+          <Button 
+            size="sm" 
+            className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+            onClick={handleJoinGroup}
+          >
+            Join
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

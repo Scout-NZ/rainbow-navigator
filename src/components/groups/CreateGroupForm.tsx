@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -20,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { mockGroups } from "@/data/mockData";
+import { useUser } from "@/contexts/UserContext";
 
 const formSchema = z.object({
   name: z.string().min(3, {
@@ -65,7 +65,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
     } as any, // Use 'as any' to bypass the type check for the initial empty string value
   });
 
-  function onSubmit(values: FormValues) {
+  const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
     
     setTimeout(() => {
@@ -90,10 +90,14 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
         description: "Your group was created successfully.",
       });
       
+      // After creating the group, set the current user as admin
+      const { createGroup } = useUser();
+      createGroup(newGroup.id);
+      
       setIsSubmitting(false);
       onSuccess();
     }, 1000);
-  }
+  };
 
   // Categories based on the existing ones in mockData plus the new ones added
   const categories = [

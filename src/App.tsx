@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
+import { UserProvider } from "./contexts/UserContext";
 import DiscoverPage from "./pages/DiscoverPage";
 import ConnectPage from "./pages/ConnectPage";
 import EventsPage from "./pages/EventsPage";
@@ -22,20 +23,22 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<DiscoverPage />} />
-            <Route path="/connect" element={<ConnectPage />} />
-            <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
-            <Route path="/events" element={<EventsPage />} />
-            <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/feed" element={<FeedPage />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <UserProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<AppLayout />}>
+              <Route path="/" element={<DiscoverPage />} />
+              <Route path="/connect" element={<ConnectPage />} />
+              <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
+              <Route path="/events" element={<EventsPage />} />
+              <Route path="/resources" element={<ResourcesPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/feed" element={<FeedPage />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

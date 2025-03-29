@@ -69,6 +69,8 @@ export type Group = {
   isPrivate: boolean;
   location: string;
   tags: string[];
+  members: string[];
+  admins: string[];
 };
 
 export type Event = {
@@ -367,7 +369,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1530538987395-032d1900e591",
     isPrivate: false,
     location: "New York",
-    tags: ["books", "discussion", "social"]
+    tags: ["books", "discussion", "social"],
+    members: ["user1"],
+    admins: ["user1"]
   },
   {
     id: "2",
@@ -378,7 +382,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306",
     isPrivate: false,
     location: "New York",
-    tags: ["hiking", "outdoors", "adventure"]
+    tags: ["hiking", "outdoors", "adventure"],
+    members: [],
+    admins: []
   },
   {
     id: "3",
@@ -389,7 +395,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4",
     isPrivate: false,
     location: "New York",
-    tags: ["activism", "politics", "advocacy"]
+    tags: ["activism", "politics", "advocacy"],
+    members: [],
+    admins: []
   },
   {
     id: "4",
@@ -400,7 +408,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e",
     isPrivate: false,
     location: "Online",
-    tags: ["gaming", "e-sports", "social"]
+    tags: ["gaming", "e-sports", "social"],
+    members: [],
+    admins: []
   },
   {
     id: "5",
@@ -411,7 +421,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2",
     isPrivate: true,
     location: "New York",
-    tags: ["support", "trans", "mental-health"]
+    tags: ["support", "trans", "mental-health"],
+    members: [],
+    admins: []
   },
   {
     id: "6",
@@ -422,7 +434,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b",
     isPrivate: false,
     location: "Wellington",
-    tags: ["art", "music", "creative", "expression"]
+    tags: ["art", "music", "creative", "expression"],
+    members: [],
+    admins: []
   },
   {
     id: "7",
@@ -433,7 +447,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998",
     isPrivate: false,
     location: "Auckland",
-    tags: ["tech", "career", "networking", "professional"]
+    tags: ["tech", "career", "networking", "professional"],
+    members: [],
+    admins: []
   },
   {
     id: "8",
@@ -444,7 +460,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e",
     isPrivate: false,
     location: "Christchurch",
-    tags: ["parents", "family", "children", "support"]
+    tags: ["parents", "family", "children", "support"],
+    members: [],
+    admins: []
   },
   {
     id: "9",
@@ -455,7 +473,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c",
     isPrivate: false,
     location: "Auckland",
-    tags: ["film", "cinema", "discussion", "entertainment"]
+    tags: ["film", "cinema", "discussion", "entertainment"],
+    members: [],
+    admins: []
   },
   {
     id: "10",
@@ -466,7 +486,9 @@ export const mockGroups: Group[] = [
     imageUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b",
     isPrivate: false,
     location: "Wellington",
-    tags: ["sports", "fitness", "teams", "active"]
+    tags: ["sports", "fitness", "teams", "active"],
+    members: [],
+    admins: []
   }
 ];
 
