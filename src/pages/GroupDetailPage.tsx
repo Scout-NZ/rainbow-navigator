@@ -9,14 +9,26 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Textarea } from "@/components/ui/textarea";
+
+// Add an interface for discussion messages
+interface DiscussionMessage {
+  id: string;
+  userId: string;
+  userImageUrl: string;
+  userName: string;
+  content: string;
+  createdAt: string;
+}
 
 export default function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { joinGroup, leaveGroup, isGroupMember, isGroupAdmin } = useUser();
+  const { joinGroup, leaveGroup, isGroupMember, isGroupAdmin, currentUser } = useUser();
   const [discussionMessage, setDiscussionMessage] = useState("");
+  const [discussions, setDiscussions] = useState<DiscussionMessage[]>([]);
   
   const group = mockGroups.find(g => g.id === groupId);
   
@@ -62,12 +74,53 @@ export default function GroupDetailPage() {
     
     if (!discussionMessage.trim()) return;
     
+    // Create a new message object
+    const newMessage: DiscussionMessage = {
+      id: Date.now().toString(),
+      userId: currentUser.id,
+      userImageUrl: mockUserProfile.imageUrl,
+      userName: mockUserProfile.name,
+      content: discussionMessage,
+      createdAt: new Date().toISOString(),
+    };
+    
+    // Add the new message to the discussions array
+    setDiscussions([...discussions, newMessage]);
+    
     toast({
       title: "Message sent",
       description: "Your message has been posted to the group discussion",
     });
     
     setDiscussionMessage("");
+  };
+
+  // Function to format time
+  const formatRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return `${diffInSeconds}s ago`;
+    }
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) {
+      return `${diffInMinutes}m ago`;
+    }
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) {
+      return `${diffInHours}h ago`;
+    }
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) {
+      return `${diffInDays}d ago`;
+    }
+    
+    return date.toLocaleDateString();
   };
   
   return (
@@ -180,8 +233,8 @@ export default function GroupDetailPage() {
                 <CardContent className="p-4">
                   <form onSubmit={handleSubmitMessage}>
                     <h3 className="font-semibold text-white mb-2">Add to the discussion</h3>
-                    <textarea 
-                      className="w-full bg-background border border-input rounded-md p-2 min-h-[80px]"
+                    <Textarea 
+                      className="w-full"
                       placeholder="Share your thoughts with the group..."
                       value={discussionMessage}
                       onChange={(e) => setDiscussionMessage(e.target.value)}
@@ -196,10 +249,37 @@ export default function GroupDetailPage() {
                 </CardContent>
               </Card>
               
-              <div className="text-center text-muted-foreground py-8">
-                <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No messages yet. Be the first to start a discussion!</p>
-              </div>
+              {discussions.length > 0 ? (
+                <div className="space-y-3">
+                  {discussions.map((message) => (
+                    <Card key={message.id} className="overflow-hidden">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <AvatarWithStatus 
+                            src={message.userImageUrl} 
+                            fallback={message.userName} 
+                            status="online"
+                          />
+                          <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                              <h4 className="font-semibold text-sm">{message.userName}</h4>
+                              <span className="text-xs text-muted-foreground">
+                                {formatRelativeTime(message.createdAt)}
+                              </span>
+                            </div>
+                            <p className="text-sm">{message.content}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-8">
+                  <MessageCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No messages yet. Be the first to start a discussion!</p>
+                </div>
+              )}
             </div>
           ) : (
             <Card className="text-center p-8">
