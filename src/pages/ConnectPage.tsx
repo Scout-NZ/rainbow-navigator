@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MessageCircle, Plus, Search, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +11,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
 
 export default function ConnectPage() {
-  const [showChat, setShowChat] = useState(false);
   const [filter, setFilter] = useState("");
   
   const filteredGroups = mockGroups.filter(group => 
@@ -29,14 +27,11 @@ export default function ConnectPage() {
         <Button 
           size="sm" 
           className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-          onClick={() => setShowChat(prev => !prev)}
         >
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Chat with AI
+          <Plus className="h-4 w-4 mr-2" />
+          Create Group
         </Button>
       </div>
-      
-      {showChat && <ChatBot onClose={() => setShowChat(false)} />}
       
       <Tabs defaultValue="groups">
         <TabsList className="w-full mb-4">

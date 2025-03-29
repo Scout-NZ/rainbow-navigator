@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
-import { Search } from "lucide-react";
+import { MessageCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { ChatBot } from "@/components/ai/ChatBot";
 
 export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
 
@@ -48,6 +50,15 @@ export function AppLayout() {
             )}>Rainbow Navigator</h1>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              onClick={() => setShowChat(prev => !prev)}
+              className="relative overflow-hidden rounded-full bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green hover:opacity-90 transition-opacity"
+            >
+              <div className="flex items-center gap-2 px-1 py-0.5">
+                <MessageCircle className="h-5 w-5 text-white" />
+                <span className="text-white">Chat with AI</span>
+              </div>
+            </Button>
             <div className="relative max-w-xs w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -59,6 +70,8 @@ export function AppLayout() {
           </div>
         </div>
       </header>
+      
+      {showChat && <ChatBot onClose={() => setShowChat(false)} />}
       
       <main className={cn(
         "flex-1 container px-4 mx-auto",
