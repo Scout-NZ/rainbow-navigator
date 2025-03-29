@@ -44,7 +44,10 @@ const formSchema = z.object({
   ),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+// Define the type with the transformed value
+type FormValues = z.infer<typeof formSchema> & {
+  tags: string[];
+};
 
 export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +62,7 @@ export function CreateGroupForm({ onSuccess }: { onSuccess: () => void }) {
       isPrivate: false,
       location: "",
       tags: "",
-    },
+    } as any, // Use 'as any' to bypass the type check for the initial empty string value
   });
 
   function onSubmit(values: FormValues) {
