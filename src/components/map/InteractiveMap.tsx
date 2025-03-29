@@ -151,11 +151,23 @@ export function InteractiveMap({
       place.category.toLowerCase().includes(filter.toLowerCase()) || 
       (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
     
-    // Apply category filter if it exists
-    const matchesCategory = categoryFilter 
-      ? place.category.toLowerCase() === categoryFilter.toLowerCase() ||
-        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === categoryFilter.toLowerCase()))
-      : true;
+    // Apply category filter if it exists - check in both the category field and tags
+    let matchesCategory = true;
+    if (categoryFilter) {
+      const normalizedCategory = categoryFilter.toLowerCase();
+      matchesCategory = 
+        place.category.toLowerCase() === normalizedCategory ||
+        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === normalizedCategory));
+      
+      // Special case for "healthcare" category since it might be capitalized differently
+      if (normalizedCategory === "healthcare") {
+        matchesCategory = 
+          place.category.toLowerCase() === "healthcare" ||
+          (place.tags && place.tags.some((tag: string) => 
+            tag?.toLowerCase() === "healthcare" || tag?.toLowerCase() === "health" || tag?.toLowerCase() === "medical"
+          ));
+      }
+    }
     
     return matchesSearch && matchesCategory;
   });

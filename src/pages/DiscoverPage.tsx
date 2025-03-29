@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid } from "lucide-react";
+import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,11 +41,11 @@ export default function DiscoverPage() {
     setShowLocationDetails(true);
   };
 
-  // Filter businesses by category if a category is selected
+  // Filter businesses by category if a category is selected - using lowercase for consistent comparison
   const filteredBusinesses = selectedCategory 
     ? businesses.filter(business => 
         business.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        business.tags.some(tag => tag.toLowerCase() === selectedCategory.toLowerCase()))
+        business.tags.some(tag => tag?.toLowerCase() === selectedCategory.toLowerCase()))
     : businesses;
   
   // Get appropriate icon for each category
@@ -57,7 +57,7 @@ export default function DiscoverPage() {
       case 'nightlife':
         return <Music className="h-5 w-5" />;
       case 'healthcare':
-        return <Heart className="h-5 w-5" />;
+        return <Stethoscope className="h-5 w-5" />;
       case 'retail':
         return <ShoppingBag className="h-5 w-5" />;
       case 'services':
@@ -68,6 +68,10 @@ export default function DiscoverPage() {
         return <MapPin className="h-5 w-5" />;
     }
   };
+  
+  // For debugging - log the filtered businesses
+  console.log("Selected category:", selectedCategory);
+  console.log("Filtered businesses:", filteredBusinesses);
   
   return (
     <div className="pb-4">
@@ -95,41 +99,47 @@ export default function DiscoverPage() {
         
         <ScrollArea className="w-full whitespace-nowrap pb-4">
           <div className="flex gap-3">
-            {filteredBusinesses.map(business => (
-              <Card 
-                key={business.id} 
-                className="min-w-[250px] max-w-[250px] card-hover cursor-pointer"
-                onClick={() => handleOpenLocationDetails(business)}
-              >
-                <div 
-                  className="h-32 bg-muted bg-cover bg-center relative"
-                  style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
+            {filteredBusinesses.length > 0 ? (
+              filteredBusinesses.map(business => (
+                <Card 
+                  key={business.id} 
+                  className="min-w-[250px] max-w-[250px] card-hover cursor-pointer"
+                  onClick={() => handleOpenLocationDetails(business)}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="outline" className="bg-white/90 text-black border-none">
-                      {business.category}
-                    </Badge>
-                  </div>
-                  <div className="absolute bottom-2 left-2">
-                    <h3 className="text-white font-semibold">{business.name}</h3>
-                  </div>
-                </div>
-                <CardContent className="p-3">
-                  <div className="flex items-center text-sm text-muted-foreground mb-2">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span className="truncate">{business.location.address}, {business.location.city}</span>
-                  </div>
-                  <div className="flex gap-1">
-                    {business.tags.slice(0, 2).map(tag => (
-                      <Badge key={tag} variant="secondary" className="text-xs">
-                        #{tag}
+                  <div 
+                    className="h-32 bg-muted bg-cover bg-center relative"
+                    style={{ backgroundImage: business.imageUrl ? `url(${business.imageUrl})` : undefined }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute top-2 right-2">
+                      <Badge variant="outline" className="bg-white/90 text-black border-none">
+                        {business.category}
                       </Badge>
-                    ))}
+                    </div>
+                    <div className="absolute bottom-2 left-2">
+                      <h3 className="text-white font-semibold">{business.name}</h3>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+                  <CardContent className="p-3">
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span className="truncate">{business.location.address}, {business.location.city}</span>
+                    </div>
+                    <div className="flex gap-1">
+                      {business.tags.slice(0, 2).map(tag => (
+                        <Badge key={tag} variant="secondary" className="text-xs">
+                          #{tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="p-4 text-center w-full">
+                <p className="text-muted-foreground">No {selectedCategory} locations found.</p>
+              </div>
+            )}
             
             <div className="min-w-[250px] max-w-[250px] h-[180px] border border-dashed rounded-lg flex flex-col items-center justify-center">
               <Plus className="h-8 w-8 text-muted-foreground mb-2" />
