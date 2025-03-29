@@ -168,17 +168,14 @@ export default function ResourcesPage() {
 
   return (
     <div className="pb-4">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-white">Resources</h1>
-        <div className="flex gap-2">
-          <Button 
-            size="sm"
-            className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Resource
-          </Button>
-        </div>
+      <div className="flex justify-end items-center mb-4">
+        <Button 
+          size="sm"
+          className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Resource
+        </Button>
       </div>
       
       <ScrollArea className="w-full whitespace-nowrap pb-2" orientation="horizontal">
