@@ -774,8 +774,8 @@ export const mockPosts: Post[] = [
 
 export const mockUserProfile: UserProfile = {
   id: "1",
-  name: "Alex Chen",
-  username: "@alexchen",
+  name: "Scout Schultz",
+  username: "@scout",
   bio: "Passionate about creating inclusive spaces and connecting communities. Happy to be part of Rainbow Navigator!",
   imageUrl: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
   interests: ["lgbtq", "community", "technology", "inclusion"],
