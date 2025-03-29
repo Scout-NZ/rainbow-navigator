@@ -1,806 +1,386 @@
-import { Calendar, Compass, Heart, MessageSquare, Settings, User } from "lucide-react";
-
-export type NavItem = {
-  label: string;
-  path: string;
-  icon: React.ComponentType;
-};
-
-export const navItems: NavItem[] = [
-  {
-    label: "Discover",
-    path: "/",
-    icon: Compass
-  },
-  {
-    label: "Connect",
-    path: "/connect",
-    icon: MessageSquare
-  },
-  {
-    label: "Events",
-    path: "/events",
-    icon: Calendar
-  },
-  {
-    label: "Resources",
-    path: "/resources",
-    icon: Heart
-  },
-  {
-    label: "Profile",
-    path: "/profile",
-    icon: User
-  }
-];
-
-export type Place = {
+export type Location = {
   id: string;
   name: string;
-  type: "business" | "event" | "resource";
+  address: string;
+  city: string;
+  neighbourhood: string;
+  lat: number;
+  lng: number;
   category: string;
-  location: {
-    lat: number;
-    lng: number;
-    address: string;
-    neighbourhood?: string;
-    city: string;
-  };
-  rating?: number;
-  verified: boolean;
-  imageUrl?: string;
+  type: string;
   tags: string[];
+  lgbt_status: string;
   description: string;
-  contact?: {
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-  lgbt_status?: "lgbt_owned" | "lgbt_managed" | "ally" | null;
-};
+  image_url: string;
+  website: string;
+  email: string;
+  phone: string;
+  verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
 
 export type Group = {
   id: string;
   name: string;
   category: string;
-  memberCount: number;
   description: string;
-  imageUrl?: string;
+  imageUrl: string;
+  memberCount: number;
   isPrivate: boolean;
-  location: string;
   tags: string[];
-  members: string[];
-  admins: string[];
-};
+}
 
 export type Event = {
   id: string;
   title: string;
+  category: string;
+  description: string;
+  imageUrl: string;
   date: string;
   time: string;
   location: {
     name: string;
     address: string;
-    lat: number;
-    lng: number;
   };
-  organizer: {
-    name: string;
-    id: string;
-    imageUrl?: string;
-  };
-  imageUrl?: string;
-  description: string;
+  price: string;
   attendees: number;
-  category: string;
   tags: string[];
-  price?: string;
-};
+}
 
-export type Resource = {
-  id: string;
-  title: string;
-  category: string;
-  provider: string;
-  description: string;
-  contact: {
-    phone?: string;
-    email?: string;
-    website?: string;
-  };
-  location?: {
-    address: string;
-    city: string;
-    lat: number;
-    lng: number;
-  };
-  tags: string[];
-  imageUrl?: string;
-};
-
-export type Post = {
-  id: string;
-  userId: string;
-  userName: string;
-  userImageUrl?: string;
-  content: {
-    text?: string;
-    imageUrl?: string;
-    videoUrl?: string;
-  };
-  createdAt: string;
-  likes: number;
-  comments: number;
-  shares: number;
-  tags: string[];
-};
-
-export type UserProfile = {
-  id: string;
-  name: string;
-  username: string;
-  bio?: string;
-  imageUrl?: string;
-  location?: string;
-  interests: string[];
-  friends: number;
-  groups: number;
-  events: number;
-  joined: string;
-  identity: string;
-  pronouns?: string;
-  gender?: string;
-  socialLinks?: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-    spotify?: string;
-    tiktok?: string;
-    linkedin?: string;
-  };
-};
-
-export const mockPlaces: Place[] = [
+export const mockLocations: Location[] = [
   {
-    id: "1",
-    name: "Rainbow Café Wellington",
-    type: "business",
-    category: "Cafés",
-    location: {
-      lat: -41.2965,
-      lng: 174.7762,
-      address: "123 Cuba Street",
-      city: "Wellington"
-    },
-    rating: 4.8,
+    id: "location1",
+    name: "The Lavender Lounge",
+    address: "123 Main St",
+    city: "New York",
+    neighbourhood: "Greenwich Village",
+    lat: 40.7128,
+    lng: -74.0060,
+    category: "Bar",
+    type: "Nightlife",
+    tags: ["LGBTQ+", "Bar", "Drinks", "Social"],
+    lgbt_status: "Safe Space",
+    description: "A cozy and inclusive bar for the LGBTQ+ community.",
+    image_url: "https://example.com/lavenderlounge.jpg",
+    website: "https://lavenderlounge.com",
+    email: "info@lavenderlounge.com",
+    phone: "555-1234",
     verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1600093463592-8e36ae95ef56",
-    tags: ["cafés", "inclusive", "trans-friendly"],
-    description: "A cozy café in the heart of Wellington with inclusive atmosphere and great coffee. Regular community events and meetups.",
-    contact: {
-      phone: "+64 4 123 4567",
-      email: "info@rainbowcafe.co.nz",
-      website: "rainbowcafe.co.nz"
-    },
-    lgbt_status: "lgbt_owned"
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
   },
   {
-    id: "2",
-    name: "Unity Books Auckland",
-    type: "business",
-    category: "Retail",
-    location: {
-      lat: -36.8485,
-      lng: 174.7633,
-      address: "19 High Street",
-      city: "Auckland"
-    },
-    rating: 4.6,
+    id: "location2",
+    name: "Rainbow Community Center",
+    address: "456 Oak St",
+    city: "San Francisco",
+    neighbourhood: "Castro",
+    lat: 37.7749,
+    lng: -122.4194,
+    category: "Community Center",
+    type: "Community",
+    tags: ["LGBTQ+", "Community", "Support", "Events"],
+    lgbt_status: "Affirming",
+    description: "A community center providing resources and support for the LGBTQ+ community.",
+    image_url: "https://example.com/rainbowcenter.jpg",
+    website: "https://rainbowcenter.org",
+    email: "info@rainbowcenter.org",
+    phone: "555-5678",
     verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1521056787327-266e2587772f",
-    tags: ["bookstore", "queer-owned", "retail"],
-    description: "LGBTQ+ focused bookstore with a wide selection of queer literature, history, and art books.",
-    contact: {
-      phone: "+64 9 987 6543",
-      email: "books@unitybooks.co.nz",
-      website: "unitybooks.co.nz"
-    },
-    lgbt_status: "lgbt_managed"
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
   },
   {
-    id: "3",
-    name: "Rainbow Health NZ",
-    type: "resource",
-    category: "Healthcare",
-    location: {
-      lat: -36.8508,
-      lng: 174.7645,
-      address: "35 Ponsonby Road",
-      city: "Auckland"
-    },
-    rating: 4.9,
+    id: "location3",
+    name: "Pride Bookstore",
+    address: "789 Pine St",
+    city: "Seattle",
+    neighbourhood: "Capitol Hill",
+    lat: 47.6062,
+    lng: -122.3321,
+    category: "Bookstore",
+    type: "Shopping",
+    tags: ["LGBTQ+", "Bookstore", "Books", "Reading"],
+    lgbt_status: "Safe Space",
+    description: "A bookstore specializing in LGBTQ+ literature.",
+    image_url: "https://example.com/pridebookstore.jpg",
+    website: "https://pridebookstore.com",
+    email: "info@pridebookstore.com",
+    phone: "555-9012",
     verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf",
-    tags: ["healthcare", "trans-care", "mental-health"],
-    description: "Specialized healthcare services for LGBTQ+ individuals including gender-affirming care and counseling.",
-    contact: {
-      phone: "+64 9 876 5432",
-      email: "care@rainbowhealth.org.nz",
-      website: "rainbowhealth.org.nz"
-    },
-    lgbt_status: "lgbt_owned"
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
   },
   {
-    id: "4",
-    name: "Proud Threads Christchurch",
-    type: "business",
-    category: "Retail",
-    location: {
-      lat: -43.5321,
-      lng: 172.6362,
-      address: "87 Cashel Street",
-      city: "Christchurch"
-    },
-    rating: 4.5,
+    id: "location4",
+    name: "Transcend Gym",
+    address: "101 Elm St",
+    city: "Los Angeles",
+    neighbourhood: "West Hollywood",
+    lat: 34.0522,
+    lng: -118.2437,
+    category: "Gym",
+    type: "Fitness",
+    tags: ["LGBTQ+", "Gym", "Fitness", "Health"],
+    lgbt_status: "Affirming",
+    description: "A gym that is trans-friendly and offers a safe space for all.",
+    image_url: "https://example.com/transcendgym.jpg",
+    website: "https://transcendgym.com",
+    email: "info@transcendgym.com",
+    phone: "555-3456",
     verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a",
-    tags: ["clothing", "pride-merchandise", "retail"],
-    description: "Gender-affirming clothing store with a focus on comfortable and stylish options for everyone.",
-    contact: {
-      phone: "+64 3 345 6789",
-      email: "shop@proudthreads.co.nz",
-      website: "proudthreads.co.nz"
-    },
-    lgbt_status: "lgbt_managed"
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
   },
   {
-    id: "5",
-    name: "Family Bar Auckland",
-    type: "business",
-    category: "Nightlife",
-    location: {
-      lat: -36.8473,
-      lng: 174.7631,
-      address: "270 Karangahape Road",
-      city: "Auckland"
-    },
-    rating: 4.7,
+    id: "location5",
+    name: "Equality Law Firm",
+    address: "222 Oak St",
+    city: "Chicago",
+    neighbourhood: "Uptown",
+    lat: 41.8781,
+    lng: -87.6298,
+    category: "Law Firm",
+    type: "Legal",
+    tags: ["LGBTQ+", "Law Firm", "Legal", "Support"],
+    lgbt_status: "Affirming",
+    description: "A law firm specializing in LGBTQ+ legal issues.",
+    image_url: "https://example.com/equalitylaw.jpg",
+    website: "https://equalitylaw.com",
+    email: "info@equalitylaw.com",
+    phone: "555-7890",
     verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1566737236500-c8ac43014a67",
-    tags: ["nightlife", "dancing", "drag-shows"],
-    description: "Popular nightclub with inclusive atmosphere, regular drag shows, and themed party nights.",
-    contact: {
-      phone: "+64 9 234 5678",
-      email: "info@familybar.co.nz",
-      website: "familybar.co.nz"
-    },
-    lgbt_status: "lgbt_owned"
+    created_at: "2023-01-01T00:00:00Z",
+    updated_at: "2023-01-01T00:00:00Z",
   },
-  {
-    id: "6",
-    name: "Queenstown Pride Center",
-    type: "resource",
-    category: "Community",
-    location: {
-      lat: -45.0312,
-      lng: 168.6626,
-      address: "45 Camp Street",
-      city: "Queenstown"
-    },
-    rating: 4.8,
-    verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4",
-    tags: ["community", "support", "events"],
-    description: "Community center offering resources, support, and social events for the LGBTQ+ community in Queenstown.",
-    contact: {
-      phone: "+64 3 456 7890",
-      email: "hello@queenstownpride.org.nz",
-      website: "queenstownpride.org.nz"
-    },
-    lgbt_status: "lgbt_owned"
-  },
-  {
-    id: "7",
-    name: "Aroha Coffee Roasters",
-    type: "business",
-    category: "Cafés",
-    location: {
-      lat: -43.5324,
-      lng: 172.6365,
-      address: "123 Victoria Street",
-      city: "Christchurch"
-    },
-    rating: 4.6,
-    verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1559925393-8be0ec4767c8",
-    tags: ["cafés", "coffee", "queer-owned"],
-    description: "Queer-owned coffee roastery and café with a welcoming atmosphere and locally sourced products.",
-    contact: {
-      phone: "+64 3 567 8901",
-      email: "brew@arohacoffee.co.nz",
-      website: "arohacoffee.co.nz"
-    },
-    lgbt_status: "lgbt_owned"
-  },
-  {
-    id: "8",
-    name: "Scotty and Mal's Cocktail Bar",
-    type: "business",
-    category: "Nightlife",
-    location: {
-      lat: -41.2930,
-      lng: 174.7787,
-      address: "176 Cuba Street",
-      city: "Wellington"
-    },
-    rating: 4.9,
-    verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1470337458703-46ad1756a187",
-    tags: ["cocktails", "lgbtq-friendly", "lounge"],
-    description: "A stylish cocktail bar with expert mixologists creating unique rainbow-inspired drinks in a welcoming atmosphere. Popular for date nights and social gatherings.",
-    contact: {
-      phone: "+64 4 891 2345",
-      email: "hello@scottyandmals.co.nz",
-      website: "scottyandmals.co.nz"
-    },
-    lgbt_status: "ally"
-  },
-  {
-    id: "9",
-    name: "Ivy Bar Wellington",
-    type: "business",
-    category: "Nightlife",
-    location: {
-      lat: -41.2944,
-      lng: 174.7770,
-      address: "49 Dixon Street",
-      city: "Wellington"
-    },
-    rating: 4.7,
-    verified: true,
-    imageUrl: "https://images.unsplash.com/photo-1572116469696-31de0f17cc34",
-    tags: ["bar", "dancing", "events"],
-    description: "Wellington's premier LGBTQ+ bar with regular themed nights, drag performances, and a vibrant dance floor. Known for their inclusive environment and strong community focus.",
-    contact: {
-      phone: "+64 4 385 6754",
-      email: "contact@ivybarwellington.co.nz",
-      website: "ivybarwellington.co.nz"
-    },
-    lgbt_status: "lgbt_managed"
-  }
 ];
 
 export const mockGroups: Group[] = [
   {
-    id: "1",
-    name: "Queer Book Club",
-    category: "Social",
-    memberCount: 87,
-    description: "Monthly meetings to discuss LGBTQ+ literature and connect with fellow readers.",
-    imageUrl: "https://images.unsplash.com/photo-1530538987395-032d1900e591",
-    isPrivate: false,
-    location: "New York",
-    tags: ["books", "discussion", "social"],
-    members: ["user1"],
-    admins: ["user1"]
-  },
-  {
-    id: "2",
+    id: "group1",
     name: "Rainbow Hikers",
-    category: "Outdoor",
-    memberCount: 124,
-    description: "Group for LGBTQ+ people who love hiking, camping, and outdoor adventures.",
-    imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306",
+    category: "Outdoors",
+    description: "A group for LGBTQ+ individuals who enjoy hiking and outdoor activities.",
+    imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop",
+    memberCount: 42,
     isPrivate: false,
-    location: "New York",
-    tags: ["hiking", "outdoors", "adventure"],
-    members: [],
-    admins: []
+    tags: ["Outdoors", "Hiking", "Social", "LGBTQ+"],
   },
   {
-    id: "3",
-    name: "Pride Advocacy Network",
-    category: "Activism",
-    memberCount: 342,
-    description: "Coalition working for LGBTQ+ rights through political action and community organizing.",
-    imageUrl: "https://images.unsplash.com/photo-1573164574572-cb89e39749b4",
+    id: "group2",
+    name: "Queer Book Club",
+    category: "Culture",
+    description: "A book club for discussing LGBTQ+ literature and related topics.",
+    imageUrl: "https://images.unsplash.com/photo-1450107579224-2d9b2bf1adc8?q=80&w=1000&auto=format&fit=crop",
+    memberCount: 56,
     isPrivate: false,
-    location: "New York",
-    tags: ["activism", "politics", "advocacy"],
-    members: [],
-    admins: []
+    tags: ["Culture", "Books", "Discussion", "LGBTQ+"],
   },
   {
-    id: "4",
-    name: "Queer Gamers Guild",
-    category: "Gaming",
-    memberCount: 156,
-    description: "Safe space for LGBTQ+ gamers to connect, play, and discuss games.",
-    imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e",
-    isPrivate: false,
-    location: "Online",
-    tags: ["gaming", "e-sports", "social"],
-    members: [],
-    admins: []
-  },
-  {
-    id: "5",
-    name: "Trans Support Circle",
+    id: "group3",
+    name: "Trans Support Network",
     category: "Support",
-    memberCount: 93,
-    description: "Support group for transgender, non-binary, and gender non-conforming individuals.",
-    imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2",
+    description: "A support group for transgender individuals and their allies.",
+    imageUrl: "https://images.unsplash.com/photo-1557425955-df376b5903c8?q=80&w=1000&auto=format&fit=crop",
+    memberCount: 103,
     isPrivate: true,
-    location: "New York",
-    tags: ["support", "trans", "mental-health"],
-    members: [],
-    admins: []
+    tags: ["Support", "Transgender", "Community", "LGBTQ+"],
   },
   {
-    id: "6",
-    name: "Rainbow Artists Collective",
-    category: "Creative",
-    memberCount: 112,
-    description: "A community of LGBTQ+ artists, musicians, and creators sharing their work and collaborating on projects.",
-    imageUrl: "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b",
+    id: "group4",
+    name: "Gaymer Group",
+    category: "Social",
+    description: "A social group for LGBTQ+ gamers to connect and play together.",
+    imageUrl: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
+    memberCount: 78,
     isPrivate: false,
-    location: "Wellington",
-    tags: ["art", "music", "creative", "expression"],
-    members: [],
-    admins: []
+    tags: ["Social", "Gaming", "Community", "LGBTQ+"],
   },
   {
-    id: "7",
-    name: "Queer Tech Alliance",
-    category: "Professional",
-    memberCount: 205,
-    description: "Networking group for LGBTQ+ professionals in tech, digital media, and related fields.",
-    imageUrl: "https://images.unsplash.com/photo-1531482615713-2afd69097998",
-    isPrivate: false,
-    location: "Auckland",
-    tags: ["tech", "career", "networking", "professional"],
-    members: [],
-    admins: []
+    id: "group5",
+    name: "Lesbian Art Collective",
+    category: "Art",
+    description: "A collective for lesbian artists to share their work and collaborate.",
+    imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop",
+    memberCount: 35,
+    isPrivate: true,
+    tags: ["Art", "Community", "Collaboration", "LGBTQ+"],
   },
-  {
-    id: "8",
-    name: "Pride Parents",
-    category: "Family",
-    memberCount: 76,
-    description: "Support and social group for LGBTQ+ parents, guardians, and their families.",
-    imageUrl: "https://images.unsplash.com/photo-1536640712-4d4c36ff0e4e",
-    isPrivate: false,
-    location: "Christchurch",
-    tags: ["parents", "family", "children", "support"],
-    members: [],
-    admins: []
-  },
-  {
-    id: "9",
-    name: "Queer Film Club",
-    category: "Entertainment",
-    memberCount: 108,
-    description: "Monthly screenings and discussions of LGBTQ+ cinema from around the world.",
-    imageUrl: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c",
-    isPrivate: false,
-    location: "Auckland",
-    tags: ["film", "cinema", "discussion", "entertainment"],
-    members: [],
-    admins: []
-  },
-  {
-    id: "10",
-    name: "Rainbow Sports Collective",
-    category: "Sports",
-    memberCount: 135,
-    description: "Inclusive sports teams and fitness groups for LGBTQ+ community members of all skill levels.",
-    imageUrl: "https://images.unsplash.com/photo-1517649763962-0c623066013b",
-    isPrivate: false,
-    location: "Wellington",
-    tags: ["sports", "fitness", "teams", "active"],
-    members: [],
-    admins: []
-  }
 ];
 
 export const mockEvents: Event[] = [
   {
-    id: "1",
-    title: "Pride Month Kick-Off Party",
-    date: "2023-06-01",
-    time: "19:00",
-    location: {
-      name: "Unity Nightclub",
-      address: "555 Liberty Lane, New York",
-      lat: 40.7168,
-      lng: -74.0100
-    },
-    organizer: {
-      name: "NYC Pride",
-      id: "org1",
-      imageUrl: "https://images.unsplash.com/photo-1575472782454-bf0a7f9fe625"
-    },
-    imageUrl: "https://images.unsplash.com/photo-1561612217-e5147162fd31",
-    description: "Join us for the official kick-off celebration of Pride Month with music, performances, and community.",
-    attendees: 325,
-    category: "Party",
-    tags: ["pride", "celebration", "party"],
-    price: "Free"
-  },
-  {
-    id: "2",
-    title: "Queer Art Exhibition",
-    date: "2023-06-10",
-    time: "14:00",
-    location: {
-      name: "Rainbow Gallery",
-      address: "789 Creative Street, New York",
-      lat: 40.7178,
-      lng: -74.0110
-    },
-    organizer: {
-      name: "Queer Artists Collective",
-      id: "org2",
-      imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5"
-    },
-    imageUrl: "https://images.unsplash.com/photo-1545989253-02cc26577f88",
-    description: "Exhibition showcasing artwork by local LGBTQ+ artists exploring themes of identity and community.",
-    attendees: 150,
-    category: "Art",
-    tags: ["art", "exhibition", "culture"],
-    price: "$10"
-  },
-  {
-    id: "3",
-    title: "Trans Rights Rally",
-    date: "2023-06-15",
-    time: "12:00",
-    location: {
-      name: "City Hall Park",
-      address: "City Hall, New York",
-      lat: 40.7128,
-      lng: -74.0060
-    },
-    organizer: {
-      name: "Trans Action Network",
-      id: "org3",
-      imageUrl: "https://images.unsplash.com/photo-1592621385612-4d7129426394"
-    },
-    imageUrl: "https://images.unsplash.com/photo-1573225342350-16731dd9bf3d",
-    description: "Peaceful demonstration in support of transgender rights and visibility.",
-    attendees: 500,
-    category: "Activism",
-    tags: ["trans", "rights", "rally"],
-    price: "Free"
-  },
-  {
-    id: "4",
-    title: "Drag Queen Story Hour",
-    date: "2023-06-20",
-    time: "11:00",
-    location: {
-      name: "Community Library",
-      address: "123 Reading Avenue, New York",
-      lat: 40.7138,
-      lng: -74.0070
-    },
-    organizer: {
-      name: "Inclusive Education Initiative",
-      id: "org4",
-      imageUrl: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b"
-    },
-    imageUrl: "https://images.unsplash.com/photo-1485221237651-96bc8d4ab392",
-    description: "Family-friendly storytelling event featuring local drag performers reading inclusive children's books.",
-    attendees: 75,
-    category: "Family",
-    tags: ["family", "drag", "education"],
-    price: "Free"
-  },
-  {
-    id: "5",
+    id: "event1",
     title: "Pride Parade",
-    date: "2023-06-25",
-    time: "10:00",
+    category: "Pride",
+    description: "Join us for the annual Pride Parade!",
+    imageUrl: "https://images.unsplash.com/photo-1570976447640-ac859a116aab?q=80&w=1000&auto=format&fit=crop",
+    date: "2024-08-20",
+    time: "12:00 PM",
     location: {
       name: "Downtown",
-      address: "Main Street, New York",
-      lat: 40.7148,
-      lng: -74.0080
+      address: "Main Street",
     },
-    organizer: {
-      name: "NYC Pride",
-      id: "org1",
-      imageUrl: "https://images.unsplash.com/photo-1575472782454-bf0a7f9fe625"
+    price: "Free",
+    attendees: 500,
+    tags: ["Pride", "Parade", "Community", "Celebration"],
+  },
+  {
+    id: "event2",
+    title: "Queer Poetry Slam",
+    category: "Culture",
+    description: "An evening of queer poetry and spoken word.",
+    imageUrl: "https://images.unsplash.com/photo-1543337724-5030f4448294?q=80&w=1000&auto=format&fit=crop",
+    date: "2024-08-25",
+    time: "7:00 PM",
+    location: {
+      name: "The Bean Scene",
+      address: "123 Coffee St",
     },
-    imageUrl: "https://images.unsplash.com/photo-1514214246283-d427a95c5d2f",
-    description: "Annual Pride Parade celebrating the LGBTQ+ community with floats, performances, and community groups.",
-    attendees: 10000,
-    category: "Parade",
-    tags: ["pride", "parade", "celebration"],
-    price: "Free"
-  }
+    price: "$5",
+    attendees: 50,
+    tags: ["Culture", "Poetry", "LGBTQ+", "Art"],
+  },
+  {
+    id: "event3",
+    title: "Transgender Day of Remembrance",
+    category: "Activism",
+    description: "A vigil to honor transgender individuals who have lost their lives to violence.",
+    imageUrl: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Transgender_flag.svg/1200px-Transgender_flag.svg.png",
+    date: "2024-11-20",
+    time: "6:00 PM",
+    location: {
+      name: "Community Park",
+      address: "456 Park Ave",
+    },
+    price: "Free",
+    attendees: 100,
+    tags: ["Activism", "Transgender", "Remembrance", "Community"],
+  },
+  {
+    id: "event4",
+    title: "LGBTQ+ Board Game Night",
+    category: "Social",
+    description: "A fun night of board games and socializing for the LGBTQ+ community.",
+    imageUrl: "https://images.unsplash.com/photo-1549608078-145b58c46dd4?q=80&w=1000&auto=format&fit=crop",
+    date: "2024-09-10",
+    time: "7:30 PM",
+    location: {
+      name: "Gamezilla",
+      address: "789 Boardgame Blvd",
+    },
+    price: "$10",
+    attendees: 30,
+    tags: ["Social", "Gaming", "LGBTQ+", "Community"],
+  },
+  {
+    id: "event5",
+    title: "Drag Show",
+    category: "Nightlife",
+    description: "An evening of fabulous drag performances!",
+    imageUrl: "https://images.unsplash.com/photo-1604318782944-71099352906b?q=80&w=1000&auto=format&fit=crop",
+    date: "2024-09-15",
+    time: "9:00 PM",
+    location: {
+      name: "The Glitterati Lounge",
+      address: "101 Sparkle St",
+    },
+    price: "$15",
+    attendees: 75,
+    tags: ["Nightlife", "Drag", "Performance", "LGBTQ+"],
+  },
 ];
 
-export const mockResources: Resource[] = [
-  {
-    id: "1",
-    title: "LGBTQ+ Legal Aid Network",
-    category: "Legal",
-    provider: "Rainbow Rights Coalition",
-    description: "Free legal consultation and representation for LGBTQ+ individuals facing discrimination or legal challenges.",
-    contact: {
-      phone: "555-123-4567",
-      email: "help@lgbtlegalaid.org",
-      website: "www.lgbtlegalaid.org"
-    },
-    location: {
-      address: "100 Justice Lane",
-      city: "New York",
-      lat: 40.7128,
-      lng: -74.0060
-    },
-    tags: ["legal", "discrimination", "rights"],
-    imageUrl: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f"
-  },
-  {
-    id: "2",
-    title: "Queer Youth Housing Program",
-    category: "Housing",
-    provider: "Safe Horizons",
-    description: "Emergency and transitional housing services for LGBTQ+ youth experiencing homelessness.",
-    contact: {
-      phone: "555-987-6543",
-      email: "housing@safehorizons.org",
-      website: "www.safehorizons.org/lgbtq-housing"
-    },
-    location: {
-      address: "250 Shelter Street",
-      city: "New York",
-      lat: 40.7138,
-      lng: -74.0070
-    },
-    tags: ["housing", "youth", "emergency"],
-    imageUrl: "https://images.unsplash.com/photo-1560518883-ce09059eeffa"
-  },
-  {
-    id: "3",
-    title: "Gender-Affirming Healthcare Directory",
-    category: "Healthcare",
-    provider: "Trans Health Initiative",
-    description: "Comprehensive directory of healthcare providers offering gender-affirming care and services.",
-    contact: {
-      email: "info@transhealth.org",
-      website: "www.transhealth.org/directory"
-    },
-    tags: ["healthcare", "trans", "gender-affirming"],
-    imageUrl: "https://images.unsplash.com/photo-1584820927498-cfe5211fd8bf"
-  },
-  {
-    id: "4",
-    title: "LGBTQ+ Crisis Hotline",
-    category: "Mental Health",
-    provider: "Rainbow Support Network",
-    description: "24/7 crisis intervention and suicide prevention services for LGBTQ+ individuals in distress.",
-    contact: {
-      phone: "1-800-PRIDE-HELP",
-      website: "www.rainbowsupport.org"
-    },
-    tags: ["crisis", "mental-health", "support"],
-    imageUrl: "https://images.unsplash.com/photo-1577563908411-5077b6dc7624"
-  },
-  {
-    id: "5",
-    title: "Queer Financial Aid Scholarships",
-    category: "Education",
-    provider: "Pride Education Fund",
-    description: "Scholarships and financial assistance for LGBTQ+ students pursuing higher education.",
-    contact: {
-      email: "scholarships@prideeducation.org",
-      website: "www.prideeducation.org"
-    },
-    tags: ["education", "scholarships", "financial-aid"],
-    imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644"
-  }
-];
+// Feed post types
+export type PostContent = {
+  text?: string;
+  imageUrl?: string;
+  videoUrl?: string;
+}
 
+export type Post = {
+  id: string;
+  userName: string;
+  userImageUrl: string;
+  createdAt: string;
+  content: PostContent;
+  likes: number;
+  comments: number;
+  shares: number;
+  tags: string[];
+}
+
+// Mock posts data
 export const mockPosts: Post[] = [
   {
-    id: "1",
-    userId: "user1",
+    id: "post1",
     userName: "Alex Rivera",
-    userImageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
+    userImageUrl: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
+    createdAt: "2024-08-15T10:30:00Z",
     content: {
-      text: "Just attended my first Pride parade! The energy was incredible and I felt so welcomed. #PrideMonth #Community",
-      imageUrl: "https://images.unsplash.com/photo-1563506644863-444710d1f416"
+      text: "Had an amazing time at the Pride Parade today! So much love and community spirit 🌈✨",
+      imageUrl: "https://images.unsplash.com/photo-1570976447640-ac859a116aab?q=80&w=1000&auto=format&fit=crop"
     },
-    createdAt: "2023-06-25T15:30:00Z",
-    likes: 124,
-    comments: 18,
-    shares: 5,
-    tags: ["pride", "community", "celebration"]
-  },
-  {
-    id: "2",
-    userId: "user2",
-    userName: "Jordan Lee",
-    userImageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-    content: {
-      text: "My journey with gender-affirming care has been life-changing. Happy to share my experience with anyone who has questions.",
-      imageUrl: "https://images.unsplash.com/photo-1584308972272-9e4e7685e80f"
-    },
-    createdAt: "2023-06-24T12:15:00Z",
-    likes: 256,
-    comments: 42,
-    shares: 23,
-    tags: ["trans", "healthcare", "journey"]
-  },
-  {
-    id: "3",
-    userId: "user3",
-    userName: "Morgan Taylor",
-    userImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-    content: {
-      videoUrl: "example-video-url.mp4",
-      text: "Check out my recap of yesterday's Queer Art Exhibition! So many talented artists in our community."
-    },
-    createdAt: "2023-06-11T18:45:00Z",
-    likes: 89,
+    likes: 87,
     comments: 12,
+    shares: 5,
+    tags: ["Pride", "Community", "Celebration"]
+  },
+  {
+    id: "post2",
+    userName: "Jamie Wong",
+    userImageUrl: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
+    createdAt: "2024-08-14T15:45:00Z",
+    content: {
+      text: "Just joined the Rainbow Hikers group! Looking forward to our first mountain adventure this weekend.",
+      imageUrl: "https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=1000&auto=format&fit=crop"
+    },
+    likes: 42,
+    comments: 8,
+    shares: 2,
+    tags: ["Outdoors", "Community", "GroupActivities"]
+  },
+  {
+    id: "post3",
+    userName: "Sam Taylor",
+    userImageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1000&auto=format&fit=crop",
+    createdAt: "2024-08-13T09:15:00Z",
+    content: {
+      text: "Our local queer book club discussion about 'Giovanni's Room' was so insightful. Love these meaningful conversations!",
+      imageUrl: "https://images.unsplash.com/photo-1450107579224-2d9b2bf1adc8?q=80&w=1000&auto=format&fit=crop"
+    },
+    likes: 56,
+    comments: 23,
     shares: 7,
-    tags: ["art", "exhibition", "talent"]
+    tags: ["Culture", "Literature", "Discussion"]
   },
   {
-    id: "4",
-    userId: "user4",
-    userName: "Sam Johnson",
-    userImageUrl: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6",
+    id: "post4",
+    userName: "Jordan Lee",
+    userImageUrl: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop",
+    createdAt: "2024-08-12T18:20:00Z",
     content: {
-      text: "Proud to announce that our Rainbow Hikers group just raised $5,000 for LGBTQ+ youth programs! Thanks to everyone who participated in our charity hike."
+      text: "Advocacy workshop was super informative today. Learned so much about how we can better support our trans community members.",
+      imageUrl: "https://images.unsplash.com/photo-1557425955-df376b5903c8?q=80&w=1000&auto=format&fit=crop"
     },
-    createdAt: "2023-06-20T09:30:00Z",
-    likes: 312,
-    comments: 28,
-    shares: 41,
-    tags: ["fundraising", "outdoors", "charity"]
+    likes: 103,
+    comments: 31,
+    shares: 18,
+    tags: ["Activism", "Education", "Support"]
   },
   {
-    id: "5",
-    userId: "user5",
-    userName: "Riley Chen",
-    userImageUrl: "https://images.unsplash.com/photo-1517070208541-6ddc4d3efbcb",
+    id: "post5",
+    userName: "Riley Johnson",
+    userImageUrl: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
+    createdAt: "2024-08-11T21:05:00Z",
     content: {
-      text: "Today marks 5 years since I came out! Feeling grateful for the supportive community I've found. ❤️🧡💛💚💙💜",
-      imageUrl: "https://images.unsplash.com/photo-1596890096735-5d7f6f02d2dd"
+      text: "Check out my art installation at the downtown gallery! It's all about queer identity and expression through color.",
+      imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=1000&auto=format&fit=crop"
     },
-    createdAt: "2023-06-15T21:00:00Z",
-    likes: 478,
-    comments: 63,
-    shares: 12,
-    tags: ["coming-out", "anniversary", "gratitude"]
+    likes: 78,
+    comments: 14,
+    shares: 9,
+    tags: ["Art", "Expression", "Identity"]
   }
 ];
-
-export const mockUserProfile: UserProfile = {
-  id: "1",
-  name: "Scout Schultz",
-  username: "@scout",
-  bio: "Passionate about creating inclusive spaces and connecting communities. Happy to be part of Rainbow Navigator!",
-  imageUrl: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
-  interests: ["lgbtq", "community", "technology", "inclusion"],
-  friends: 142,
-  groups: 5,
-  events: 12,
-  location: "Auckland, New Zealand",
-  identity: "",
-  pronouns: "",
-  gender: "",
-  joined: "2023-01-15",
-  socialLinks: {
-    instagram: "",
-    facebook: "",
-    twitter: "",
-    spotify: "",
-    tiktok: "",
-    linkedin: ""
-  }
-};
