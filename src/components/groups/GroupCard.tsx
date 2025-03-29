@@ -9,7 +9,12 @@ import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
 import { useEffect, useState } from "react";
 
-export function GroupCard({ group }: { group: Group }) {
+interface GroupCardProps {
+  group: Group;
+  isCompact?: boolean;
+}
+
+export function GroupCard({ group, isCompact = false }: GroupCardProps) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { joinGroup, isGroupMember, currentUser } = useUser();
@@ -68,9 +73,9 @@ export function GroupCard({ group }: { group: Group }) {
   };
 
   return (
-    <Card className="card-hover overflow-hidden">
+    <Card className={`card-hover overflow-hidden ${isCompact ? "flex" : ""}`}>
       <div 
-        className="h-32 bg-muted bg-cover bg-center relative"
+        className={`${isCompact ? "h-24 w-24 flex-shrink-0" : "h-32"} bg-muted bg-cover bg-center relative`}
         style={{ 
           backgroundImage: group.imageUrl 
             ? `url(${group.imageUrl})` 
@@ -79,17 +84,30 @@ export function GroupCard({ group }: { group: Group }) {
       >
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
         
-        <div className="absolute bottom-2 left-3 right-3 flex justify-between items-center">
-          <h3 className="text-white font-semibold truncate">{group.name}</h3>
-          {group.isPrivate && (
-            <span className="flex items-center gap-1 text-white text-xs bg-black/40 p-1 rounded">
-              <Lock className="h-3 w-3" /> Private
-            </span>
-          )}
-        </div>
+        {!isCompact && (
+          <div className="absolute bottom-2 left-3 right-3 flex justify-between items-center">
+            <h3 className="text-white font-semibold truncate">{group.name}</h3>
+            {group.isPrivate && (
+              <span className="flex items-center gap-1 text-white text-xs bg-black/40 p-1 rounded">
+                <Lock className="h-3 w-3" /> Private
+              </span>
+            )}
+          </div>
+        )}
       </div>
       
-      <CardContent className="p-3">
+      <CardContent className={`p-3 ${isCompact ? "flex-1" : ""}`}>
+        {isCompact && (
+          <div className="flex justify-between items-center mb-1">
+            <h3 className="font-semibold">{group.name}</h3>
+            {group.isPrivate && (
+              <span className="flex items-center gap-1 text-xs">
+                <Lock className="h-3 w-3" /> Private
+              </span>
+            )}
+          </div>
+        )}
+        
         <div className="flex justify-between items-center mb-2">
           <Badge variant="outline" className="bg-background/80">
             {group.category}
@@ -102,43 +120,69 @@ export function GroupCard({ group }: { group: Group }) {
         
         <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
         
-        <div className="flex gap-1 mt-2 flex-wrap">
-          {group.tags.slice(0, 3).map(tag => (
-            <Badge key={tag} variant="secondary" className="text-xs">
-              #{tag}
-            </Badge>
-          ))}
-        </div>
+        {!isCompact && (
+          <div className="flex gap-1 mt-2 flex-wrap">
+            {group.tags.slice(0, 3).map(tag => (
+              <Badge key={tag} variant="secondary" className="text-xs">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )}
       </CardContent>
       
-      <CardFooter className="p-3 pt-0 flex justify-between">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="w-1/2"
-          onClick={handleViewGroup}
-        >
-          View
-        </Button>
-        {isMember ? (
+      {!isCompact && (
+        <CardFooter className="p-3 pt-0 flex justify-between">
           <Button 
+            variant="outline" 
             size="sm" 
             className="w-1/2"
-            variant="secondary"
             onClick={handleViewGroup}
           >
-            View Group
+            View
           </Button>
-        ) : (
-          <Button 
-            size="sm" 
-            className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-            onClick={handleJoinGroup}
-          >
-            Join
-          </Button>
-        )}
-      </CardFooter>
+          {isMember ? (
+            <Button 
+              size="sm" 
+              className="w-1/2"
+              variant="secondary"
+              onClick={handleViewGroup}
+            >
+              View Group
+            </Button>
+          ) : (
+            <Button 
+              size="sm" 
+              className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+              onClick={handleJoinGroup}
+            >
+              Join
+            </Button>
+          )}
+        </CardFooter>
+      )}
+      
+      {isCompact && (
+        <div className="flex items-center p-3 pl-0">
+          {isMember ? (
+            <Button 
+              size="sm" 
+              variant="secondary"
+              onClick={handleViewGroup}
+            >
+              View
+            </Button>
+          ) : (
+            <Button 
+              size="sm" 
+              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+              onClick={handleJoinGroup}
+            >
+              Join
+            </Button>
+          )}
+        </div>
+      )}
     </Card>
   );
 }

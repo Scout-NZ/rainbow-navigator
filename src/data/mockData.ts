@@ -75,6 +75,58 @@ export type Resource = {
   tags: string[];
 };
 
+export type User = {
+  id: string;
+  name: string;
+  avatar: string;
+  pronouns: string;
+  bio: string;
+  interests: string[];
+}
+
+export const mockUsers: User[] = [
+  {
+    id: "user1",
+    name: "Alex Rivera",
+    avatar: "/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png",
+    pronouns: "they/them",
+    bio: "LGBTQ+ advocate and outdoor enthusiast",
+    interests: ["hiking", "reading", "activism", "photography"]
+  },
+  {
+    id: "user2",
+    name: "Jamie Wong",
+    avatar: "/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png",
+    pronouns: "she/her",
+    bio: "Visual artist passionate about queer representation in media",
+    interests: ["art", "film", "fashion", "design"]
+  },
+  {
+    id: "user3",
+    name: "Sam Taylor",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1000&auto=format&fit=crop",
+    pronouns: "he/him",
+    bio: "Software developer and gamer. Love creating inclusive tech spaces.",
+    interests: ["gaming", "coding", "music", "books"]
+  },
+  {
+    id: "user4",
+    name: "Jordan Lee",
+    avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=1000&auto=format&fit=crop",
+    pronouns: "she/they",
+    bio: "Mental health counselor specializing in LGBTQ+ youth support",
+    interests: ["psychology", "wellness", "education", "advocacy"]
+  },
+  {
+    id: "user5",
+    name: "Riley Johnson",
+    avatar: "https://images.unsplash.com/photo-1499952127939-9bbf5af6c51c?q=80&w=1000&auto=format&fit=crop",
+    pronouns: "they/them",
+    bio: "Environmental activist and community organizer",
+    interests: ["sustainability", "politics", "community", "gardening"]
+  }
+];
+
 export const mockLocations: Location[] = [
   {
     id: "location1",
