@@ -1,6 +1,5 @@
-
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X, Edit } from "lucide-react";
+import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X, Edit, Trash2, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mockGroups, mockUserProfile } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +22,7 @@ interface DiscussionMessage {
   content: string;
   createdAt: string;
   imageUrl?: string;
+  flagged?: boolean;
 }
 
 interface GroupMember {
@@ -56,6 +56,21 @@ export default function GroupDetailPage() {
   ]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
+  useEffect(() => {
+    if (groupId) {
+      const savedDiscussions = localStorage.getItem(`group-${groupId}-discussions`);
+      if (savedDiscussions) {
+        setDiscussions(JSON.parse(savedDiscussions));
+      }
+    }
+  }, [groupId]);
+  
+  useEffect(() => {
+    if (discussions.length > 0) {
+      localStorage.setItem(`group-${groupId}-discussions`, JSON.stringify(discussions));
+    }
+  }, [discussions, groupId]);
+
   if (!groupData) {
     return (
       <div className="text-center p-8">
@@ -177,6 +192,31 @@ export default function GroupDetailPage() {
     }
   };
 
+  const handleDeleteMessage = (messageId: string) => {
+    const updatedDiscussions = discussions.filter(message => message.id !== messageId);
+    setDiscussions(updatedDiscussions);
+    
+    toast({
+      title: "Message deleted",
+      description: "The message has been removed from the discussion",
+    });
+  };
+
+  const handleFlagMessage = (messageId: string) => {
+    const updatedDiscussions = discussions.map(message => 
+      message.id === messageId 
+        ? { ...message, flagged: true } 
+        : message
+    );
+    
+    setDiscussions(updatedDiscussions);
+    
+    toast({
+      title: "Message flagged",
+      description: "The message has been flagged as inappropriate",
+    });
+  };
+
   const formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -219,13 +259,11 @@ export default function GroupDetailPage() {
   };
 
   const handleSaveGroupEdit = (updatedGroupData: Partial<typeof groupData>) => {
-    // Update the local state with the edited group data
     setGroupData({
       ...groupData,
       ...updatedGroupData
     });
     
-    // Convert rules string to array if it exists
     if (updatedGroupData.rules) {
       const rulesArray = updatedGroupData.rules
         .split('\n')
@@ -431,7 +469,10 @@ export default function GroupDetailPage() {
               {discussions.length > 0 ? (
                 <div className="space-y-3">
                   {discussions.map((message) => (
-                    <Card key={message.id} className="overflow-hidden">
+                    <Card 
+                      key={message.id} 
+                      className={`overflow-hidden ${message.flagged ? 'border-yellow-500/50 bg-yellow-500/5' : ''}`}
+                    >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-3">
                           <AvatarWithStatus 
@@ -442,9 +483,54 @@ export default function GroupDetailPage() {
                           <div className="flex-1">
                             <div className="flex justify-between items-center mb-1">
                               <h4 className="font-semibold text-sm">{message.userName}</h4>
-                              <span className="text-xs text-muted-foreground">
-                                {formatRelativeTime(message.createdAt)}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-muted-foreground">
+                                  {formatRelativeTime(message.createdAt)}
+                                </span>
+                                
+                                {isAdmin && (
+                                  <div className="flex gap-1">
+                                    <AlertDialog>
+                                      <AlertDialogTrigger asChild>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="icon" 
+                                          className="h-6 w-6 text-red-500 hover:bg-red-500/10 hover:text-red-500"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </AlertDialogTrigger>
+                                      <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete message?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                            Are you sure you want to delete this message? This action cannot be undone.
+                                          </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction
+                                            className="bg-red-500 hover:bg-red-600 text-white"
+                                            onClick={() => handleDeleteMessage(message.id)}
+                                          >
+                                            Delete
+                                          </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                      </AlertDialogContent>
+                                    </AlertDialog>
+                                    
+                                    <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      className={`h-6 w-6 ${message.flagged ? 'text-yellow-500' : 'text-muted-foreground hover:text-yellow-500'}`}
+                                      onClick={() => handleFlagMessage(message.id)}
+                                      disabled={message.flagged}
+                                    >
+                                      <Flag className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                             {message.content && <p className="text-sm mb-2">{message.content}</p>}
                             {message.imageUrl && (
@@ -454,6 +540,11 @@ export default function GroupDetailPage() {
                                   alt="Shared image" 
                                   className="rounded-md max-h-80 w-auto" 
                                 />
+                              </div>
+                            )}
+                            {message.flagged && (
+                              <div className="mt-2 text-xs text-yellow-500 bg-yellow-500/10 p-2 rounded">
+                                This message has been flagged as potentially inappropriate
                               </div>
                             )}
                           </div>
