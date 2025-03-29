@@ -1,4 +1,4 @@
-
+import { useEffect, useState } from "react";
 import { BookOpen, Filter, Phone, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,17 +7,106 @@ import { ResourceCard } from "@/components/resources/ResourceCard";
 import { mockResources } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
+
+type CombinedResource = {
+  id: string;
+  title: string;
+  category: string;
+  provider: string;
+  description: string;
+  contact: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  location?: {
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+    neighbourhood?: string;
+  };
+  tags: string[];
+  imageUrl?: string;
+};
 
 export default function ResourcesPage() {
-  // Group resources by category
-  const resourcesByCategory = mockResources.reduce((groups, resource) => {
+  const [resources, setResources] = useState<CombinedResource[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchHealthcareLocations() {
+      try {
+        const { data: locations, error } = await supabase
+          .from('locations')
+          .select('*')
+          .eq('category', 'Healthcare')
+          .order('name');
+
+        if (error) {
+          console.error("Error fetching healthcare locations:", error);
+          toast({
+            title: "Error loading healthcare resources",
+            description: error.message,
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log("Fetched healthcare locations:", locations);
+
+        const healthcareResources = locations.map(location => ({
+          id: location.id,
+          title: location.name,
+          category: "Healthcare",
+          provider: location.name,
+          description: location.description || "Healthcare provider",
+          contact: {
+            phone: location.phone,
+            email: location.email,
+            website: location.website,
+          },
+          location: {
+            address: location.address || "",
+            city: location.city || "",
+            lat: location.lat || 0,
+            lng: location.lng || 0,
+            neighbourhood: location.neighbourhood,
+          },
+          tags: location.tags || ["healthcare"],
+          imageUrl: location.image_url,
+        }));
+
+        const otherCategoryResources = mockResources.filter(
+          resource => resource.category.toLowerCase() !== "healthcare"
+        );
+        
+        setResources([...healthcareResources, ...otherCategoryResources]);
+      } catch (error) {
+        console.error("Failed to fetch healthcare locations:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load healthcare resources. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchHealthcareLocations();
+  }, []);
+
+  const resourcesByCategory = resources.reduce((groups, resource) => {
     const category = resource.category;
     if (!groups[category]) {
       groups[category] = [];
     }
     groups[category].push(resource);
     return groups;
-  }, {} as Record<string, typeof mockResources>);
+  }, {} as Record<string, CombinedResource[]>);
 
   return (
     <div className="pb-4">
@@ -61,19 +150,34 @@ export default function ResourcesPage() {
         </TabsList>
         
         <TabsContent value="directory" className="mt-0 space-y-6">
-          {Object.entries(resourcesByCategory).map(([category, resources]) => (
-            <div key={category}>
-              <h2 className="text-lg font-semibold mb-3 flex items-center">
-                <BookOpen className="h-5 w-5 mr-2 text-primary" />
-                {category} Resources
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {resources.map(resource => (
-                  <ResourceCard key={resource.id} resource={resource} />
-                ))}
-              </div>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading resources...</p>
             </div>
-          ))}
+          ) : (
+            Object.entries(resourcesByCategory).map(([category, categoryResources]) => (
+              <div key={category}>
+                <h2 className="text-lg font-semibold mb-3 flex items-center">
+                  <BookOpen className="h-5 w-5 mr-2 text-primary" />
+                  {category} Resources
+                </h2>
+                {categoryResources.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {categoryResources.map(resource => (
+                      <ResourceCard key={resource.id} resource={resource} />
+                    ))}
+                  </div>
+                ) : (
+                  <Card className="mb-4">
+                    <CardContent className="py-6 text-center">
+                      <p className="text-muted-foreground">No {category.toLowerCase()} resources found.</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            ))
+          )}
         </TabsContent>
         
         <TabsContent value="news" className="mt-0">
