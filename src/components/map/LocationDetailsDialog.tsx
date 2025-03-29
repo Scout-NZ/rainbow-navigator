@@ -24,8 +24,11 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
   const getLgbtStatusBadge = () => {
     if (!location.lgbt_status) return null;
     
-    let badgeProps = {
-      variant: 'default' as const,
+    let badgeProps: {
+      variant: "default" | "secondary" | "destructive" | "outline" | "lgbtOwned" | "lgbtManaged" | "ally";
+      text: string;
+    } = {
+      variant: 'default',
       text: '',
     };
     

@@ -97,11 +97,20 @@ export default function DiscoverPage() {
     
     switch(status) {
       case 'lgbt_owned':
-        return <Badge variant="lgbtOwned">LGBT+ Owned</Badge>;
+        return <Badge variant="lgbtOwned" className="flex items-center gap-1">
+          <Heart className="h-3 w-3" />
+          LGBT+ Owned
+        </Badge>;
       case 'lgbt_managed':
-        return <Badge variant="lgbtManaged">LGBT+ Managed</Badge>;
+        return <Badge variant="lgbtManaged" className="flex items-center gap-1">
+          <Heart className="h-3 w-3" />
+          LGBT+ Managed
+        </Badge>;
       case 'ally':
-        return <Badge variant="ally">Ally</Badge>;
+        return <Badge variant="ally" className="flex items-center gap-1">
+          <Heart className="h-3 w-3" />
+          Ally
+        </Badge>;
       default:
         return null;
     }

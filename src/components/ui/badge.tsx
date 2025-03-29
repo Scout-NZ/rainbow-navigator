@@ -16,7 +16,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
-        // New variants for LGBT+ status badges
+        // LGBT+ status badges with distinct gradient backgrounds
         lgbtOwned: 
           "border-transparent bg-gradient-to-r from-rainbow-orange via-rainbow-green to-rainbow-blue text-white hover:opacity-90",
         lgbtManaged: 
