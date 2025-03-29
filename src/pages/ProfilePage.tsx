@@ -1,3 +1,4 @@
+
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface ProfileFormValues {
   name: string;
@@ -23,6 +25,7 @@ interface ProfileFormValues {
   location: string;
   interests: string;
   identity: string;
+  pronouns: string;
 }
 
 export default function ProfilePage() {
@@ -30,7 +33,8 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const [profile, setProfile] = useState({
     ...mockUserProfile,
-    identity: mockUserProfile.identity || ""
+    identity: mockUserProfile.identity || "",
+    pronouns: mockUserProfile.pronouns || ""
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -42,6 +46,7 @@ export default function ProfilePage() {
       location: profile.location || "",
       interests: profile.interests.join(", "),
       identity: profile.identity || "",
+      pronouns: profile.pronouns || "",
     },
   });
 
@@ -54,6 +59,7 @@ export default function ProfilePage() {
       location: values.location,
       interests: values.interests.split(",").map(tag => tag.trim()).filter(Boolean),
       identity: values.identity,
+      pronouns: values.pronouns,
     };
     
     setProfile(updatedProfile);
@@ -135,6 +141,7 @@ export default function ProfilePage() {
               <div>
                 <h2 className="text-xl font-bold">{profile.name}</h2>
                 <p className="text-muted-foreground text-sm">{profile.username}</p>
+                {profile.pronouns && <p className="text-sm text-muted-foreground">{profile.pronouns}</p>}
               </div>
               <Button 
                 variant="outline" 
@@ -313,6 +320,99 @@ export default function ProfilePage() {
                     <FormLabel>Username</FormLabel>
                     <FormControl>
                       <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="pronouns"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>Pronouns</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <div className="flex items-center space-x-6 flex-wrap gap-y-2">
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="he/him" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              he/him
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="she/her" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              she/her
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="they/them" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              they/them
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="ze/zir" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              ze/zir
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="it/its" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              it/its
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="xe/xem" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              xe/xem
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="fae/faer" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              fae/faer
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="ey/em" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              ey/em
+                            </FormLabel>
+                          </FormItem>
+                          <FormItem className="flex items-center space-x-2 space-y-0">
+                            <FormControl>
+                              <RadioGroupItem value="" />
+                            </FormControl>
+                            <FormLabel className="font-normal cursor-pointer">
+                              None/Unspecified
+                            </FormLabel>
+                          </FormItem>
+                        </div>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
