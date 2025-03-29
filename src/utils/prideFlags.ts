@@ -80,7 +80,7 @@ export const prideIdentities: PrideIdentity[] = [
   {
     id: "takatapui",
     label: "Takatāpui",
-    flagGradient: "url('/lovable-uploads/e6ac4095-eae8-49bb-8e6c-dc0afc4eb3ca.png')",
+    flagGradient: "url('/lovable-uploads/cc2b11cf-f44a-45f5-866e-9ddefe3c7dbf.png')",
   }
 ];
 
