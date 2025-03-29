@@ -148,6 +148,8 @@ export type UserProfile = {
   events: number;
   joined: string;
   identity: string;
+  pronouns?: string;
+  gender?: string;
 };
 
 export const mockPlaces: Place[] = [
@@ -782,5 +784,7 @@ export const mockUserProfile: UserProfile = {
   events: 12,
   location: "Auckland, New Zealand",
   identity: "",
+  pronouns: "",
+  gender: "",
   joined: "2023-01-15"
 };
