@@ -1,17 +1,19 @@
 
 import { useState, useRef, useEffect } from "react";
-import { Send, ArrowLeft } from "lucide-react";
+import { Send, ArrowLeft, ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { AvatarWithStatus } from "@/components/ui/avatar-with-status";
+import { useUser } from "@/contexts/UserContext";
 
 type Message = {
   id: string;
   content: string;
   sender: "user" | "contact";
   timestamp: Date;
+  imageUrl?: string;
 };
 
 type ChatContact = {
@@ -30,6 +32,7 @@ interface ChatSessionProps {
 }
 
 export function ChatSession({ contact, onBack }: ChatSessionProps) {
+  const { userProfile } = useUser();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "welcome",
@@ -42,15 +45,40 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
   ]);
   
   const [input, setInput] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const endOfMessagesRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Scroll to bottom of chat when messages change
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImage(file);
+      
+      // Create a preview URL for the image
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSendMessage = () => {
-    if (!input.trim()) return;
+    if (!input.trim() && !imagePreview) return;
     
     // Add user message
     const userMessage: Message = {
@@ -58,10 +86,16 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
       content: input,
       sender: "user",
       timestamp: new Date(),
+      imageUrl: imagePreview || undefined
     };
     
     setMessages(prev => [...prev, userMessage]);
     setInput("");
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     
     // Simulate reply after a short delay
     setTimeout(() => {
@@ -97,7 +131,8 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSendMessage();
     }
   };
@@ -140,15 +175,24 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
                   : "bg-muted"
               }`}
             >
-              <p className="text-sm">{message.content}</p>
+              {message.content && <p className="text-sm">{message.content}</p>}
+              {message.imageUrl && (
+                <div className={`mt-2 ${message.content ? "mt-2" : "mt-0"}`}>
+                  <img 
+                    src={message.imageUrl} 
+                    alt="Shared image" 
+                    className="rounded-md max-h-60 w-auto" 
+                  />
+                </div>
+              )}
               <span className="text-xs opacity-70 mt-1 block">
                 {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             </div>
             {message.sender === "user" && (
               <Avatar className="h-8 w-8 ml-2 flex-shrink-0">
-                <AvatarImage src="https://randomuser.me/api/portraits/men/12.jpg" />
-                <AvatarFallback>ME</AvatarFallback>
+                <AvatarImage src={userProfile.imageUrl} />
+                <AvatarFallback>{userProfile.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
           </div>
@@ -157,22 +201,53 @@ export function ChatSession({ contact, onBack }: ChatSessionProps) {
         <div ref={endOfMessagesRef} />
       </CardContent>
       
-      <div className="p-3 bg-background border-t flex items-center gap-2">
-        <Input 
-          placeholder="Type a message..." 
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1"
-        />
-        <Button 
-          size="icon" 
-          onClick={handleSendMessage}
-          disabled={!input.trim()}
-          className="bg-primary text-primary-foreground"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
+      <div className="p-3 bg-background border-t">
+        {imagePreview && (
+          <div className="relative mb-2">
+            <img src={imagePreview} alt="Preview" className="w-full max-h-40 object-cover rounded-md" />
+            <Button 
+              variant="destructive" 
+              size="icon" 
+              className="absolute top-2 right-2 h-6 w-6 rounded-full"
+              onClick={handleRemoveImage}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-9 w-9"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+          </Button>
+          <input 
+            type="file" 
+            ref={fileInputRef}
+            onChange={handleImageChange} 
+            accept="image/*" 
+            className="hidden" 
+          />
+          
+          <Input 
+            placeholder="Type a message..." 
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button 
+            size="icon" 
+            onClick={handleSendMessage}
+            disabled={!input.trim() && !imagePreview}
+            className="bg-primary text-primary-foreground"
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
     </Card>
   );

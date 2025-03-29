@@ -1,6 +1,5 @@
-
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User } from "lucide-react";
+import { ArrowLeft, Calendar, Lock, MessageCircle, Users, UserPlus, LogOut, Crown, UserX, User, ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mockGroups, mockUserProfile } from "@/data/mockData";
 import { Badge } from "@/components/ui/badge";
@@ -9,12 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useUser } from "@/contexts/UserContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
-// Add an interface for discussion messages
 interface DiscussionMessage {
   id: string;
   userId: string;
@@ -22,9 +20,9 @@ interface DiscussionMessage {
   userName: string;
   content: string;
   createdAt: string;
+  imageUrl?: string;
 }
 
-// Add an interface for group members
 interface GroupMember {
   id: string;
   name: string;
@@ -39,11 +37,14 @@ export default function GroupDetailPage() {
   const { groupId } = useParams<{ groupId: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { joinGroup, leaveGroup, isGroupMember, isGroupAdmin, currentUser } = useUser();
+  const { joinGroup, leaveGroup, isGroupMember, isGroupAdmin, currentUser, userProfile } = useUser();
   const [discussionMessage, setDiscussionMessage] = useState("");
   const [discussions, setDiscussions] = useState<DiscussionMessage[]>([]);
   const [groupMembers, setGroupMembers] = useState<GroupMember[]>([]);
   const [selectedMember, setSelectedMember] = useState<GroupMember | null>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const group = mockGroups.find(g => g.id === groupId);
   
@@ -62,27 +63,21 @@ export default function GroupDetailPage() {
   const isMember = isGroupMember(group.id);
   const isAdmin = isGroupAdmin(group.id);
 
-  // Initialize group members on component mount
   useEffect(() => {
-    // Create a mock list of members based on the group data
-    // In a real app, this would fetch from an API
-    
     const mockMembers: GroupMember[] = [];
     
-    // Add the current user if they are a member
     if (isMember) {
       mockMembers.push({
         id: currentUser.id,
-        name: mockUserProfile.name,
-        imageUrl: mockUserProfile.imageUrl,
-        pronouns: "they/them", // Assuming this data would come from profile
+        name: userProfile.name,
+        imageUrl: userProfile.imageUrl,
+        pronouns: userProfile.pronouns || "they/them", 
         status: "online",
         joinDate: "Since Oct 2023",
         isAdmin: isAdmin
       });
     }
     
-    // Add some placeholder members
     const placeholderNames = ["Alex Chen", "Jordan Smith", "Taylor Kim", "Sam Rodriguez", "Quinn Patel"];
     const placeholderPronouns = ["she/her", "he/him", "they/them", "she/they", "he/they"];
     
@@ -94,12 +89,12 @@ export default function GroupDetailPage() {
         pronouns: placeholderPronouns[i] || "they/them",
         status: i % 3 === 0 ? "online" : "offline",
         joinDate: i === 0 ? "Since Oct 2023" : "Joined recently",
-        isAdmin: i === 0 && !isAdmin // Make the first placeholder an admin if the user isn't
+        isAdmin: i === 0 && !isAdmin
       });
     }
     
     setGroupMembers(mockMembers);
-  }, [groupId, isMember, isAdmin, currentUser.id, group.memberCount]);
+  }, [groupId, isMember, isAdmin, currentUser.id, group.memberCount, userProfile]);
 
   const handleJoinGroup = () => {
     console.log("Joining group:", group.name);
@@ -123,22 +118,42 @@ export default function GroupDetailPage() {
     });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setSelectedImage(file);
+      
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleSubmitMessage = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!discussionMessage.trim()) return;
+    if (!discussionMessage.trim() && !selectedImage) return;
     
-    // Create a new message object
     const newMessage: DiscussionMessage = {
       id: Date.now().toString(),
       userId: currentUser.id,
-      userImageUrl: mockUserProfile.imageUrl,
-      userName: mockUserProfile.name,
+      userImageUrl: userProfile.imageUrl,
+      userName: userProfile.name,
       content: discussionMessage,
       createdAt: new Date().toISOString(),
+      imageUrl: imagePreview || undefined
     };
     
-    // Add the new message to the discussions array
     setDiscussions([...discussions, newMessage]);
     
     toast({
@@ -147,9 +162,13 @@ export default function GroupDetailPage() {
     });
     
     setDiscussionMessage("");
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
-  // Function to format time
   const formatRelativeTime = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -177,14 +196,11 @@ export default function GroupDetailPage() {
     return date.toLocaleDateString();
   };
 
-  // Function to view a member's profile
   const viewMemberProfile = (member: GroupMember) => {
     setSelectedMember(member);
   };
 
-  // Function to remove a member from the group
   const removeMember = (memberId: string) => {
-    // In a real app, this would call an API to remove the member
     const updatedMembers = groupMembers.filter(member => member.id !== memberId);
     setGroupMembers(updatedMembers);
     
@@ -305,17 +321,52 @@ export default function GroupDetailPage() {
                   <form onSubmit={handleSubmitMessage}>
                     <h3 className="font-semibold text-white mb-2">Add to the discussion</h3>
                     <Textarea 
-                      className="w-full"
+                      className="w-full mb-2"
                       placeholder="Share your thoughts with the group..."
                       value={discussionMessage}
                       onChange={(e) => setDiscussionMessage(e.target.value)}
                     />
-                    <Button 
-                      type="submit"
-                      className="mt-2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                    >
-                      Post Message
-                    </Button>
+                    
+                    {imagePreview && (
+                      <div className="relative mb-2">
+                        <img src={imagePreview} alt="Preview" className="w-full max-h-60 object-cover rounded-md" />
+                        <Button 
+                          variant="destructive" 
+                          size="icon" 
+                          className="absolute top-2 right-2 h-6 w-6 rounded-full"
+                          onClick={handleRemoveImage}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <div className="flex justify-between items-center mt-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <ImageIcon className="h-4 w-4 mr-2" />
+                        Add Image
+                      </Button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef}
+                        onChange={handleImageChange} 
+                        accept="image/*" 
+                        className="hidden" 
+                      />
+                      
+                      <Button 
+                        type="submit"
+                        className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                        disabled={!discussionMessage.trim() && !selectedImage}
+                      >
+                        Post Message
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
@@ -338,7 +389,16 @@ export default function GroupDetailPage() {
                                 {formatRelativeTime(message.createdAt)}
                               </span>
                             </div>
-                            <p className="text-sm">{message.content}</p>
+                            {message.content && <p className="text-sm mb-2">{message.content}</p>}
+                            {message.imageUrl && (
+                              <div className="mt-2">
+                                <img 
+                                  src={message.imageUrl} 
+                                  alt="Shared image" 
+                                  className="rounded-md max-h-80 w-auto" 
+                                />
+                              </div>
+                            )}
                           </div>
                         </div>
                       </CardContent>
