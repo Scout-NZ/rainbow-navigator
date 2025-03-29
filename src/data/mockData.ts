@@ -33,6 +33,9 @@ export interface Group {
   isPrivate: boolean;
   memberCount: number;
   city: string;
+  members?: string[];
+  admins?: string[];
+  rules?: string;
 }
 
 export interface User {
@@ -46,6 +49,243 @@ export interface User {
   interests: string[];
   role: string;
 }
+
+export interface Event {
+  id: number;
+  title: string;
+  date: string;
+  time: string;
+  location: {
+    name: string;
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+  };
+  description: string;
+  category: string;
+  price: string;
+  attendees: number | any[];
+  imageUrl: string;
+  tags?: string[];
+  organizer?: {
+    id: number;
+    name: string;
+    avatar: string;
+  };
+}
+
+export interface Post {
+  id: number;
+  content: string;
+  imageUrl?: string;
+  likes: number;
+  comments: number;
+  createdAt: string;
+  author: {
+    id: number;
+    name: string;
+    username: string;
+    avatar: string;
+  };
+}
+
+export interface Resource {
+  id: number;
+  title: string;
+  description: string;
+  category: string;
+  tags: string[];
+  url: string;
+  imageUrl?: string;
+  source: string;
+  featured: boolean;
+  createdAt: string;
+}
+
+export const mockUserProfile = {
+  id: 1,
+  name: "Alex Rivera",
+  username: "alexr",
+  email: "alex@example.com",
+  avatar: "https://picsum.photos/200?random=1",
+  coverPhoto: "https://picsum.photos/800/300?random=1",
+  bio: "LGBT+ advocate and community organizer",
+  location: "Auckland",
+  pronouns: "they/them",
+  identities: ["queer", "non-binary"],
+  interests: ["activism", "art", "community"],
+  joinDate: "2023-06-15",
+  badges: ["Verified", "Community Leader"],
+  socialLinks: {
+    instagram: "alex_rivera",
+    twitter: "alexrivera",
+    website: "https://alexrivera.example.com"
+  },
+  settings: {
+    privacy: "public",
+    notifications: true,
+    theme: "light"
+  }
+};
+
+export const mockPosts = [
+  {
+    id: 1,
+    content: "Just attended an amazing Pride event in Auckland! The community here is incredible.",
+    imageUrl: "https://picsum.photos/600/400?random=1",
+    likes: 42,
+    comments: 7,
+    createdAt: "2023-09-15T14:30:00Z",
+    author: {
+      id: 1,
+      name: "Alex Rivera",
+      username: "alexr",
+      avatar: "https://picsum.photos/200?random=1"
+    }
+  },
+  {
+    id: 2,
+    content: "Found this amazing queer-owned café today. The coffee is excellent and the atmosphere is so welcoming!",
+    imageUrl: "https://picsum.photos/600/400?random=2",
+    likes: 28,
+    comments: 5,
+    createdAt: "2023-09-14T10:15:00Z",
+    author: {
+      id: 2,
+      name: "Sam Johnson",
+      username: "samj",
+      avatar: "https://picsum.photos/200?random=2"
+    }
+  },
+  {
+    id: 3,
+    content: "Looking for recommendations for LGBT-friendly healthcare providers in Wellington. Any suggestions?",
+    likes: 15,
+    comments: 12,
+    createdAt: "2023-09-13T18:45:00Z",
+    author: {
+      id: 3,
+      name: "Jordan Smith",
+      username: "jordans",
+      avatar: "https://picsum.photos/200?random=3"
+    }
+  }
+];
+
+export const mockEvents = [
+  {
+    id: 1,
+    title: "Auckland Pride Parade",
+    date: "2023-10-25",
+    time: "14:00",
+    location: {
+      name: "Ponsonby Road",
+      address: "Ponsonby Road",
+      city: "Auckland",
+      lat: -36.8512,
+      lng: 174.7419
+    },
+    description: "Annual pride parade celebrating the LGBTQ+ community in Auckland.",
+    category: "Pride",
+    price: "Free",
+    attendees: 1500,
+    imageUrl: "https://picsum.photos/600/400?random=4",
+    tags: ["pride", "parade", "community"],
+    organizer: {
+      id: 1,
+      name: "Auckland Pride",
+      avatar: "https://picsum.photos/200?random=10"
+    }
+  },
+  {
+    id: 2,
+    title: "Queer Book Club",
+    date: "2023-10-10",
+    time: "18:30",
+    location: {
+      name: "Rainbow Community Centre",
+      address: "123 Queen Street",
+      city: "Wellington",
+      lat: -41.2902,
+      lng: 174.7762
+    },
+    description: "Join us for our monthly book club discussing queer literature.",
+    category: "Education",
+    price: "Free",
+    attendees: 25,
+    imageUrl: "https://picsum.photos/600/400?random=5",
+    tags: ["books", "discussion", "community"],
+    organizer: {
+      id: 2,
+      name: "Wellington LGBTQ+ Society",
+      avatar: "https://picsum.photos/200?random=11"
+    }
+  },
+  {
+    id: 3,
+    title: "Drag Night Extravaganza",
+    date: "2023-10-15",
+    time: "20:00",
+    location: {
+      name: "Club Rainbow",
+      address: "456 Main Street",
+      city: "Christchurch",
+      lat: -43.5321,
+      lng: 172.6362
+    },
+    description: "A night of fabulous drag performances, music, and dancing.",
+    category: "Nightlife",
+    price: "$25",
+    attendees: 150,
+    imageUrl: "https://picsum.photos/600/400?random=6",
+    tags: ["drag", "performances", "nightlife"],
+    organizer: {
+      id: 3,
+      name: "Christchurch Drag Collective",
+      avatar: "https://picsum.photos/200?random=12"
+    }
+  }
+];
+
+export const mockResources = [
+  {
+    id: 1,
+    title: "LGBTQ+ Youth Support Services",
+    description: "A comprehensive guide to support services for LGBTQ+ youth in New Zealand.",
+    category: "Support",
+    tags: ["youth", "support", "mental health"],
+    url: "https://example.com/youth-support",
+    imageUrl: "https://picsum.photos/600/400?random=7",
+    source: "Rainbow Youth NZ",
+    featured: true,
+    createdAt: "2023-08-10T00:00:00Z"
+  },
+  {
+    id: 2,
+    title: "Coming Out Guide",
+    description: "Resources and advice for coming out to family, friends, and colleagues.",
+    category: "Education",
+    tags: ["coming out", "guide", "advice"],
+    url: "https://example.com/coming-out-guide",
+    imageUrl: "https://picsum.photos/600/400?random=8",
+    source: "OutLine NZ",
+    featured: true,
+    createdAt: "2023-07-15T00:00:00Z"
+  },
+  {
+    id: 3,
+    title: "Trans Healthcare Directory",
+    description: "A directory of trans-friendly healthcare providers across New Zealand.",
+    category: "Healthcare",
+    tags: ["transgender", "healthcare", "directory"],
+    url: "https://example.com/trans-healthcare",
+    imageUrl: "https://picsum.photos/600/400?random=9",
+    source: "Gender Minorities Aotearoa",
+    featured: false,
+    createdAt: "2023-06-20T00:00:00Z"
+  }
+];
 
 export const mockGroups: Group[] = [
   {
@@ -160,7 +400,6 @@ export const mockGroups: Group[] = [
   }
 ];
 
-// Update mockPlaces to ensure they have featured flag
 export const mockPlaces: Place[] = [
   {
     id: 1,
@@ -404,7 +643,6 @@ export const mockPlaces: Place[] = [
   }
 ];
 
-// Add mockUsers export if it doesn't exist
 export const mockUsers: User[] = [
   {
     id: 1,
