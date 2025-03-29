@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InteractiveMap } from "@/components/map/InteractiveMap";
 import { mockPlaces } from "@/data/mockData";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { LocationDetailsDialog } from "@/components/map/LocationDetailsDialog";
 import { toast } from "@/components/ui/use-toast";
@@ -201,8 +201,9 @@ export default function DiscoverPage() {
           </Button>
         </div>
         
-        <ScrollArea className="w-full whitespace-nowrap pb-4">
-          <div className="flex gap-3">
+        {/* Updated ScrollArea component with proper horizontal scrolling configuration */}
+        <ScrollArea className="w-full">
+          <div className="flex gap-3 pb-4">
             {filteredBusinesses.length > 0 ? (
               filteredBusinesses.map(business => (
                 <Card 
@@ -252,6 +253,7 @@ export default function DiscoverPage() {
               <Button variant="outline" size="sm" className="mt-2">Add Place</Button>
             </div>
           </div>
+          <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </div>
       
