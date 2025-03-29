@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
@@ -15,6 +16,13 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // New variants for LGBT+ status badges
+        lgbtOwned: 
+          "border-transparent bg-gradient-to-r from-rainbow-orange via-rainbow-green to-rainbow-blue text-white hover:opacity-90",
+        lgbtManaged: 
+          "border-transparent bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-indigo text-white hover:opacity-90",
+        ally: 
+          "border-transparent bg-gradient-to-r from-rainbow-blue to-rainbow-indigo text-white hover:opacity-90",
       },
     },
     defaultVariants: {

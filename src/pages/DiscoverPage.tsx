@@ -91,6 +91,22 @@ export default function DiscoverPage() {
     }
   };
 
+  // Get LGBT+ status badge
+  const getLgbtStatusBadge = (status: string | undefined) => {
+    if (!status) return null;
+    
+    switch(status) {
+      case 'lgbt_owned':
+        return <Badge variant="lgbtOwned">LGBT+ Owned</Badge>;
+      case 'lgbt_managed':
+        return <Badge variant="lgbtManaged">LGBT+ Managed</Badge>;
+      case 'ally':
+        return <Badge variant="ally">Ally</Badge>;
+      default:
+        return null;
+    }
+  };
+
   // Filter businesses by category and LGBT+ status
   const filteredBusinesses = businesses.filter(business => {
     // Category filter
@@ -194,19 +210,7 @@ export default function DiscoverPage() {
                       <Badge variant="outline" className="bg-white/90 text-black border-none">
                         {business.category}
                       </Badge>
-                      {business.lgbt_status && (
-                        <Badge 
-                          variant="outline" 
-                          className={business.lgbt_status === 'ally' 
-                            ? 'bg-primary/20 text-primary border-none' 
-                            : 'bg-rainbow-gradient text-white border-none'
-                          }
-                        >
-                          {business.lgbt_status === 'lgbt_owned' && 'LGBT+ Owned'}
-                          {business.lgbt_status === 'lgbt_managed' && 'LGBT+ Managed'}
-                          {business.lgbt_status === 'ally' && 'Ally'}
-                        </Badge>
-                      )}
+                      {business.lgbt_status && getLgbtStatusBadge(business.lgbt_status)}
                     </div>
                     <div className="absolute bottom-2 left-2">
                       <h3 className="text-white font-semibold">{business.name}</h3>

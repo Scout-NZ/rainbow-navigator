@@ -24,30 +24,32 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
   const getLgbtStatusBadge = () => {
     if (!location.lgbt_status) return null;
     
-    let badgeText = '';
-    let badgeClass = '';
+    let badgeProps = {
+      variant: 'default' as const,
+      text: '',
+    };
     
     switch(location.lgbt_status) {
       case 'lgbt_owned':
-        badgeText = 'LGBT+ Owned';
-        badgeClass = 'bg-rainbow-gradient text-white border-0';
+        badgeProps.variant = 'lgbtOwned';
+        badgeProps.text = 'LGBT+ Owned';
         break;
       case 'lgbt_managed':
-        badgeText = 'LGBT+ Managed';
-        badgeClass = 'bg-rainbow-gradient text-white border-0';
+        badgeProps.variant = 'lgbtManaged';
+        badgeProps.text = 'LGBT+ Managed';
         break;
       case 'ally':
-        badgeText = 'Ally';
-        badgeClass = 'bg-primary/20 text-primary border-0';
+        badgeProps.variant = 'ally';
+        badgeProps.text = 'Ally';
         break;
       default:
         return null;
     }
     
     return (
-      <Badge className={`${badgeClass} flex items-center gap-1`}>
+      <Badge variant={badgeProps.variant} className="flex items-center gap-1">
         <Heart className="h-3 w-3" />
-        {badgeText}
+        {badgeProps.text}
       </Badge>
     );
   };
