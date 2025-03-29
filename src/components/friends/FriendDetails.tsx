@@ -15,9 +15,10 @@ export interface FriendData {
 interface FriendDetailsProps {
   friend: FriendData;
   onSendMessage?: (friendId: string) => void;
+  onViewProfile?: (friendId: string) => void;
 }
 
-export function FriendDetails({ friend, onSendMessage }: FriendDetailsProps) {
+export function FriendDetails({ friend, onSendMessage, onViewProfile }: FriendDetailsProps) {
   const { toast } = useToast();
   
   const handleSendMessage = () => {
@@ -27,6 +28,17 @@ export function FriendDetails({ friend, onSendMessage }: FriendDetailsProps) {
       toast({
         title: "Message sent",
         description: `Started a conversation with ${friend.name}`,
+      });
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(friend.id);
+    } else {
+      toast({
+        title: "Profile view",
+        description: `Viewing ${friend.name}'s profile`,
       });
     }
   };
@@ -59,6 +71,7 @@ export function FriendDetails({ friend, onSendMessage }: FriendDetailsProps) {
         <Button 
           size="sm" 
           className="flex-1 bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+          onClick={handleViewProfile}
         >
           View Profile
         </Button>

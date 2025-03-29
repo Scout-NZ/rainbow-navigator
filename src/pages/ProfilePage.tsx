@@ -1,4 +1,5 @@
-import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera } from "lucide-react";
+
+import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -26,15 +27,32 @@ interface ProfileFormValues {
   identity: string;
   pronouns: string;
   gender: string;
+  socialLinks: {
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    spotify: string;
+    tiktok: string;
+    linkedin: string;
+  };
 }
 
 export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
   const [profile, setProfile] = useState({
     ...mockUserProfile,
     pronouns: mockUserProfile.pronouns || "",
-    gender: mockUserProfile.gender || ""
+    gender: mockUserProfile.gender || "",
+    socialLinks: mockUserProfile.socialLinks || {
+      instagram: "",
+      facebook: "",
+      twitter: "",
+      spotify: "",
+      tiktok: "",
+      linkedin: ""
+    }
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -42,13 +60,39 @@ export default function ProfilePage() {
     defaultValues: {
       name: profile.name,
       username: profile.username,
-      bio: profile.bio,
+      bio: profile.bio || "",
       location: profile.location || "",
       interests: profile.interests.join(", "),
       identity: profile.identity || "",
       pronouns: profile.pronouns || "",
       gender: profile.gender || "",
+      socialLinks: {
+        instagram: profile.socialLinks?.instagram || "",
+        facebook: profile.socialLinks?.facebook || "",
+        twitter: profile.socialLinks?.twitter || "",
+        spotify: profile.socialLinks?.spotify || "",
+        tiktok: profile.socialLinks?.tiktok || "",
+        linkedin: profile.socialLinks?.linkedin || ""
+      }
     },
+  });
+
+  const socialForm = useForm<{
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    spotify: string;
+    tiktok: string;
+    linkedin: string;
+  }>({
+    defaultValues: {
+      instagram: profile.socialLinks?.instagram || "",
+      facebook: profile.socialLinks?.facebook || "",
+      twitter: profile.socialLinks?.twitter || "",
+      spotify: profile.socialLinks?.spotify || "",
+      tiktok: profile.socialLinks?.tiktok || "",
+      linkedin: profile.socialLinks?.linkedin || ""
+    }
   });
 
   const onSubmit = (values: ProfileFormValues) => {
@@ -73,6 +117,28 @@ export default function ProfilePage() {
     });
   };
 
+  const onSocialSubmit = (values: {
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    spotify: string;
+    tiktok: string;
+    linkedin: string;
+  }) => {
+    const updatedProfile = {
+      ...profile,
+      socialLinks: values
+    };
+    
+    setProfile(updatedProfile);
+    setIsSocialDialogOpen(false);
+    
+    toast({
+      title: "Social links updated",
+      description: "Your social links have been successfully updated.",
+    });
+  };
+
   const handleProfilePictureClick = () => {
     fileInputRef.current?.click();
   };
@@ -94,6 +160,8 @@ export default function ProfilePage() {
   };
 
   const headerGradient = getIdentityGradient(profile.identity);
+
+  const hasAnySocialLink = profile.socialLinks && Object.values(profile.socialLinks).some(link => !!link);
 
   return (
     <div className="pb-4">
@@ -179,6 +247,99 @@ export default function ProfilePage() {
                   #{interest}
                 </Badge>
               ))}
+            </div>
+
+            {/* Social Links Section */}
+            <div className="mt-4 border-t pt-3">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-medium">Social Links</h3>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsSocialDialogOpen(true)}
+                >
+                  <Edit className="h-3.5 w-3.5 mr-1" />
+                  Edit
+                </Button>
+              </div>
+              
+              {hasAnySocialLink ? (
+                <div className="flex flex-wrap gap-3">
+                  {profile.socialLinks?.instagram && (
+                    <a 
+                      href={profile.socialLinks.instagram.startsWith('http') ? profile.socialLinks.instagram : `https://${profile.socialLinks.instagram}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Instagram className="h-4 w-4 mr-1" />
+                      <span>Instagram</span>
+                    </a>
+                  )}
+                  
+                  {profile.socialLinks?.facebook && (
+                    <a 
+                      href={profile.socialLinks.facebook.startsWith('http') ? profile.socialLinks.facebook : `https://${profile.socialLinks.facebook}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Facebook className="h-4 w-4 mr-1" />
+                      <span>Facebook</span>
+                    </a>
+                  )}
+                  
+                  {profile.socialLinks?.twitter && (
+                    <a 
+                      href={profile.socialLinks.twitter.startsWith('http') ? profile.socialLinks.twitter : `https://${profile.socialLinks.twitter}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Twitter className="h-4 w-4 mr-1" />
+                      <span>X</span>
+                    </a>
+                  )}
+                  
+                  {profile.socialLinks?.spotify && (
+                    <a 
+                      href={profile.socialLinks.spotify.startsWith('http') ? profile.socialLinks.spotify : `https://${profile.socialLinks.spotify}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Music className="h-4 w-4 mr-1" />
+                      <span>Spotify</span>
+                    </a>
+                  )}
+                  
+                  {profile.socialLinks?.tiktok && (
+                    <a 
+                      href={profile.socialLinks.tiktok.startsWith('http') ? profile.socialLinks.tiktok : `https://${profile.socialLinks.tiktok}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Video className="h-4 w-4 mr-1" />
+                      <span>TikTok</span>
+                    </a>
+                  )}
+                  
+                  {profile.socialLinks?.linkedin && (
+                    <a 
+                      href={profile.socialLinks.linkedin.startsWith('http') ? profile.socialLinks.linkedin : `https://${profile.socialLinks.linkedin}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      <Linkedin className="h-4 w-4 mr-1" />
+                      <span>LinkedIn</span>
+                    </a>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No social links added yet</p>
+              )}
             </div>
             
             <div className="grid grid-cols-3 gap-2 mt-4 text-center">
@@ -576,6 +737,135 @@ export default function ProfilePage() {
                   className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
                 >
                   Save Changes
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Social Links Dialog */}
+      <Dialog open={isSocialDialogOpen} onOpenChange={setIsSocialDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Social Links</DialogTitle>
+            <DialogDescription>
+              Add your social media links below. 
+              You can enter the full URL or just your username.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...socialForm}>
+            <form onSubmit={socialForm.handleSubmit(onSocialSubmit)} className="space-y-4">
+              <FormField
+                control={socialForm.control}
+                name="instagram"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Instagram className="h-4 w-4 mr-2" /> Instagram
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://instagram.com/username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={socialForm.control}
+                name="facebook"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Facebook className="h-4 w-4 mr-2" /> Facebook
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://facebook.com/username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={socialForm.control}
+                name="twitter"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Twitter className="h-4 w-4 mr-2" /> X (Twitter)
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://x.com/username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={socialForm.control}
+                name="spotify"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Music className="h-4 w-4 mr-2" /> Spotify
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://open.spotify.com/user/username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={socialForm.control}
+                name="tiktok"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Video className="h-4 w-4 mr-2" /> TikTok
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://tiktok.com/@username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={socialForm.control}
+                name="linkedin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center">
+                      <Linkedin className="h-4 w-4 mr-2" /> LinkedIn
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="username or https://linkedin.com/in/username" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsSocialDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                >
+                  Save Links
                 </Button>
               </div>
             </form>

@@ -150,6 +150,14 @@ export type UserProfile = {
   identity: string;
   pronouns?: string;
   gender?: string;
+  socialLinks?: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    spotify?: string;
+    tiktok?: string;
+    linkedin?: string;
+  };
 };
 
 export const mockPlaces: Place[] = [
@@ -786,5 +794,13 @@ export const mockUserProfile: UserProfile = {
   identity: "",
   pronouns: "",
   gender: "",
-  joined: "2023-01-15"
+  joined: "2023-01-15",
+  socialLinks: {
+    instagram: "",
+    facebook: "",
+    twitter: "",
+    spotify: "",
+    tiktok: "",
+    linkedin: ""
+  }
 };
