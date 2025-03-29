@@ -7,8 +7,6 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { InteractiveMap } from "@/components/map/InteractiveMap";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { mockPlaces } from "@/data/mockData";
 import { 
   Carousel, 
   CarouselContent, 
@@ -16,6 +14,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
+import { mockPlaces } from "@/data/mockData";
 
 // Define categories with their icons
 const categories = [
@@ -56,33 +55,14 @@ export default function DiscoverPage() {
   
   return (
     <div className="space-y-6">
-      {/* Rainbow gradient header */}
-      <div className="bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green -mx-4 -mt-4 px-4 py-6 rounded-b-3xl shadow-md">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 border-2 border-white/50">
-              <AvatarImage src="/lovable-uploads/87cf8dd3-ecd9-4db2-9df3-cc901744bda7.png" alt="Logo" />
-              <AvatarFallback className="bg-white/20">RN</AvatarFallback>
-            </Avatar>
-            <h1 className="text-2xl font-bold text-white">Discover</h1>
-          </div>
-          <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              type="search" 
-              placeholder="Ask Navigator..." 
-              className="pl-9 pr-4 py-2 rounded-full bg-white/90 border-none" 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-        
-        <div className="flex gap-2 mt-4">
+      {/* Simple header */}
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">Discover</h1>
+        <div className="flex gap-2">
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-1 bg-white/20 text-white border-white/40 hover:bg-white/30"
+            className="gap-1"
           >
             <MapPin className="h-4 w-4" />
             <span className="sr-only sm:not-sr-only">Current Location</span>
@@ -90,7 +70,7 @@ export default function DiscoverPage() {
           <Button 
             variant="outline" 
             size="sm" 
-            className="gap-1 bg-white/20 text-white border-white/40 hover:bg-white/30"
+            className="gap-1"
           >
             <Search className="h-4 w-4" />
             <span className="sr-only sm:not-sr-only">Search</span>
@@ -99,7 +79,7 @@ export default function DiscoverPage() {
       </div>
       
       {/* Map Section - Large and prominent */}
-      <div className="rounded-lg overflow-hidden h-[60vh] mb-6 shadow-md">
+      <div className="rounded-lg overflow-hidden h-[75vh] mb-6 shadow-md">
         <InteractiveMap className="h-full" />
       </div>
       
