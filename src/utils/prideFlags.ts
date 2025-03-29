@@ -47,6 +47,11 @@ export const prideIdentities: PrideIdentity[] = [
     flagGradient: "linear-gradient(180deg, #B57EDC 33.33%, #FFFFFF 33.33% 66.66%, #4A8123 66.66%)",
   },
   {
+    id: "intersex",
+    label: "Intersex",
+    flagGradient: "linear-gradient(180deg, #FFDA00 0% 100%), radial-gradient(circle at center, #7902AA 0%, #7902AA 30%, transparent 30%)",
+  },
+  {
     id: "ally",
     label: "Ally",
     flagGradient: "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)",
