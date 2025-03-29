@@ -11,6 +11,13 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageIcon, X } from "lucide-react";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 
 // Define the schema for group editing
 const groupEditSchema = z.object({
@@ -23,6 +30,12 @@ const groupEditSchema = z.object({
 });
 
 type GroupEditFormValues = z.infer<typeof groupEditSchema>;
+
+// Categories list - matching the same options from CreateGroupForm
+const categories = [
+  "Social", "Outdoor", "Activism", "Gaming", "Support",
+  "Creative", "Professional", "Family", "Entertainment", "Sports"
+];
 
 interface GroupEditFormProps {
   group: Group;
@@ -42,7 +55,7 @@ export function GroupEditForm({ group, onSave, onCancel }: GroupEditFormProps) {
       name: group.name,
       description: group.description,
       category: group.category,
-      rules: "", // Rules will be added from the parent component if available
+      rules: group.rules || "", // Add default for rules
       isPrivate: group.isPrivate,
       tags: group.tags.join(", "),
     },
@@ -77,6 +90,7 @@ export function GroupEditForm({ group, onSave, onCancel }: GroupEditFormProps) {
       category: values.category,
       tags,
       isPrivate: values.isPrivate,
+      rules: values.rules, // Include rules in the updated group
     };
 
     // If we have a new image, add it to the updated group
@@ -166,16 +180,30 @@ export function GroupEditForm({ group, onSave, onCancel }: GroupEditFormProps) {
           )}
         />
 
-        {/* Group Category */}
+        {/* Group Category - Changed to Select dropdown */}
         <FormField
           control={form.control}
           name="category"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Category</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
+              <Select 
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {categories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
