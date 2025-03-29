@@ -36,7 +36,7 @@ export function AppLayout() {
         <div className="container px-4 py-3 mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img 
-              src="/lovable-uploads/bd55a184-9d3b-4c0b-b50c-b212d4be16a8.png" 
+              src="/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png" 
               alt="Rainbow Navigator" 
               className="h-10"
             />
