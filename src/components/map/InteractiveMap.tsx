@@ -202,7 +202,7 @@ export function InteractiveMap({
     // Apply search text filter
     const matchesSearch = 
       place.name.toLowerCase().includes(filter.toLowerCase()) || 
-      place.category.toLowerCase().includes(filter.toLowerCase()) || 
+      (place.category && place.category.toLowerCase().includes(filter.toLowerCase())) || 
       (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
     
     // Apply category filter if it exists - check in both the category field and tags
@@ -210,13 +210,13 @@ export function InteractiveMap({
     if (categoryFilter) {
       const normalizedCategory = categoryFilter.toLowerCase();
       matchesCategory = 
-        place.category.toLowerCase() === normalizedCategory ||
+        (place.category && place.category.toLowerCase() === normalizedCategory) ||
         (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === normalizedCategory));
       
       // Special case for "healthcare" category since it might be capitalized differently
       if (normalizedCategory === "healthcare") {
         matchesCategory = 
-          place.category.toLowerCase() === "healthcare" ||
+          (place.category && place.category.toLowerCase() === "healthcare") ||
           (place.tags && place.tags.some((tag: string) => 
             tag?.toLowerCase() === "healthcare" || tag?.toLowerCase() === "health" || tag?.toLowerCase() === "medical"
           ));
@@ -226,7 +226,9 @@ export function InteractiveMap({
     // Apply LGBT+ status filter if it exists
     let matchesLgbtStatus = true;
     if (lgbtStatusFilter) {
-      matchesLgbtStatus = place.lgbt_status === lgbtStatusFilter;
+      // When filtering for LGBT status, if the item doesn't have any status, include it in results
+      // This ensures we show places without a specified LGBT status when filtering
+      matchesLgbtStatus = !place.lgbt_status || place.lgbt_status === lgbtStatusFilter;
     }
     
     return matchesSearch && matchesCategory && matchesLgbtStatus;
