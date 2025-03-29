@@ -4,6 +4,7 @@ import { mockUserProfile } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 type UserProfile = {
   id: string;
@@ -132,11 +133,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             pronouns: data.pronouns,
             gender: data.gender,
             interests: data.interests || [],
-            imageUrl: data.imageUrl,
+            imageUrl: data.imageurl, // Changed from imageUrl to imageurl to match the database column
             friends: data.friends || 0,
             groups: data.groups || 0,
             events: data.events || 0,
-            socialLinks: data.socialLinks || {},
+            socialLinks: data.sociallinks || {}, // Changed from socialLinks to sociallinks to match the database column
           };
           
           setUserProfile(profileData);
@@ -245,8 +246,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             pronouns: newProfile.pronouns,
             gender: newProfile.gender,
             interests: newProfile.interests,
-            imageUrl: newProfile.imageUrl,
-            socialLinks: newProfile.socialLinks,
+            imageurl: newProfile.imageUrl, // Changed from imageUrl to imageurl to match the database column
+            sociallinks: newProfile.socialLinks, // Changed from socialLinks to sociallinks to match the database column
           })
           .eq('id', user.id);
 
