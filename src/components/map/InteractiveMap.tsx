@@ -34,8 +34,45 @@ const containerStyle = {
   borderRadius: '0.5rem'
 };
 
+// City coordinates for New Zealand locations
+const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
+  'Auckland': { lat: -36.8485, lng: 174.7633 },
+  'Wellington': { lat: -41.2865, lng: 174.7762 },
+  'Christchurch': { lat: -43.5320, lng: 172.6306 },
+  'Hamilton': { lat: -37.7870, lng: 175.2793 },
+  'Tauranga': { lat: -37.6878, lng: 176.1651 },
+  'Dunedin': { lat: -45.8788, lng: 170.5028 },
+  'Waikato': { lat: -37.7870, lng: 175.2793 },
+  'Wairarapa': { lat: -41.0000, lng: 175.6500 },
+  'Kapiti': { lat: -40.9000, lng: 175.0000 },
+  'National': { lat: -41.0000, lng: 174.0000 }, // Center of NZ
+  'Taupō': { lat: -38.6857, lng: 176.0702 }
+};
+
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
+
+// Get coordinates for a given city
+const getCityCoordinates = (city: string | null): { lat: number; lng: number } => {
+  if (!city) return DEFAULT_LOCATION;
+  
+  // Try to find exact match
+  if (CITY_COORDINATES[city]) {
+    return CITY_COORDINATES[city];
+  }
+  
+  // Try case-insensitive match
+  const normalizedCity = city.toLowerCase();
+  for (const [key, coords] of Object.entries(CITY_COORDINATES)) {
+    if (key.toLowerCase() === normalizedCity) {
+      return coords;
+    }
+  }
+  
+  // If no match found, return default
+  console.log(`No coordinates found for city: ${city}, using default`);
+  return DEFAULT_LOCATION;
+};
 
 // Transform Supabase location to app location format
 const transformLocation = (location: any) => {
@@ -51,6 +88,11 @@ const transformLocation = (location: any) => {
     tags.push(location.category.toLowerCase());
   }
   
+  // Get coordinates based on the location's city or use the provided lat/lng
+  const coordinates = location.lat && location.lng 
+    ? { lat: location.lat, lng: location.lng }
+    : getCityCoordinates(location.city);
+  
   return {
     id: location.id,
     name: location.name,
@@ -62,8 +104,8 @@ const transformLocation = (location: any) => {
       address: location.address || '',
       neighbourhood: location.neighbourhood || '',
       city: location.city || '',
-      lat: location.lat || DEFAULT_LOCATION.lat,
-      lng: location.lng || DEFAULT_LOCATION.lng
+      lat: coordinates.lat,
+      lng: coordinates.lng
     },
     contact: {
       phone: location.phone || '',
@@ -137,7 +179,7 @@ export function InteractiveMap({
     }
   });
   
-  console.log("All locations:", locations);
+  console.log("All locations with coordinates:", locations);
   console.log("Category filter:", categoryFilter);
   
   // Use mockPlaces as fallback while loading or if there's an error
@@ -323,7 +365,33 @@ export function InteractiveMap({
           )}
           
           {/* Render markers for each place */}
-          {filteredPlaces.map((place) => {
+          {places.filter(place => {
+            // Apply search text filter
+            const matchesSearch = 
+              place.name.toLowerCase().includes(filter.toLowerCase()) || 
+              place.category.toLowerCase().includes(filter.toLowerCase()) || 
+              (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
+            
+            // Apply category filter if it exists - check in both the category field and tags
+            let matchesCategory = true;
+            if (categoryFilter) {
+              const normalizedCategory = categoryFilter.toLowerCase();
+              matchesCategory = 
+                place.category.toLowerCase() === normalizedCategory ||
+                (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === normalizedCategory));
+              
+              // Special case for "healthcare" category since it might be capitalized differently
+              if (normalizedCategory === "healthcare") {
+                matchesCategory = 
+                  place.category.toLowerCase() === "healthcare" ||
+                  (place.tags && place.tags.some((tag: string) => 
+                    tag?.toLowerCase() === "healthcare" || tag?.toLowerCase() === "health" || tag?.toLowerCase() === "medical"
+                  ));
+              }
+            }
+            
+            return matchesSearch && matchesCategory;
+          }).map((place) => {
             const position: LatLngExpression = [place.location.lat, place.location.lng];
             return (
               <Marker

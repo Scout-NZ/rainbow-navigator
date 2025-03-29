@@ -9,6 +9,7 @@ import { mockPlaces } from "@/data/mockData";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { LocationDetailsDialog } from "@/components/map/LocationDetailsDialog";
+import { toast } from "@/components/ui/use-toast";
 
 // Default location (Auckland, New Zealand)
 const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
@@ -28,11 +29,22 @@ export default function DiscoverPage() {
     setSelectedCategory(prevCategory => 
       prevCategory === category ? null : category
     );
+    
+    // Show toast notification for category selection
+    toast({
+      title: category ? `Showing ${category}` : "Showing all locations",
+      description: "Filter applied to map and listings",
+    });
   };
 
   // Function to clear category filter
   const handleViewAll = () => {
     setSelectedCategory(null);
+    
+    toast({
+      title: "Showing all locations",
+      description: "Filter cleared",
+    });
   };
 
   // Function to open location details
@@ -43,9 +55,23 @@ export default function DiscoverPage() {
 
   // Filter businesses by category if a category is selected - using lowercase for consistent comparison
   const filteredBusinesses = selectedCategory 
-    ? businesses.filter(business => 
-        business.category.toLowerCase() === selectedCategory.toLowerCase() ||
-        business.tags.some(tag => tag?.toLowerCase() === selectedCategory.toLowerCase()))
+    ? businesses.filter(business => {
+        const businessCategory = business.category.toLowerCase();
+        const selectedCategoryLower = selectedCategory.toLowerCase();
+        
+        // Special case for healthcare to ensure consistent results
+        if (selectedCategoryLower === "healthcare") {
+          return businessCategory === "healthcare" || 
+                 business.tags.some(tag => 
+                   tag?.toLowerCase() === "healthcare" || 
+                   tag?.toLowerCase() === "health" || 
+                   tag?.toLowerCase() === "medical"
+                 );
+        }
+        
+        return businessCategory === selectedCategoryLower || 
+               business.tags.some(tag => tag?.toLowerCase() === selectedCategoryLower);
+      })
     : businesses;
   
   // Get appropriate icon for each category
@@ -68,10 +94,6 @@ export default function DiscoverPage() {
         return <MapPin className="h-5 w-5" />;
     }
   };
-  
-  // For debugging - log the filtered businesses
-  console.log("Selected category:", selectedCategory);
-  console.log("Filtered businesses:", filteredBusinesses);
   
   return (
     <div className="pb-4">
@@ -175,7 +197,7 @@ export default function DiscoverPage() {
             {["Cafés", "Nightlife", "Healthcare", "Retail", "Services", "Community"].map(category => (
               <Card 
                 key={category} 
-                className={`card-hover cursor-pointer ${selectedCategory === category.toLowerCase() ? 'ring-2 ring-primary' : ''}`}
+                className={`card-hover cursor-pointer ${selectedCategory?.toLowerCase() === category.toLowerCase() ? 'ring-2 ring-primary' : ''}`}
                 onClick={() => handleCategorySelect(category.toLowerCase())}
               >
                 <CardContent className="p-3 flex items-center gap-3">
