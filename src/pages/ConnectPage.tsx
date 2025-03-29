@@ -213,6 +213,7 @@ export default function ConnectPage() {
               <Button 
                 variant="outline" 
                 size="sm"
+                className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover text-white border-0"
                 onClick={() => setOpenCreateDialog(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
