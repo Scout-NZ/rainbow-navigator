@@ -76,6 +76,11 @@ export const prideIdentities: PrideIdentity[] = [
     id: "ally",
     label: "Ally",
     flagGradient: "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)",
+  },
+  {
+    id: "takatapui",
+    label: "Takatāpui",
+    flagGradient: "url('/lovable-uploads/e6ac4095-eae8-49bb-8e6c-dc0afc4eb3ca.png')",
   }
 ];
 
