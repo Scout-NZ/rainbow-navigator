@@ -1,4 +1,3 @@
-
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProfileFormValues {
   name: string;
@@ -249,7 +249,6 @@ export default function ProfilePage() {
               ))}
             </div>
 
-            {/* Social Links Section */}
             <div className="mt-4 border-t pt-3">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="text-sm font-medium">Social Links</h3>
@@ -452,7 +451,7 @@ export default function ProfilePage() {
       </Tabs>
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Edit Profile</DialogTitle>
             <DialogDescription>
@@ -460,293 +459,294 @@ export default function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
           
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="pronouns"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Pronouns</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex flex-col space-y-1"
-                      >
-                        <div className="flex items-center space-x-6 flex-wrap gap-y-2">
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="he/him" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              he/him
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="she/her" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              she/her
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="they/them" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              they/them
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="ze/zir" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              ze/zir
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="it/its" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              it/its
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="xe/xem" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              xe/xem
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="fae/faer" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              fae/faer
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="ey/em" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              ey/em
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              None/Unspecified
-                            </FormLabel>
-                          </FormItem>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="gender"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel>Gender</FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex flex-col space-y-1"
-                      >
-                        <div className="flex items-center space-x-6 flex-wrap gap-y-2">
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="Man" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              Man
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="Trans Man" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              Trans Man
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="Woman" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              Woman
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="Trans Woman" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              Trans Woman
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="Non-Binary" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              Non-Binary
-                            </FormLabel>
-                          </FormItem>
-                          <FormItem className="flex items-center space-x-2 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="" />
-                            </FormControl>
-                            <FormLabel className="font-normal cursor-pointer">
-                              None/Unspecified
-                            </FormLabel>
-                          </FormItem>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="bio"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bio</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        {...field} 
-                        placeholder="Tell the community about yourself..." 
-                        className="h-24"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="location"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Where are you based?" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="identity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>LGBT+ Identity</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <ScrollArea className="h-[60vh] pr-4">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select your identity" />
-                        </SelectTrigger>
+                        <Input {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No selection</SelectItem>
-                        {prideIdentities.map((identity) => (
-                          <SelectItem key={identity.id} value={identity.id}>
-                            {identity.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="interests"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Interests (comma-separated)</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="lgbtq, art, music, activism" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                >
-                  Save Changes
-                </Button>
-              </div>
-            </form>
-          </Form>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="pronouns"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Pronouns</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <div className="flex items-center space-x-6 flex-wrap gap-y-2">
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="he/him" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                he/him
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="she/her" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                she/her
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="they/them" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                they/them
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="ze/zir" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                ze/zir
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="it/its" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                it/its
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="xe/xem" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                xe/xem
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="fae/faer" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                fae/faer
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="ey/em" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                ey/em
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                None/Unspecified
+                              </FormLabel>
+                            </FormItem>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="gender"
+                  render={({ field }) => (
+                    <FormItem className="space-y-3">
+                      <FormLabel>Gender</FormLabel>
+                      <FormControl>
+                        <RadioGroup
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                          className="flex flex-col space-y-1"
+                        >
+                          <div className="flex items-center space-x-6 flex-wrap gap-y-2">
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Man" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Man
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Trans Man" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Trans Man
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Woman" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Woman
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Trans Woman" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Trans Woman
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="Non-Binary" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Non-Binary
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                None/Unspecified
+                              </FormLabel>
+                            </FormItem>
+                          </div>
+                        </RadioGroup>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="bio"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Bio</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          {...field} 
+                          placeholder="Tell the community about yourself..." 
+                          className="h-24"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="Where are you based?" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="identity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>LGBT+ Identity</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select your identity" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No selection</SelectItem>
+                          {prideIdentities.map((identity) => (
+                            <SelectItem key={identity.id} value={identity.id}>
+                              {identity.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="interests"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Interests (comma-separated)</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="lgbtq, art, music, activism" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
 
-      {/* Social Links Dialog */}
       <Dialog open={isSocialDialogOpen} onOpenChange={setIsSocialDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[80vh]">
           <DialogHeader>
             <DialogTitle>Edit Social Links</DialogTitle>
             <DialogDescription>
@@ -755,121 +755,123 @@ export default function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
           
-          <Form {...socialForm}>
-            <form onSubmit={socialForm.handleSubmit(onSocialSubmit)} className="space-y-4">
-              <FormField
-                control={socialForm.control}
-                name="instagram"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Instagram className="h-4 w-4 mr-2" /> Instagram
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://instagram.com/username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={socialForm.control}
-                name="facebook"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Facebook className="h-4 w-4 mr-2" /> Facebook
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://facebook.com/username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={socialForm.control}
-                name="twitter"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Twitter className="h-4 w-4 mr-2" /> X (Twitter)
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://x.com/username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={socialForm.control}
-                name="spotify"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Music className="h-4 w-4 mr-2" /> Spotify
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://open.spotify.com/user/username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={socialForm.control}
-                name="tiktok"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Video className="h-4 w-4 mr-2" /> TikTok
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://tiktok.com/@username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={socialForm.control}
-                name="linkedin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center">
-                      <Linkedin className="h-4 w-4 mr-2" /> LinkedIn
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="username or https://linkedin.com/in/username" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => setIsSocialDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                >
-                  Save Links
-                </Button>
-              </div>
-            </form>
-          </Form>
+          <ScrollArea className="h-[50vh] pr-4">
+            <Form {...socialForm}>
+              <form onSubmit={socialForm.handleSubmit(onSocialSubmit)} className="space-y-4">
+                <FormField
+                  control={socialForm.control}
+                  name="instagram"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Instagram className="h-4 w-4 mr-2" /> Instagram
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://instagram.com/username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={socialForm.control}
+                  name="facebook"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Facebook className="h-4 w-4 mr-2" /> Facebook
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://facebook.com/username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={socialForm.control}
+                  name="twitter"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Twitter className="h-4 w-4 mr-2" /> X (Twitter)
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://x.com/username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={socialForm.control}
+                  name="spotify"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Music className="h-4 w-4 mr-2" /> Spotify
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://open.spotify.com/user/username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={socialForm.control}
+                  name="tiktok"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Video className="h-4 w-4 mr-2" /> TikTok
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://tiktok.com/@username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={socialForm.control}
+                  name="linkedin"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center">
+                        <Linkedin className="h-4 w-4 mr-2" /> LinkedIn
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="username or https://linkedin.com/in/username" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <div className="flex justify-end space-x-2 pt-4">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsSocialDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                  >
+                    Save Links
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
