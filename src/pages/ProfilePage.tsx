@@ -1,4 +1,4 @@
-import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video } from "lucide-react";
+import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -42,7 +42,7 @@ export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
-  const { userProfile, updateUserProfile } = useUser();
+  const { userProfile, updateUserProfile, signOut } = useUser();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -145,6 +145,10 @@ export default function ProfilePage() {
     });
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   const headerGradient = getIdentityGradient(userProfile.identity);
 
   const hasAnySocialLink = userProfile.socialLinks && Object.values(userProfile.socialLinks).some(link => !!link);
@@ -153,10 +157,16 @@ export default function ProfilePage() {
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold text-white">Profile</h1>
-        <Button variant="outline" size="sm" className="rounded-full">
-          <Settings className="h-4 w-4 mr-2" />
-          Settings
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="rounded-full" onClick={handleSignOut}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </Button>
+          <Button variant="outline" size="sm" className="rounded-full">
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
+          </Button>
+        </div>
       </div>
       
       <Card className="mb-6 overflow-hidden">
