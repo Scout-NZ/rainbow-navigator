@@ -78,7 +78,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profileError, setProfileError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Set up auth state listener and check for existing session
+  // Listen for auth state changes
   useEffect(() => {
     console.log('Setting up auth state listener');
     
@@ -101,8 +101,31 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
-  }, []);
+    // Set up message listener for popup authentication
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin) return;
+      
+      if (event.data.type === 'AUTH_COMPLETE') {
+        console.log('Received auth complete message from popup', event.data);
+        if (event.data.success) {
+          window.location.reload(); // Reload to get the updated session
+        } else {
+          toast({
+            title: 'Authentication Error',
+            description: event.data.error || 'Failed to complete authentication',
+            variant: 'destructive',
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [toast]);
 
   // Fetch user profile when user changes
   useEffect(() => {

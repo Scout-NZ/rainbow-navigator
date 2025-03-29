@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -110,8 +111,11 @@ export default function AuthPage() {
       
       console.log(`Initiating Google sign-in with redirect to: ${redirectUrl}`);
       
+      // Open a new window or tab for the authentication
+      window.open('/auth-popup', '_blank', 'width=600,height=600');
+      
       // Show dialog informing user about popup
-      setDialogMessage('Please complete the authentication in the new window. This window will refresh once you\'re logged in.');
+      setDialogMessage('Please complete the authentication in the new window. This page will refresh once you\'re logged in.');
       setOpenDialog(true);
       
       const { data, error } = await supabase.auth.signInWithOAuth({

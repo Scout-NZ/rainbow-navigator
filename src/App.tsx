@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import GroupDetailPage from "./pages/GroupDetailPage";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
+import AuthPopup from "./pages/AuthPopup";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -51,6 +52,7 @@ const App = () => (
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/auth-popup" element={<AuthPopup />} />
               
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DiscoverPage />} />

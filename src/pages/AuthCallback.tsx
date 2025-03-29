@@ -11,7 +11,7 @@ export default function AuthCallback() {
   const [isProcessing, setIsProcessing] = useState(true);
 
   useEffect(() => {
-    // Handle OAuth callback with hash fragments
+    // Handle OAuth callback
     const handleAuthCallback = async () => {
       try {
         console.log('Auth callback initiated');
@@ -44,14 +44,19 @@ export default function AuthCallback() {
           .eq('id', data.session.user.id)
           .maybeSingle();
           
+        if (profileError) {
+          console.error('Error checking profile:', profileError);
+          throw new Error('Failed to check if profile exists');
+        }
+          
         if (!profileData) {
           console.log('Profile not found, creating new profile');
           
           // Get user metadata
           const userData = data.session.user;
           let fullName = userData.user_metadata?.full_name || 
-                         userData.user_metadata?.name ||
-                         userData.user_metadata?.preferred_username;
+                       userData.user_metadata?.name ||
+                       userData.user_metadata?.preferred_username;
           let userEmail = userData.email;
           
           console.log('User data for profile creation:', {
@@ -79,17 +84,20 @@ export default function AuthCallback() {
             
           if (insertError) {
             console.error('Error creating profile:', insertError);
-            // We'll try to continue anyway
-            toast({
-              title: 'Profile Creation Warning',
-              description: 'Your profile was created with limited information. You can update it in your settings.',
-              variant: 'destructive',
-            });
+            throw new Error('Failed to create user profile');
           } else {
             console.log('New profile created successfully:', newProfile);
           }
         } else {
           console.log('Profile found:', profileData);
+        }
+
+        // If we're in a popup, notify the parent window and close
+        if (window.opener) {
+          console.log('This is a popup window, notifying parent and closing');
+          window.opener.postMessage({ type: 'AUTH_COMPLETE', success: true }, window.location.origin);
+          window.close();
+          return;
         }
 
         // Redirect to home page if authentication was successful
@@ -107,6 +115,13 @@ export default function AuthCallback() {
           description: err.message || 'Failed to complete authentication',
           variant: 'destructive',
         });
+        
+        // If we're in a popup, notify the parent window of the error and close
+        if (window.opener) {
+          window.opener.postMessage({ type: 'AUTH_COMPLETE', success: false, error: err.message }, window.location.origin);
+          window.close();
+          return;
+        }
         
         // Wait a moment before redirecting on error
         setTimeout(() => {
