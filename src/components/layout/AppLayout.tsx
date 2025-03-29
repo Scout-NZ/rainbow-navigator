@@ -41,12 +41,14 @@ export function AppLayout() {
       >
         <div className="container px-4 py-3 mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Link to="/">
-              <img 
-                src="/lovable-uploads/81d7e401-05ab-439f-9086-8a67457532e2.png" 
-                alt="Rainbow Navigator" 
-                className="h-10"
-              />
+            <Link to="/" className="flex items-center">
+              <Avatar className="h-10 w-10 border-2 border-white">
+                <AvatarImage 
+                  src={userProfile.imageUrl}
+                  alt={userProfile.name} 
+                />
+                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
             </Link>
             <h1 className={cn(
               "text-xl font-bold sr-only md:not-sr-only",
@@ -55,16 +57,6 @@ export function AppLayout() {
           </div>
           
           <div className="flex items-center gap-3">
-            <Link to="/profile" className="relative flex items-center">
-              <Avatar className="h-9 w-9 border-2 border-white">
-                <AvatarImage 
-                  src={userProfile.imageUrl}
-                  alt={userProfile.name} 
-                />
-                <AvatarFallback>{userProfile.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-            </Link>
-            
             <div className="relative max-w-xs w-full">
               <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
