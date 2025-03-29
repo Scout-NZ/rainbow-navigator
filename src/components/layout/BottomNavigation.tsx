@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { DiscoverIcon, ConnectIcon, FeedIcon, EventsIcon, ResourcesIcon } from "@/components/navigation/NavIcons";
-import { User } from "lucide-react";
 
 // Define navigation items
 const navItems = [
@@ -28,9 +27,9 @@ const navItems = [
     icon: EventsIcon
   },
   {
-    label: "Profile",
-    path: "/profile",
-    icon: () => <User />
+    label: "Resources",
+    path: "/resources",
+    icon: ResourcesIcon
   }
 ];
 
