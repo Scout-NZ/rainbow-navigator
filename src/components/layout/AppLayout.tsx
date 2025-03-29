@@ -1,9 +1,10 @@
 
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
-import { Search } from "lucide-react";
+import { Search, Settings } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,13 +45,25 @@ export function AppLayout() {
               isHomePage || isScrolled ? "rainbow-text" : "text-white"
             )}>Rainbow Navigator</h1>
           </div>
-          <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              type="search" 
-              placeholder="Search" 
-              className="pl-9 rounded-full bg-white border-none" 
-            />
+          <div className="flex items-center gap-3">
+            <div className="relative max-w-xs w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                type="search" 
+                placeholder="Search" 
+                className="pl-9 rounded-full bg-white border-none" 
+              />
+            </div>
+            <Button 
+              variant="ghost" 
+              size="icon"
+              asChild
+              className="ml-2"
+            >
+              <Link to="/admin">
+                <Settings className="h-5 w-5" />
+              </Link>
+            </Button>
           </div>
         </div>
       </header>
