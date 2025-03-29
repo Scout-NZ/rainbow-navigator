@@ -65,21 +65,13 @@ export function AppLayout() {
               </Avatar>
             </Link>
             
-            <Button 
-              onClick={() => setShowChat(prev => !prev)}
-              className="relative overflow-hidden rounded-full bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green hover:opacity-90 transition-opacity"
-            >
-              <div className="flex items-center gap-2 px-1 py-0.5">
-                <MessageCircle className="h-5 w-5 text-white" />
-                <span className="text-white">Chat with AI</span>
-              </div>
-            </Button>
             <div className="relative max-w-xs w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
                 type="search" 
-                placeholder="Search" 
+                placeholder="Ask Navigator..." 
                 className="pl-9 rounded-full bg-white border-none" 
+                onClick={() => setShowChat(true)}
               />
             </div>
           </div>
