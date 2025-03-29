@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { mockUserProfile } from '@/data/mockData';
 import { supabase } from '@/integrations/supabase/client';
@@ -80,22 +79,24 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Set up auth state listener and check for existing session
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        setSession(session);
-        setUser(session?.user ?? null);
+      (event, newSession) => {
+        console.log('Auth state changed:', event, newSession?.user?.id);
+        setSession(newSession);
+        setUser(newSession?.user ?? null);
         
         // Don't fetch profile here - will be done in another effect
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      console.log('Initial session check:', initialSession?.user?.id);
+      setSession(initialSession);
+      setUser(initialSession?.user ?? null);
       setLoading(false);
     });
 
@@ -124,42 +125,44 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .from('profiles')
           .select('*')
           .eq('id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
-          if (error.code === 'PGRST116') {
-            console.log('Profile not found, creating new profile for user:', user.id);
-            
-            // Profile doesn't exist, create one
-            const newProfile = {
-              id: user.id,
-              name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-              username: user.email?.split('@')[0],
-              interests: [],
-              friends: 0,
-              groups: 0,
-              events: 0,
-            };
-            
-            const { error: insertError } = await supabase
-              .from('profiles')
-              .insert([newProfile]);
+          console.error('Error fetching user profile:', error);
+          throw error;
+        }
+        
+        if (!data) {
+          console.log('Profile not found, creating new profile for user:', user.id);
+          
+          // Profile doesn't exist, create one
+          const newProfile = {
+            id: user.id,
+            name: user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+            username: user.email?.split('@')[0],
+            interests: [],
+            friends: 0,
+            groups: 0,
+            events: 0,
+          };
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfile]);
               
-            if (insertError) {
-              console.error('Error creating profile:', insertError);
-              throw insertError;
-            }
-            
-            setUserProfile({
-              ...mockUserProfile,
-              ...newProfile,
-              id: user.id,
-            });
-          } else {
-            console.error('Error fetching user profile:', error);
-            throw error;
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            throw insertError;
           }
-        } else if (data) {
+          
+          setUserProfile({
+            ...mockUserProfile,
+            ...newProfile,
+            id: user.id,
+          });
+          
+          console.log('New profile created');
+        } else {
           // Transform the social links from JSON to our expected format
           const socialLinksData = data.sociallinks as Json;
           let parsedSocialLinks: UserProfile['socialLinks'] = {};
@@ -177,7 +180,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           const profileData: UserProfile = {
             id: data.id,
-            name: data.name || user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            name: data.name || user.user_metadata?.name || user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
             username: data.username,
             bio: data.bio,
             location: data.location,
@@ -192,6 +195,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             socialLinks: parsedSocialLinks,
           };
           
+          console.log('Profile data loaded:', profileData.name);
           setUserProfile(profileData);
         }
       } catch (error: any) {
@@ -199,7 +203,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setProfileError('Failed to load user profile');
         toast({
           title: 'Error',
-          description: 'Failed to load user profile.',
+          description: 'Failed to load user profile. Please try refreshing the page.',
           variant: 'destructive',
         });
       } finally {
@@ -228,7 +232,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const currentUser = { 
     id: user?.id || mockUserProfile.id,
-    name: userProfile.name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'User',
+    name: userProfile.name || user?.user_metadata?.name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User',
   };
 
   const joinGroup = (groupId: string) => {

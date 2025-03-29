@@ -24,14 +24,57 @@ export default function AuthCallback() {
           throw new Error(errorDescription);
         }
 
+        // Get session data and check for errors
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           throw error;
         }
 
-        console.log('Auth callback successful, session:', data.session?.user?.id);
+        if (!data.session) {
+          throw new Error('No session found');
+        }
+
+        console.log('Auth callback successful, user:', data.session.user.id);
         
+        // Check if profile exists, create if it doesn't
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.session.user.id)
+          .single();
+          
+        if (profileError && profileError.code === 'PGRST116') {
+          console.log('Profile not found, creating new profile');
+          
+          // Create a new profile
+          const newProfile = {
+            id: data.session.user.id,
+            name: data.session.user.user_metadata?.name || data.session.user.user_metadata?.full_name || data.session.user.email?.split('@')[0] || 'User',
+            username: data.session.user.email?.split('@')[0],
+            interests: [],
+            friends: 0,
+            groups: 0,
+            events: 0,
+          };
+          
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert([newProfile]);
+            
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            // Continue anyway - we'll try to use the session
+          } else {
+            console.log('New profile created successfully');
+          }
+        } else if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          // Continue anyway - we'll try to use the session
+        } else {
+          console.log('Profile found:', profileData);
+        }
+
         // Redirect to home page if authentication was successful
         toast({
           title: 'Success',
