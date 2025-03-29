@@ -40,18 +40,31 @@ export default function ConnectPage() {
   const [groups, setGroups] = useState(mockGroups);
   
   useEffect(() => {
-    const updatedGroups = mockGroups.map(group => {
-      const storedCount = localStorage.getItem(`group-${group.id}-member-count`);
-      if (storedCount) {
-        return {
-          ...group,
-          memberCount: parseInt(storedCount)
-        };
-      }
-      return group;
-    });
+    const refreshGroups = () => {
+      const updatedGroups = mockGroups.map(group => {
+        const storedCount = localStorage.getItem(`group-${group.id}-member-count`);
+        if (storedCount) {
+          return {
+            ...group,
+            memberCount: parseInt(storedCount)
+          };
+        }
+        return group;
+      });
+      
+      setGroups(updatedGroups);
+    };
     
-    setGroups(updatedGroups);
+    refreshGroups();
+    
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key && e.key.startsWith('group-') && e.key.endsWith('-member-count')) {
+        refreshGroups();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [location.pathname, isGroupMember]);
   
   const friendSuggestions: FriendData[] = [

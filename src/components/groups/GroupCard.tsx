@@ -16,19 +16,34 @@ export function GroupCard({ group }: { group: Group }) {
   const isMember = isGroupMember(group.id);
   const [memberCount, setMemberCount] = useState(group.memberCount);
   
-  // Ensure the member count reflects if the current user is a member and any other updates
+  // Ensure the member count reflects the correct number from localStorage or updates if the user joins
   useEffect(() => {
-    // First check local storage for any saved member count
-    const storedMemberCount = localStorage.getItem(`group-${group.id}-member-count`);
-    if (storedMemberCount) {
-      setMemberCount(parseInt(storedMemberCount));
-    } else if (isMember && memberCount === group.memberCount) {
-      // If the user is a member but count hasn't been updated, increment it
-      const newCount = group.memberCount + 1;
-      setMemberCount(newCount);
-      localStorage.setItem(`group-${group.id}-member-count`, newCount.toString());
-    }
-  }, [group.id, group.memberCount, isMember]);
+    const syncMemberCount = () => {
+      const storedMemberCount = localStorage.getItem(`group-${group.id}-member-count`);
+      
+      if (storedMemberCount) {
+        // Always use the stored count if available
+        setMemberCount(parseInt(storedMemberCount));
+      } else if (isMember && memberCount === group.memberCount) {
+        // If user is a member but count hasn't been updated, increment it
+        const newCount = group.memberCount + 1;
+        setMemberCount(newCount);
+        localStorage.setItem(`group-${group.id}-member-count`, newCount.toString());
+      }
+    };
+    
+    syncMemberCount();
+    
+    // Listen for storage events from other tabs/windows
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === `group-${group.id}-member-count` && e.newValue) {
+        setMemberCount(parseInt(e.newValue));
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [group.id, group.memberCount, isMember, memberCount]);
   
   const handleViewGroup = () => {
     console.log("Viewing group:", group.name);
