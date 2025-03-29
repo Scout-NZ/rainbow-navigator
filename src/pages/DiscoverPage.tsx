@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -246,12 +245,6 @@ export default function DiscoverPage() {
                 <p className="text-muted-foreground">No {selectedCategory} locations found.</p>
               </div>
             )}
-            
-            <div className="min-w-[250px] max-w-[250px] h-[180px] border border-dashed rounded-lg flex flex-col items-center justify-center">
-              <Plus className="h-8 w-8 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">Suggest a Location</p>
-              <Button variant="outline" size="sm" className="mt-2">Add Place</Button>
-            </div>
           </div>
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
