@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -97,7 +96,9 @@ export default function DiscoverPage() {
   
   return (
     <div className="pb-4">
-      <div className="flex justify-between items-center mb-4">
+      <div className="absolute top-0 left-0 right-0 h-40 z-0 bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green"></div>
+      
+      <div className="flex justify-between items-center mb-4 relative z-10">
         <h1 className="text-2xl font-bold text-white">Discover</h1>
         <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowChat(prev => !prev)}>
           Ask AI
@@ -105,7 +106,7 @@ export default function DiscoverPage() {
       </div>
       
       <InteractiveMap 
-        className="h-64 mb-6" 
+        className="h-64 mb-6 relative z-10" 
         defaultLocation={DEFAULT_LOCATION} 
         categoryFilter={selectedCategory}
         onLocationSelect={handleOpenLocationDetails}
@@ -172,7 +173,7 @@ export default function DiscoverPage() {
         </ScrollArea>
       </div>
       
-      <Tabs defaultValue="categories">
+      <Tabs defaultValue="categories" className="relative z-10">
         <TabsList className="w-full mb-4">
           <TabsTrigger value="categories" className="flex-1">Categories</TabsTrigger>
           <TabsTrigger value="trending" className="flex-1">Trending</TabsTrigger>
@@ -180,7 +181,6 @@ export default function DiscoverPage() {
         </TabsList>
         
         <TabsContent value="categories" className="mt-0">
-          {/* View All button across both columns */}
           <Card 
             className={`card-hover cursor-pointer mb-3 ${selectedCategory === null ? 'ring-2 ring-primary' : ''}`}
             onClick={handleViewAll}
@@ -266,7 +266,6 @@ export default function DiscoverPage() {
         </TabsContent>
       </Tabs>
       
-      {/* Location Details Dialog */}
       <LocationDetailsDialog
         location={selectedLocation}
         isOpen={showLocationDetails}
