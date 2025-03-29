@@ -98,7 +98,7 @@ export default function DiscoverPage() {
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold rainbow-text">Discover</h1>
+        <h1 className="text-2xl font-bold text-white">Discover</h1>
         <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowChat(prev => !prev)}>
           Ask AI
         </Button>
