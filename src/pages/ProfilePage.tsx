@@ -7,8 +7,57 @@ import { mockUserProfile, mockEvents, mockGroups, mockPosts } from "@/data/mockD
 import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { PostCard } from "@/components/feed/PostCard";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { useToast } from "@/hooks/use-toast";
+
+interface ProfileFormValues {
+  name: string;
+  username: string;
+  bio: string;
+  location: string;
+  interests: string;
+}
 
 export default function ProfilePage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const { toast } = useToast();
+  const [profile, setProfile] = useState(mockUserProfile);
+  
+  const form = useForm<ProfileFormValues>({
+    defaultValues: {
+      name: profile.name,
+      username: profile.username,
+      bio: profile.bio,
+      location: profile.location || "",
+      interests: profile.interests.join(", "),
+    },
+  });
+
+  const onSubmit = (values: ProfileFormValues) => {
+    // In a real app, this would call an API to update the profile
+    const updatedProfile = {
+      ...profile,
+      name: values.name,
+      username: values.username,
+      bio: values.bio,
+      location: values.location,
+      interests: values.interests.split(",").map(tag => tag.trim()).filter(Boolean),
+    };
+    
+    setProfile(updatedProfile);
+    setIsDialogOpen(false);
+    
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been successfully updated.",
+    });
+  };
+
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
@@ -26,34 +75,38 @@ export default function ProfilePage() {
           <div className="px-4 pb-4 pt-0 relative">
             <Avatar className="h-24 w-24 border-4 border-background absolute -top-12">
               <img 
-                src={mockUserProfile.imageUrl} 
-                alt={mockUserProfile.name}
+                src={profile.imageUrl} 
+                alt={profile.name}
                 className="object-cover"
               />
             </Avatar>
             
             <div className="pt-16 flex justify-between items-start">
               <div>
-                <h2 className="text-xl font-bold">{mockUserProfile.name}</h2>
-                <p className="text-muted-foreground text-sm">{mockUserProfile.username}</p>
+                <h2 className="text-xl font-bold">{profile.name}</h2>
+                <p className="text-muted-foreground text-sm">{profile.username}</p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setIsDialogOpen(true)}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit Profile
               </Button>
             </div>
             
-            <p className="mt-3 text-sm">{mockUserProfile.bio}</p>
+            <p className="mt-3 text-sm">{profile.bio}</p>
             
-            {mockUserProfile.location && (
+            {profile.location && (
               <div className="flex items-center mt-2 text-sm text-muted-foreground">
                 <Globe className="h-4 w-4 mr-2" />
-                <span>{mockUserProfile.location}</span>
+                <span>{profile.location}</span>
               </div>
             )}
             
             <div className="flex gap-2 mt-3 flex-wrap">
-              {mockUserProfile.interests.map(interest => (
+              {profile.interests.map(interest => (
                 <Badge key={interest} variant="secondary" className="text-xs">
                   #{interest}
                 </Badge>
@@ -62,15 +115,15 @@ export default function ProfilePage() {
             
             <div className="grid grid-cols-3 gap-2 mt-4 text-center">
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{mockUserProfile.friends}</div>
+                <div className="text-lg font-bold">{profile.friends}</div>
                 <div className="text-xs text-muted-foreground">Friends</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{mockUserProfile.groups}</div>
+                <div className="text-lg font-bold">{profile.groups}</div>
                 <div className="text-xs text-muted-foreground">Groups</div>
               </div>
               <div className="p-2 rounded-md bg-muted/30">
-                <div className="text-lg font-bold">{mockUserProfile.events}</div>
+                <div className="text-lg font-bold">{profile.events}</div>
                 <div className="text-xs text-muted-foreground">Events</div>
               </div>
             </div>
@@ -168,6 +221,112 @@ export default function ProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
+      
+      {/* Edit Profile Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your profile information below.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        {...field} 
+                        placeholder="Tell the community about yourself..." 
+                        className="h-24"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="location"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="Where are you based?" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="interests"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Interests (comma-separated)</FormLabel>
+                    <FormControl>
+                      <Input {...field} placeholder="lgbtq, art, music, activism" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
