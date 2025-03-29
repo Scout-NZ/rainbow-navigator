@@ -7,7 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { parseCSV, importLocations } from "@/utils/csvImport";
 import { toast } from "@/components/ui/use-toast";
-import { FileText, Upload, AlertCircle, CheckCircle2 } from "lucide-react";
+import { FileText, Upload, AlertCircle, CheckCircle2, ShieldAlert } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export function CSVImporter() {
@@ -16,12 +16,14 @@ export function CSVImporter() {
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<{success: number, errors: number} | null>(null);
+  const [permissionError, setPermissionError] = useState(false);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile);
     setPreview([]);
     setResult(null);
+    setPermissionError(false);
     
     if (selectedFile) {
       const reader = new FileReader();
@@ -49,6 +51,7 @@ export function CSVImporter() {
     setImporting(true);
     setProgress(0);
     setResult(null);
+    setPermissionError(false);
     
     try {
       const reader = new FileReader();
@@ -85,7 +88,15 @@ export function CSVImporter() {
         setProgress(100);
         setResult(result);
         
-        if (result.success > 0) {
+        // Check if we have a permission error (all records failed)
+        if (result.errors === locations.length && result.success === 0) {
+          setPermissionError(true);
+          toast({
+            title: "Permission denied",
+            description: "You don't have permission to import locations. Contact your administrator.",
+            variant: "destructive"
+          });
+        } else if (result.success > 0) {
           toast({
             title: "Import completed",
             description: `Successfully imported ${result.success} locations.${result.errors > 0 ? ` Failed to import ${result.errors} locations.` : ''}`,
@@ -124,6 +135,18 @@ export function CSVImporter() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          {permissionError && (
+            <Alert variant="destructive">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertTitle>Permission Denied</AlertTitle>
+              <AlertDescription>
+                Your account doesn't have permission to import data into the locations table. 
+                This is likely due to Row Level Security (RLS) policies. Please contact your 
+                Supabase administrator to grant you the necessary permissions.
+              </AlertDescription>
+            </Alert>
+          )}
+        
           <div className="grid w-full max-w-sm items-center gap-1.5">
             <Input
               type="file"
@@ -145,7 +168,7 @@ export function CSVImporter() {
             </div>
           )}
           
-          {result && (
+          {result && !permissionError && (
             <Alert variant={result.errors > 0 ? "default" : "default"} className="border-l-4 border-l-primary">
               <CheckCircle2 className="h-4 w-4" />
               <AlertTitle>Import Completed</AlertTitle>
@@ -212,6 +235,7 @@ export function CSVImporter() {
           setFile(null);
           setPreview([]);
           setResult(null);
+          setPermissionError(false);
         }} disabled={importing || !file}>
           Clear
         </Button>
