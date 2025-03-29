@@ -1,3 +1,4 @@
+
 // Map of identities to their pride flag backgrounds
 export interface PrideIdentity {
   id: string;
@@ -49,7 +50,7 @@ export const prideIdentities: PrideIdentity[] = [
   {
     id: "intersex",
     label: "Intersex",
-    flagGradient: "radial-gradient(circle at center, #7902AA 10%, transparent 12%, transparent 18%, #7902AA 20%, transparent 22%), linear-gradient(180deg, #FFDA00 0% 100%)",
+    flagGradient: "radial-gradient(circle at center, transparent 10%, #7902AA 12%, #7902AA 18%, transparent 20%), linear-gradient(180deg, #FFDA00 0% 100%)",
   },
   {
     id: "genderfluid",
