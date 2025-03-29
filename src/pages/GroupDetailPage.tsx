@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Calendar, Lock, MessageCircle, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,7 +30,7 @@ export default function GroupDetailPage() {
       <Button 
         variant="ghost" 
         size="sm" 
-        className="mb-4"
+        className="mb-4 text-white"
         onClick={() => navigate("/connect")}
       >
         <ArrowLeft className="h-4 w-4 mr-1" />
