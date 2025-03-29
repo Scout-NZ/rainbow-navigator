@@ -14,7 +14,18 @@ import {
 import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-export function ResourceCard({ resource }: { resource: Resource }) {
+// Update the Resource type to include optional neighbourhood
+type ResourceWithNeighbourhood = Resource & {
+  location?: {
+    address: string;
+    city: string;
+    lat: number;
+    lng: number;
+    neighbourhood?: string;
+  };
+};
+
+export function ResourceCard({ resource }: { resource: ResourceWithNeighbourhood }) {
   const [showDetails, setShowDetails] = useState(false);
 
   return (
