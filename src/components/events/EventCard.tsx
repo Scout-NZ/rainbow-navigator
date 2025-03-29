@@ -61,7 +61,7 @@ export function EventCard({ event }: { event: Event }) {
         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{event.description}</p>
         
         <div className="flex gap-1 mt-2 flex-wrap">
-          {event.tags.slice(0, 3).map(tag => (
+          {event.tags && event.tags.slice(0, 3).map(tag => (
             <Badge key={tag} variant="secondary" className="text-xs">
               #{tag}
             </Badge>
@@ -72,7 +72,7 @@ export function EventCard({ event }: { event: Event }) {
       <CardFooter className="p-3 pt-0 flex justify-between gap-2">
         <Button variant="outline" size="sm" className="w-1/2">Details</Button>
         <Button size="sm" className="w-1/2 bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
-          Attend ({event.attendees})
+          Attend ({typeof event.attendees === 'number' ? event.attendees : event.attendees.length})
         </Button>
       </CardFooter>
     </Card>

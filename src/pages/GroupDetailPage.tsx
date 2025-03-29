@@ -67,7 +67,6 @@ export default function GroupDetailPage() {
         setDiscussions(JSON.parse(savedDiscussions));
       }
       
-      // Load group-specific events from localStorage
       const savedEvents = localStorage.getItem(`group-${groupId}-events`);
       if (savedEvents) {
         setGroupEvents(JSON.parse(savedEvents));
@@ -318,11 +317,13 @@ export default function GroupDetailPage() {
         name: userProfile.name,
         imageUrl: userProfile.imageUrl
       },
-      attendees: [currentUser.id],
+      attendees: 1,
       capacity: 50,
       category: eventData.category,
       imageUrl: null,
-      groupId: groupId
+      groupId: groupId,
+      price: "Free",
+      tags: [eventData.category, "Community", "GroupEvent"]
     };
     
     setGroupEvents([...groupEvents, newEvent]);
