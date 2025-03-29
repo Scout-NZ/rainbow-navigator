@@ -92,9 +92,9 @@ export const getIdentityById = (id: string | undefined): PrideIdentity | undefin
 
 export const getIdentityGradient = (id: string | undefined): string => {
   if (id === "none" || !id) {
-    // Progress Pride flag for no selection or "none" value
-    return "linear-gradient(to right, #000000 0, #000000 16.5%, #784F17 16.5%, #784F17 33%, #E40303 33%, #E40303 39%, #FF8C00 39%, #FF8C00 45%, #FFED00 45%, #FFED00 51%, #008026 51%, #008026 57%, #004DFF 57%, #004DFF 63%, #750787 63%, #750787 70%, #73D7EE 70%, #73D7EE 76%, #FFAFC8 76%, #FFAFC8 82%, #FFFFFF 82%, #FFFFFF 88%, #FFAFC8 88%, #FFAFC8 94%, #73D7EE 94%, #73D7EE 100%)";
+    // Use the same rainbow gradient as the ally identity for non-selected
+    return "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
   }
   const identity = getIdentityById(id);
-  return identity?.flagGradient || "linear-gradient(to right, #000000 0, #000000 16.5%, #784F17 16.5%, #784F17 33%, #E40303 33%, #E40303 39%, #FF8C00 39%, #FF8C00 45%, #FFED00 45%, #FFED00 51%, #008026 51%, #008026 57%, #004DFF 57%, #004DFF 63%, #750787 63%, #750787 70%, #73D7EE 70%, #73D7EE 76%, #FFAFC8 76%, #FFAFC8 82%, #FFFFFF 82%, #FFFFFF 88%, #FFAFC8 88%, #FFAFC8 94%, #73D7EE 94%, #73D7EE 100%)";
+  return identity?.flagGradient || "linear-gradient(45deg, #FF5757, #FF914D, #FFDE59, #70CE88, #5E9CF5, #9B87F5, #D069C3)";
 };
