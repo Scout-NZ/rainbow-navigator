@@ -26,7 +26,7 @@ export default function FeedPage() {
     if (!composeText.trim() && !composeImage) return;
     
     const newPost: Post = {
-      id: localPosts.length + 1,
+      id: typeof localPosts.length === 'number' ? localPosts.length + 1 : parseInt(String(localPosts.length)) + 1,
       content: {
         text: composeText.trim(),
         ...(composeImage && { imageUrl: composeImage })

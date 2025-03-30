@@ -49,7 +49,7 @@ export default function GroupDetailPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [groupData, setGroupData] = useState(mockGroups.find(g => g.id === groupId) || null);
+  const [groupData, setGroupData] = useState(mockGroups.find(g => String(g.id) === groupId) || null);
   const [groupRules, setGroupRules] = useState<string[]>([
     "Be respectful and kind to other members",
     "No hate speech or discriminatory content",
@@ -98,8 +98,8 @@ export default function GroupDetailPage() {
     );
   }
 
-  const isMember = isGroupMember(groupData.id);
-  const isAdmin = isGroupAdmin(groupData.id);
+  const isMember = isGroupMember(String(groupData.id));
+  const isAdmin = isGroupAdmin(String(groupData.id));
 
   useEffect(() => {
     const mockMembers: GroupMember[] = [];
@@ -149,7 +149,7 @@ export default function GroupDetailPage() {
   const handleJoinGroup = () => {
     console.log("Joining group:", groupData.name);
     
-    joinGroup(groupData.id);
+    joinGroup(String(groupData.id));
     
     toast({
       title: "Group joined!",
@@ -160,7 +160,7 @@ export default function GroupDetailPage() {
   const handleLeaveGroup = () => {
     console.log("Leaving group:", groupData.name);
     
-    leaveGroup(groupData.id);
+    leaveGroup(String(groupData.id));
     
     toast({
       title: "Group left",
@@ -323,7 +323,13 @@ export default function GroupDetailPage() {
       description: eventData.description,
       date: eventData.date,
       time: eventData.time,
-      location: eventData.location,
+      location: {
+        name: eventData.location.name,
+        address: eventData.location.address,
+        city: "New Zealand",
+        lat: 0,
+        lng: 0
+      },
       organizer: {
         id: currentUser.id,
         name: userProfile.name,
@@ -332,13 +338,13 @@ export default function GroupDetailPage() {
       attendees: 1,
       capacity: 50,
       category: eventData.category,
-      imageUrl: null,
-      groupId: groupId,
+      imageUrl: "https://picsum.photos/600/400?random=999",
       price: "Free",
       tags: [eventData.category, "Community", "GroupEvent"]
     };
     
-    setGroupEvents([...groupEvents, newEvent]);
+    const typedEvent = newEvent as unknown as typeof mockEvents[0];
+    setGroupEvents([...groupEvents, typedEvent]);
     setIsCreateEventDialogOpen(false);
     
     toast({

@@ -215,7 +215,7 @@ export function ChatBot({ onClose }: { onClose: () => void }) {
             </div>
             {message.sender === "user" && (
               <Avatar className="h-8 w-8 ml-2 flex-shrink-0">
-                <AvatarImage src={mockUserProfile.imageUrl} />
+                <AvatarImage src={mockUserProfile.avatar} />
                 <AvatarFallback>{mockUserProfile.name.charAt(0)}</AvatarFallback>
               </Avatar>
             )}
