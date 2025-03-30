@@ -1,32 +1,14 @@
 
 import { useEffect, useRef, useState } from "react";
-import { MapPin, Search, Locate } from "lucide-react";
+import { MapPin, Search, Locate, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { mockPlaces } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { LocationDetailsDialog } from "./LocationDetailsDialog";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { LatLngExpression } from 'leaflet';
+import { GoogleMap, useJsApiLoader, MarkerF, InfoWindowF } from '@react-google-maps/api';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
-
-// Fix Leaflet marker icon issue
-// This is needed because Leaflet expects the marker icons to be in a specific location
-import icon from 'leaflet/dist/images/marker-icon.png';
-import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-
-let DefaultIcon = L.icon({
-  iconUrl: icon,
-  shadowUrl: iconShadow,
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34]
-});
-
-L.Marker.prototype.options.icon = DefaultIcon;
 
 // Default map container style
 const containerStyle = {
@@ -119,35 +101,52 @@ const transformLocation = (location: any) => {
   };
 };
 
-// Custom marker icons based on place type
-const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
-  // If the location has an LGBT+ status, use a different icon class
-  let iconClassName = `marker-${type.toLowerCase()}`;
-  
-  if (lgbtStatus) {
-    iconClassName += ` marker-${lgbtStatus}`;
-  }
-  
-  return L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    className: iconClassName
-  });
+// Map options for Google Maps
+const mapOptions = {
+  disableDefaultUI: true,
+  zoomControl: false,
+  mapTypeControl: false,
+  streetViewControl: false,
+  styles: [
+    {
+      featureType: "poi",
+      elementType: "labels",
+      stylers: [{ visibility: "off" }]
+    }
+  ]
 };
 
-// MapController component to control the map view when props change
-function MapController({ center, zoom }: { center: { lat: number; lng: number }, zoom: number }) {
-  const map = useMap();
+// Custom marker icons based on place type
+const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
+  // Set base color based on type
+  let fillColor = '#4B5563'; // default gray
   
-  useEffect(() => {
-    map.setView([center.lat, center.lng], zoom);
-  }, [center, zoom, map]);
+  if (type.toLowerCase() === 'business') {
+    fillColor = '#F59E0B'; // amber
+  } else if (type.toLowerCase() === 'event') {
+    fillColor = '#8B5CF6'; // purple
+  } else if (type.toLowerCase() === 'resource') {
+    fillColor = '#10B981'; // emerald
+  }
   
-  return null;
-}
+  // Modify color for LGBT status
+  if (lgbtStatus === 'lgbt_owned' || lgbtStatus === 'lgbt_managed') {
+    fillColor = '#EC4899'; // pink
+  } else if (lgbtStatus === 'ally') {
+    fillColor = '#3B82F6'; // blue
+  }
+  
+  // For Google Maps we use SVG path as icon
+  return {
+    path: 'M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z',
+    fillColor: fillColor,
+    fillOpacity: 0.9,
+    strokeWeight: 1,
+    strokeColor: '#FFFFFF',
+    scale: 1.5,
+    anchor: { x: 12, y: 24 },
+  };
+};
 
 type MapProps = {
   className?: string;
@@ -171,7 +170,13 @@ export function InteractiveMap({
   const [isLocating, setIsLocating] = useState(false);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [mapCenter, setMapCenter] = useState(defaultLocation);
-  const mapRef = useRef<L.Map | null>(null);
+  const mapRef = useRef<google.maps.Map | null>(null);
+  
+  // Load Google Maps API
+  const { isLoaded } = useJsApiLoader({
+    id: 'google-map-script',
+    googleMapsApiKey: 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE'
+  });
   
   // Fetch locations from Supabase
   const { data: locations = [], isLoading, error } = useQuery({
@@ -254,7 +259,7 @@ export function InteractiveMap({
   // Function to handle map zoom
   const handleZoom = (zoomIn: boolean) => {
     if (mapRef.current) {
-      const currentZoom = mapRef.current.getZoom();
+      const currentZoom = mapRef.current.getZoom() || zoom;
       const newZoom = zoomIn ? currentZoom + 1 : currentZoom - 1;
       mapRef.current.setZoom(newZoom);
       setZoom(newZoom);
@@ -274,6 +279,12 @@ export function InteractiveMap({
           setUserLocation(userPos);
           setMapCenter(userPos);
           setZoom(14);
+          
+          // If map is loaded, pan to user location
+          if (mapRef.current) {
+            mapRef.current.panTo(userPos);
+            mapRef.current.setZoom(14);
+          }
           
           toast({
             title: "Location found",
@@ -302,9 +313,23 @@ export function InteractiveMap({
     }
   };
 
-  // Convert location objects to LatLngExpression for Leaflet
-  const mapCenterPosition: LatLngExpression = [mapCenter.lat, mapCenter.lng];
-  const userLocationPosition: LatLngExpression | undefined = userLocation ? [userLocation.lat, userLocation.lng] : undefined;
+  // Set map and save ref when loaded
+  const onMapLoad = (map: google.maps.Map) => {
+    mapRef.current = map;
+  };
+
+  // Handle map center changed
+  const onCenterChanged = () => {
+    if (mapRef.current) {
+      const newCenter = mapRef.current.getCenter();
+      if (newCenter) {
+        setMapCenter({
+          lat: newCenter.lat(),
+          lng: newCenter.lng()
+        });
+      }
+    }
+  };
 
   // Display loading or error message
   if (isLoading && locations.length === 0) {
@@ -343,88 +368,83 @@ export function InteractiveMap({
       </div>
       
       <div className="relative flex-1 min-h-[300px]">
-        {/* Leaflet Map component */}
-        <MapContainer
-          style={containerStyle}
-          zoom={zoom}
-          ref={(map) => {
-            if (map) mapRef.current = map;
-          }}
-          // We need to use `center` as an attribute that gets passed to MapOptions
-          // rather than a React prop, so we use typescript assertion here
-          {...{center: mapCenterPosition} as any}
-        >
-          <TileLayer
-            // Fix the TileLayer props
-            {...{
-              url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-              attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            } as any}
-          />
-          
-          {/* Controller to update map view when props change */}
-          <MapController 
-            center={userLocation || mapCenter} 
-            zoom={zoom} 
-          />
-          
-          {/* User location marker */}
-          {userLocation && userLocationPosition && (
-            <Marker
-              // Fix the Marker props 
-              {...{
-                position: userLocationPosition,
-                icon: L.divIcon({
-                  className: 'user-location-marker',
-                  html: '<div class="w-4 h-4 rounded-full bg-blue-500 border-2 border-white"></div>',
-                  iconSize: [16, 16],
-                  iconAnchor: [8, 8],
-                })
-              } as any}
-            />
-          )}
-          
-          {/* Apply filters here for rendering markers */}
-          {filteredPlaces.map((place) => {
-            const position: LatLngExpression = [place.location.lat, place.location.lng];
-            return (
-              <Marker
+        {isLoaded ? (
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={userLocation || mapCenter}
+            zoom={zoom}
+            options={mapOptions}
+            onLoad={onMapLoad}
+            onCenterChanged={onCenterChanged}
+          >
+            {/* User location marker */}
+            {userLocation && (
+              <MarkerF
+                position={userLocation}
+                icon={{
+                  path: google.maps.SymbolPath.CIRCLE,
+                  scale: 8,
+                  fillColor: "#3B82F6",
+                  fillOpacity: 1,
+                  strokeColor: "#FFFFFF",
+                  strokeWeight: 2,
+                }}
+              />
+            )}
+            
+            {/* Place markers */}
+            {filteredPlaces.map((place) => (
+              <MarkerF
                 key={place.id}
-                // Fix the Marker props
-                {...{
-                  position: position,
-                  icon: getMarkerIcon(place.type, place.lgbt_status),
-                  eventHandlers: {
-                    click: () => handleMarkerClick(place),
-                  }
-                } as any}
+                position={{
+                  lat: place.location.lat,
+                  lng: place.location.lng
+                }}
+                icon={getMarkerIcon(place.type, place.lgbt_status)}
+                onClick={() => handleMarkerClick(place)}
+              />
+            ))}
+            
+            {/* Info window for selected place */}
+            {selectedPlace && (
+              <InfoWindowF
+                position={{
+                  lat: selectedPlace.location.lat,
+                  lng: selectedPlace.location.lng
+                }}
+                onCloseClick={() => setSelectedPlace(null)}
               >
-                <Popup>
-                  <div className="p-2 max-w-[200px]">
-                    <h3 className="font-semibold text-sm">{place.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1">{place.category}</p>
-                    <p className="text-xs mt-1">{place.location.address}, {place.location.city}</p>
-                    {place.lgbt_status && (
-                      <p className="text-xs mt-1 font-medium">
-                        {place.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
-                        {place.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
-                        {place.lgbt_status === 'ally' && '❤️ Ally'}
-                      </p>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="link" 
-                      className="text-xs p-0 h-auto mt-1" 
-                      onClick={() => openLocationDetails(place)}
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
-        </MapContainer>
+                <div className="p-2 max-w-[200px]">
+                  <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
+                  <p className="text-xs mt-1">
+                    {selectedPlace.location.address}, {selectedPlace.location.city}
+                  </p>
+                  {selectedPlace.lgbt_status && (
+                    <p className="text-xs mt-1 font-medium">
+                      {selectedPlace.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
+                      {selectedPlace.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
+                      {selectedPlace.lgbt_status === 'ally' && '❤️ Ally'}
+                    </p>
+                  )}
+                  <Button 
+                    size="sm" 
+                    variant="link" 
+                    className="text-xs p-0 h-auto mt-1" 
+                    onClick={() => openLocationDetails(selectedPlace)}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              </InfoWindowF>
+            )}
+          </GoogleMap>
+        ) : (
+          <div className="flex items-center justify-center h-full bg-muted">
+            <div className="animate-spin mr-2 h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
+            <span>Loading map...</span>
+          </div>
+        )}
         
         {/* Custom zoom controls */}
         <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
@@ -453,29 +473,6 @@ export function InteractiveMap({
         isOpen={showDetailsDialog} 
         onClose={() => setShowDetailsDialog(false)}
       />
-      
-      {/* Add CSS for custom markers */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .marker-business {
-          filter: hue-rotate(30deg);
-        }
-        .marker-event {
-          filter: hue-rotate(240deg);
-        }
-        .marker-resource {
-          filter: hue-rotate(120deg);
-        }
-        .user-location-marker {
-          border-radius: 50%;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3);
-        }
-        .marker-lgbt_owned, .marker-lgbt_managed {
-          filter: hue-rotate(300deg);
-        }
-        .marker-ally {
-          filter: hue-rotate(60deg);
-        }
-      `}} />
     </div>
   );
 }

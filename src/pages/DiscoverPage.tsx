@@ -80,7 +80,10 @@ export default function DiscoverPage() {
       
       {/* Map Section - Large and prominent */}
       <div className="rounded-lg overflow-hidden h-[75vh] mb-6 shadow-md">
-        <InteractiveMap className="h-full" />
+        <InteractiveMap 
+          className="h-full"
+          categoryFilter={selectedCategory === "All" ? null : selectedCategory}
+        />
       </div>
       
       {/* Categories Filter */}
