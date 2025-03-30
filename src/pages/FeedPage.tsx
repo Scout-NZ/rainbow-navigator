@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -234,7 +233,12 @@ export default function FeedPage() {
         
         <TabsContent value="friends" className="space-y-4 mt-4">
           {localPosts
-            .filter(post => post.author.id < 4) // Just a simple filter for demo
+            .filter(post => {
+              const authorId = typeof post.author.id === 'string' 
+                ? parseInt(post.author.id, 10) 
+                : post.author.id;
+              return authorId < 4;
+            })
             .map(post => (
               <PostCard key={post.id} post={post} />
             ))}
