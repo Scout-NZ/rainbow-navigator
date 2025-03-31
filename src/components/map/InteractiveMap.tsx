@@ -136,7 +136,7 @@ const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
     fillColor = '#3B82F6'; // blue
   }
   
-  // For Google Maps we use SVG path as icon
+  // For Google Maps we use SVG path with proper Point object for anchor
   return {
     path: 'M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z',
     fillColor: fillColor,
@@ -144,7 +144,7 @@ const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
     strokeWeight: 1,
     strokeColor: '#FFFFFF',
     scale: 1.5,
-    anchor: { x: 12, y: 24 },
+    anchor: new google.maps.Point(12, 24),
   };
 };
 
