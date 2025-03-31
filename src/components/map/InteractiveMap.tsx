@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { toast } from "@/components/ui/use-toast";
@@ -42,17 +41,13 @@ export function InteractiveMap({
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   
-  // Fetch and filter locations
   const { filteredPlaces } = useLocations(filter, categoryFilter, lgbtStatusFilter);
   
-  // Load Google Maps API with error handling
   const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
-    libraries
+    libraries,
   });
   
-  // Handle Google Maps loading error
   useEffect(() => {
     if (loadError) {
       console.error("Error loading Google Maps:", loadError);
@@ -69,18 +64,15 @@ export function InteractiveMap({
     setSelectedPlace(place);
   };
 
-  // Function to open location details dialog
   const openLocationDetails = (place: any) => {
     setSelectedPlace(place);
     setShowDetailsDialog(true);
     
-    // If a parent component wants to handle the selection, call the callback
     if (onLocationSelect) {
       onLocationSelect(place);
     }
   };
 
-  // Function to handle map zoom
   const handleZoom = (zoomIn: boolean) => {
     if (mapRef.current) {
       const currentZoom = mapRef.current.getZoom() || zoom;
@@ -90,7 +82,6 @@ export function InteractiveMap({
     }
   };
 
-  // Function to get user's location
   const getUserLocation = () => {
     setIsLocating(true);
     if (navigator.geolocation) {
@@ -104,7 +95,6 @@ export function InteractiveMap({
           setMapCenter(userPos);
           setZoom(14);
           
-          // If map is loaded, pan to user location
           if (mapRef.current) {
             mapRef.current.panTo(userPos);
             mapRef.current.setZoom(14);
@@ -137,14 +127,12 @@ export function InteractiveMap({
     }
   };
 
-  // Set map and save ref when loaded
   const onMapLoad = (map: google.maps.Map) => {
     console.log("Google Map loaded successfully");
     mapRef.current = map;
     setMapLoaded(true);
   };
 
-  // Handle map center changed
   const onCenterChanged = () => {
     if (mapRef.current) {
       const newCenter = mapRef.current.getCenter();
@@ -191,7 +179,6 @@ export function InteractiveMap({
           <MapLoadingState error={mapError} />
         )}
         
-        {/* Custom zoom controls */}
         {isLoaded && mapLoaded && (
           <MapZoomControls 
             onZoomIn={() => handleZoom(true)}
@@ -200,7 +187,6 @@ export function InteractiveMap({
         )}
       </div>
 
-      {/* Location Details Dialog */}
       <LocationDetailsDialog 
         location={selectedPlace} 
         isOpen={showDetailsDialog} 
