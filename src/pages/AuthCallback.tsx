@@ -118,8 +118,16 @@ export default function AuthCallback() {
         
         // If we're in a popup, notify the parent window of the error and close
         if (window.opener) {
-          window.opener.postMessage({ type: 'AUTH_COMPLETE', success: false, error: err.message }, window.location.origin);
-          window.close();
+          window.opener.postMessage({ 
+            type: 'AUTH_COMPLETE', 
+            success: false, 
+            error: err.message 
+          }, window.location.origin);
+          
+          // Wait a moment before closing to ensure the message is sent
+          setTimeout(() => {
+            window.close();
+          }, 1000);
           return;
         }
         

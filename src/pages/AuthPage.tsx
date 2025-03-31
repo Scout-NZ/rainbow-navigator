@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +29,36 @@ export default function AuthPage() {
   if (!loading && user) {
     return <Navigate to="/" replace />;
   }
+
+  useEffect(() => {
+    // Listen for messages from the popup window
+    const handleAuthMessage = (event: MessageEvent) => {
+      // Only accept messages from the same origin
+      if (event.origin !== window.location.origin) return;
+      
+      if (event.data.type === 'AUTH_COMPLETE') {
+        setAuthInProgress(false);
+        setOpenDialog(false);
+        
+        if (event.data.success) {
+          toast({
+            title: 'Success',
+            description: 'You have been signed in successfully.',
+          });
+          navigate('/');
+        } else {
+          toast({
+            title: 'Authentication Error',
+            description: event.data.error || 'Failed to complete authentication',
+            variant: 'destructive',
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('message', handleAuthMessage);
+    return () => window.removeEventListener('message', handleAuthMessage);
+  }, [toast, navigate]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,39 +135,28 @@ export default function AuthPage() {
     setAuthInProgress(true);
     
     try {
-      // Get the current URL for the redirect
-      const currentOrigin = window.location.origin;
-      const redirectUrl = `${currentOrigin}/auth/callback`;
+      // Open the auth popup window
+      const popupWindow = window.open('/auth-popup', '_blank', 'width=600,height=600');
       
-      console.log(`Initiating Google sign-in with redirect to: ${redirectUrl}`);
-      
-      // Open a new window or tab for the authentication
-      window.open('/auth-popup', '_blank', 'width=600,height=600');
+      if (!popupWindow) {
+        throw new Error('Popup blocked by browser. Please enable popups for this site.');
+      }
       
       // Show dialog informing user about popup
       setDialogMessage('Please complete the authentication in the new window. This page will refresh once you\'re logged in.');
       setOpenDialog(true);
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          }
-        },
-      });
-
-      if (error) throw error;
+      // Focus the popup window
+      popupWindow.focus();
       
-      // Success will redirect automatically
-      console.log('Google auth initialized:', data);
+      // We don't need to call supabase.auth.signInWithOAuth here
+      // The popup handles that directly now
+      
     } catch (error: any) {
-      console.error('Error signing in with Google:', error);
+      console.error('Error opening Google sign-in popup:', error);
       toast({
         title: 'Error',
-        description: error.message || 'Could not sign in with Google. Please check your network connection and try again.',
+        description: error.message || 'Could not open the login popup. Please check your browser settings.',
         variant: 'destructive',
       });
       setAuthInProgress(false);
