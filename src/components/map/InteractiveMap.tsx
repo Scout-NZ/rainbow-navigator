@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -104,8 +103,8 @@ const transformLocation = (location: any) => {
 // Google Maps API key
 const GOOGLE_MAPS_API_KEY = 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE';
 
-// Libraries to load with Google Maps - fix the library types to match the expected types
-const libraries: ["places" | "drawing" | "geometry" | "visualization"][] = ["places"];
+// Libraries to load with Google Maps - defining correctly for @react-google-maps/api
+const libraries = ['places'] as ['places' | 'drawing' | 'geometry' | 'visualization'];
 
 // Map options for Google Maps
 const mapOptions = {
@@ -528,4 +527,3 @@ export function InteractiveMap({
     </div>
   );
 }
-
