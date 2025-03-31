@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -103,8 +104,8 @@ const transformLocation = (location: any) => {
 // Google Maps API key
 const GOOGLE_MAPS_API_KEY = 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE';
 
-// Libraries to load with Google Maps
-const libraries: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ["places"];
+// Libraries to load with Google Maps - fix the library types to match the expected types
+const libraries: ["places" | "drawing" | "geometry" | "visualization"][] = ["places"];
 
 // Map options for Google Maps
 const mapOptions = {
@@ -351,15 +352,10 @@ export function InteractiveMap({
     setMapLoaded(true);
   };
 
-  // Handle map load error
-  const onMapLoadError = (error: Error) => {
+  // Handle map load error - but handle it in the useEffect for loadError instead
+  const handleMapLoadError = (error: Error) => {
     console.error("Error loading map:", error);
     setMapError(`Failed to initialize map: ${error.message}`);
-    toast({
-      title: "Map Error",
-      description: `Failed to initialize map: ${error.message}`,
-      variant: "destructive"
-    });
   };
 
   // Handle map center changed
@@ -409,7 +405,6 @@ export function InteractiveMap({
             options={mapOptions}
             onLoad={onMapLoad}
             onCenterChanged={onCenterChanged}
-            onError={onMapLoadError}
           >
             {mapLoaded && (
               <>
@@ -533,3 +528,4 @@ export function InteractiveMap({
     </div>
   );
 }
+
