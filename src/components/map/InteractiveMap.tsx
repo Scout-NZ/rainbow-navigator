@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { toast } from "@/components/ui/use-toast";
@@ -10,6 +11,7 @@ import { useLocations } from "./useLocations";
 import {
   DEFAULT_LOCATION,
   GOOGLE_MAPS_API_KEY,
+  LOADER_ID,
   libraries,
   mapOptions,
   containerStyle
@@ -46,6 +48,7 @@ export function InteractiveMap({
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,
+    id: LOADER_ID
   });
   
   useEffect(() => {

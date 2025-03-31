@@ -36,6 +36,9 @@ export const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 // Google Maps API key
 export const GOOGLE_MAPS_API_KEY = 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
 
+// Loader ID - consistent across all components
+export const LOADER_ID = 'rainbow-navigator-maps';
+
 // Libraries to load with Google Maps
 export const libraries = ['places'] as ['places' | 'drawing' | 'geometry' | 'visualization'];
 
