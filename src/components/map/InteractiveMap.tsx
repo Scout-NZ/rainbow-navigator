@@ -45,6 +45,7 @@ export function InteractiveMap({
   
   const { filteredPlaces } = useLocations(filter, categoryFilter, lgbtStatusFilter);
   
+  // Using the consistent loader ID from mapUtils
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     libraries,

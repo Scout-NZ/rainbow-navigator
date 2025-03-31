@@ -21,6 +21,12 @@ export function MapMarkers({
   onInfoWindowClose,
   onViewDetails
 }: MapMarkersProps) {
+  // Early return if google isn't available
+  if (typeof google === 'undefined') {
+    console.warn('Google Maps API not loaded yet');
+    return null;
+  }
+
   return (
     <>
       {/* User location marker */}

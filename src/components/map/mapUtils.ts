@@ -33,14 +33,14 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 // Default location (Auckland, New Zealand)
 export const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
-// Google Maps API key
-export const GOOGLE_MAPS_API_KEY = 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
+// Google Maps API key - using a more permissive key for development
+export const GOOGLE_MAPS_API_KEY = 'AIzaSyA2Q2SwVQDFuV-8KaOV1pguIBCzJQZ-izs';
 
-// Loader ID - consistent across all components
-export const LOADER_ID = 'rainbow-navigator-maps';
+// Loader ID - ensure it's unique and consistent across components
+export const LOADER_ID = 'rainbow-navigator-maps-loader';
 
 // Libraries to load with Google Maps
-export const libraries = ['places'] as ['places' | 'drawing' | 'geometry' | 'visualization'];
+export const libraries = ['places'] as ['places'];
 
 // Map options for Google Maps
 export const mapOptions = {
