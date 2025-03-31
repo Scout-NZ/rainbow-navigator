@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { MapPin, Search, Locate, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -101,6 +100,12 @@ const transformLocation = (location: any) => {
   };
 };
 
+// Google Maps API key
+const GOOGLE_MAPS_API_KEY = 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE';
+
+// Libraries to load with Google Maps
+const libraries: ("places" | "drawing" | "geometry" | "localContext" | "visualization")[] = ["places"];
+
 // Map options for Google Maps
 const mapOptions = {
   disableDefaultUI: true,
@@ -171,27 +176,53 @@ export function InteractiveMap({
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
   const [mapCenter, setMapCenter] = useState(defaultLocation);
   const mapRef = useRef<google.maps.Map | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const [mapError, setMapError] = useState<string | null>(null);
   
-  // Load Google Maps API
-  const { isLoaded } = useJsApiLoader({
+  // Load Google Maps API with error handling
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE'
+    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    libraries
   });
+  
+  // Handle Google Maps loading error
+  useEffect(() => {
+    if (loadError) {
+      console.error("Error loading Google Maps:", loadError);
+      setMapError("Failed to load Google Maps. Please check your connection and try again.");
+      toast({
+        title: "Map Error",
+        description: "Failed to load Google Maps. Please check your connection and try again.",
+        variant: "destructive"
+      });
+    }
+  }, [loadError]);
   
   // Fetch locations from Supabase
   const { data: locations = [], isLoading, error } = useQuery({
     queryKey: ['locations'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('locations')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching locations:', error);
-        throw error;
+      try {
+        const { data, error } = await supabase
+          .from('locations')
+          .select('*');
+        
+        if (error) {
+          console.error('Error fetching locations:', error);
+          throw error;
+        }
+        
+        return data.map(transformLocation);
+      } catch (err) {
+        console.error('Failed to fetch locations:', err);
+        toast({
+          title: "Error",
+          description: "Failed to load location data. Using mock data instead.",
+          variant: "destructive"
+        });
+        return [];
       }
-      
-      return data.map(transformLocation);
     }
   });
   
@@ -315,7 +346,20 @@ export function InteractiveMap({
 
   // Set map and save ref when loaded
   const onMapLoad = (map: google.maps.Map) => {
+    console.log("Google Map loaded successfully");
     mapRef.current = map;
+    setMapLoaded(true);
+  };
+
+  // Handle map load error
+  const onMapLoadError = (error: Error) => {
+    console.error("Error loading map:", error);
+    setMapError(`Failed to initialize map: ${error.message}`);
+    toast({
+      title: "Map Error",
+      description: `Failed to initialize map: ${error.message}`,
+      variant: "destructive"
+    });
   };
 
   // Handle map center changed
@@ -330,17 +374,6 @@ export function InteractiveMap({
       }
     }
   };
-
-  // Display loading or error message
-  if (isLoading && locations.length === 0) {
-    // Show loading state (using mock data as fallback)
-    console.log("Loading locations...");
-  }
-
-  if (error && locations.length === 0) {
-    console.error("Error loading locations:", error);
-    // Using mock data as fallback
-  }
 
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
@@ -376,95 +409,119 @@ export function InteractiveMap({
             options={mapOptions}
             onLoad={onMapLoad}
             onCenterChanged={onCenterChanged}
+            onError={onMapLoadError}
           >
-            {/* User location marker */}
-            {userLocation && (
-              <MarkerF
-                position={userLocation}
-                icon={{
-                  path: google.maps.SymbolPath.CIRCLE,
-                  scale: 8,
-                  fillColor: "#3B82F6",
-                  fillOpacity: 1,
-                  strokeColor: "#FFFFFF",
-                  strokeWeight: 2,
-                }}
-              />
-            )}
-            
-            {/* Place markers */}
-            {filteredPlaces.map((place) => (
-              <MarkerF
-                key={place.id}
-                position={{
-                  lat: place.location.lat,
-                  lng: place.location.lng
-                }}
-                icon={getMarkerIcon(place.type, place.lgbt_status)}
-                onClick={() => handleMarkerClick(place)}
-              />
-            ))}
-            
-            {/* Info window for selected place */}
-            {selectedPlace && (
-              <InfoWindowF
-                position={{
-                  lat: selectedPlace.location.lat,
-                  lng: selectedPlace.location.lng
-                }}
-                onCloseClick={() => setSelectedPlace(null)}
-              >
-                <div className="p-2 max-w-[200px]">
-                  <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
-                  <p className="text-xs mt-1">
-                    {selectedPlace.location.address}, {selectedPlace.location.city}
-                  </p>
-                  {selectedPlace.lgbt_status && (
-                    <p className="text-xs mt-1 font-medium">
-                      {selectedPlace.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
-                      {selectedPlace.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
-                      {selectedPlace.lgbt_status === 'ally' && '❤️ Ally'}
-                    </p>
-                  )}
-                  <Button 
-                    size="sm" 
-                    variant="link" 
-                    className="text-xs p-0 h-auto mt-1" 
-                    onClick={() => openLocationDetails(selectedPlace)}
+            {mapLoaded && (
+              <>
+                {/* User location marker */}
+                {userLocation && (
+                  <MarkerF
+                    position={userLocation}
+                    icon={{
+                      path: google.maps.SymbolPath.CIRCLE,
+                      scale: 8,
+                      fillColor: "#3B82F6",
+                      fillOpacity: 1,
+                      strokeColor: "#FFFFFF",
+                      strokeWeight: 2,
+                    }}
+                  />
+                )}
+                
+                {/* Place markers */}
+                {filteredPlaces.map((place) => (
+                  <MarkerF
+                    key={place.id}
+                    position={{
+                      lat: place.location.lat,
+                      lng: place.location.lng
+                    }}
+                    icon={getMarkerIcon(place.type, place.lgbt_status)}
+                    onClick={() => handleMarkerClick(place)}
+                  />
+                ))}
+                
+                {/* Info window for selected place */}
+                {selectedPlace && (
+                  <InfoWindowF
+                    position={{
+                      lat: selectedPlace.location.lat,
+                      lng: selectedPlace.location.lng
+                    }}
+                    onCloseClick={() => setSelectedPlace(null)}
                   >
-                    View Details
-                  </Button>
-                </div>
-              </InfoWindowF>
+                    <div className="p-2 max-w-[200px]">
+                      <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
+                      <p className="text-xs mt-1">
+                        {selectedPlace.location.address}, {selectedPlace.location.city}
+                      </p>
+                      {selectedPlace.lgbt_status && (
+                        <p className="text-xs mt-1 font-medium">
+                          {selectedPlace.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
+                          {selectedPlace.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
+                          {selectedPlace.lgbt_status === 'ally' && '❤️ Ally'}
+                        </p>
+                      )}
+                      <Button 
+                        size="sm" 
+                        variant="link" 
+                        className="text-xs p-0 h-auto mt-1" 
+                        onClick={() => openLocationDetails(selectedPlace)}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </InfoWindowF>
+                )}
+              </>
             )}
           </GoogleMap>
         ) : (
           <div className="flex items-center justify-center h-full bg-muted">
-            <div className="animate-spin mr-2 h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
-            <span>Loading map...</span>
+            {mapError ? (
+              <div className="text-center p-4">
+                <div className="mb-2 h-12 w-12 text-red-500 mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-semibold text-red-500">Map Error</h3>
+                <p className="text-sm text-muted-foreground">{mapError}</p>
+                <p className="text-xs mt-2">Please check the console for more details</p>
+              </div>
+            ) : (
+              <>
+                <div className="animate-spin mr-2 h-5 w-5 border-2 border-primary border-t-transparent rounded-full"></div>
+                <span>Loading map...</span>
+              </>
+            )}
           </div>
         )}
         
         {/* Custom zoom controls */}
-        <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
-            onClick={() => handleZoom(true)}
-          >
-            +
-          </Button>
-          <Button 
-            size="sm" 
-            variant="secondary" 
-            className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
-            onClick={() => handleZoom(false)}
-          >
-            -
-          </Button>
-        </div>
+        {isLoaded && mapLoaded && (
+          <div className="absolute top-4 right-4 flex flex-col gap-2 z-[1000]">
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
+              onClick={() => handleZoom(true)}
+            >
+              +
+            </Button>
+            <Button 
+              size="sm" 
+              variant="secondary" 
+              className="h-8 w-8 p-0 rounded-full bg-white shadow-md"
+              onClick={() => handleZoom(false)}
+            >
+              -
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Location Details Dialog */}
