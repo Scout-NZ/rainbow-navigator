@@ -34,7 +34,7 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 export const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
 // Google Maps API key
-export const GOOGLE_MAPS_API_KEY = 'AIzaSyDQlnjBL6hINz0TKvDNbS5rQwSU-BH0inE';
+export const GOOGLE_MAPS_API_KEY = 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
 
 // Libraries to load with Google Maps
 export const libraries = ['places'] as ['places' | 'drawing' | 'geometry' | 'visualization'];
