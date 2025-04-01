@@ -18,9 +18,14 @@ import GroupDetailPage from "./pages/GroupDetailPage";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
 import AuthPopup from "./pages/AuthPopup";
+import LandingPage from "./pages/LandingPage";
 
 // Create a client
 const queryClient = new QueryClient();
+
+// Get the base URL from environment or default to '/app'
+// This allows the app to work in a subdirectory like rainbownavigator.com/app
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '/app';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -48,7 +53,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <UserProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={BASE_PATH}>
             <Routes>
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />

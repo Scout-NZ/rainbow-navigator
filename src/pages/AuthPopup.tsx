@@ -1,17 +1,20 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AuthPopup() {
   const [error, setError] = useState<string | null>(null);
+  
+  // Get base path for correct redirect URL construction
+  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
 
   useEffect(() => {
     const handleAuth = async () => {
       try {
         const currentOrigin = window.location.origin;
-        const redirectUrl = `${currentOrigin}/auth/callback`;
+        // Make sure the redirectUrl includes the base path
+        const redirectUrl = `${currentOrigin}${basePath}/auth/callback`;
         
-        console.log("Auth popup opened, initiating Google OAuth");
+        console.log("Auth popup opened, initiating Google OAuth with redirect URL:", redirectUrl);
         
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
@@ -59,7 +62,7 @@ export default function AuthPopup() {
     };
 
     handleAuth();
-  }, []);
+  }, [basePath]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">

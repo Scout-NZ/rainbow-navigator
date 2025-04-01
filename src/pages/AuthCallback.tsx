@@ -9,6 +9,9 @@ export default function AuthCallback() {
   const { toast } = useToast();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
+  
+  // Get base path for correct navigation
+  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
 
   useEffect(() => {
     // Handle OAuth callback

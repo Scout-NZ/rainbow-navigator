@@ -25,6 +25,9 @@ export default function AuthPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
   
+  // Get the base path for correct popup URL construction
+  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
+  
   // If user is already logged in, redirect to home
   if (!loading && user) {
     return <Navigate to="/" replace />;
@@ -135,8 +138,9 @@ export default function AuthPage() {
     setAuthInProgress(true);
     
     try {
-      // Open the auth popup window
-      const popupWindow = window.open('/auth-popup', '_blank', 'width=600,height=600');
+      // Open the auth popup window with the correct path that includes the basename
+      const popupPath = `${basePath}/auth-popup`;
+      const popupWindow = window.open(popupPath, '_blank', 'width=600,height=600');
       
       if (!popupWindow) {
         throw new Error('Popup blocked by browser. Please enable popups for this site.');
@@ -148,9 +152,6 @@ export default function AuthPage() {
       
       // Focus the popup window
       popupWindow.focus();
-      
-      // We don't need to call supabase.auth.signInWithOAuth here
-      // The popup handles that directly now
       
     } catch (error: any) {
       console.error('Error opening Google sign-in popup:', error);
