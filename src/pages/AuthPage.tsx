@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -25,8 +24,8 @@ export default function AuthPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogMessage, setDialogMessage] = useState('');
   
-  // Get the base path for correct popup URL construction
-  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
+  // For subdomain setup, we don't need a base path in the URL
+  const basePath = import.meta.env.VITE_BASE_PATH || '/';
   
   // If user is already logged in, redirect to home
   if (!loading && user) {
@@ -138,8 +137,8 @@ export default function AuthPage() {
     setAuthInProgress(true);
     
     try {
-      // Open the auth popup window with the correct path that includes the basename
-      const popupPath = `${basePath}/auth-popup`;
+      // Open the auth popup window with the correct path for subdomain
+      const popupPath = `${basePath}auth-popup`;
       const popupWindow = window.open(popupPath, '_blank', 'width=600,height=600');
       
       if (!popupWindow) {

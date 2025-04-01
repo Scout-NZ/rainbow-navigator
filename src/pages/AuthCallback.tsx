@@ -10,8 +10,8 @@ export default function AuthCallback() {
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
   
-  // Get base path for correct navigation
-  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
+  // For subdomain setup, we don't need a base path in the URL
+  const basePath = import.meta.env.VITE_BASE_PATH || '/';
 
   useEffect(() => {
     // Handle OAuth callback

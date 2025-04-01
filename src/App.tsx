@@ -23,9 +23,9 @@ import LandingPage from "./pages/LandingPage";
 // Create a client
 const queryClient = new QueryClient();
 
-// Get the base URL from environment or default to '/app'
-// This allows the app to work in a subdirectory like rainbownavigator.com/app
-const BASE_PATH = import.meta.env.VITE_BASE_PATH || '/app';
+// Since we're using a subdomain instead of a subdirectory, we don't need a base path
+// If environment variable is set, use it; otherwise, use '/'
+const BASE_PATH = import.meta.env.VITE_BASE_PATH || '/';
 
 // Protected route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

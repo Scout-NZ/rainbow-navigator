@@ -1,18 +1,19 @@
+
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export default function AuthPopup() {
   const [error, setError] = useState<string | null>(null);
   
-  // Get base path for correct redirect URL construction
-  const basePath = import.meta.env.VITE_BASE_PATH || '/app';
+  // For subdomain setup, we don't need a base path in the URL
+  const basePath = import.meta.env.VITE_BASE_PATH || '/';
 
   useEffect(() => {
     const handleAuth = async () => {
       try {
         const currentOrigin = window.location.origin;
-        // Make sure the redirectUrl includes the base path
-        const redirectUrl = `${currentOrigin}${basePath}/auth/callback`;
+        // Construct the redirect URL using the current origin (app.rainbownavigator.com)
+        const redirectUrl = `${currentOrigin}${basePath}auth/callback`;
         
         console.log("Auth popup opened, initiating Google OAuth with redirect URL:", redirectUrl);
         
