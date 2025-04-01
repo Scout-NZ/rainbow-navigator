@@ -1,10 +1,9 @@
 
 import { useState } from "react";
-import { MapPin, Plus, Coffee, Music, Heart, ShoppingBag, Settings, Users, Grid, Stethoscope, Search, Locate } from "lucide-react";
+import { MapPin, Grid, Coffee, Music, Heart, ShoppingBag, Settings, Users, Stethoscope, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
 import { InteractiveMap } from "@/components/map/InteractiveMap";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -47,7 +46,7 @@ const getCategoryColor = (category: string) => {
 
 export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLgbtStatus, setSelectedLgbtStatus] = useState<string | null>(null);
   
   // Get featured and recent places from mockPlaces
   const featuredPlaces = mockPlaces.filter(place => place.featured).slice(0, 10);
@@ -75,6 +74,14 @@ export default function DiscoverPage() {
             <Search className="h-4 w-4" />
             <span className="sr-only sm:not-sr-only">Search</span>
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="gap-1"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="sr-only sm:not-sr-only">Add Place</span>
+          </Button>
         </div>
       </div>
       
@@ -83,6 +90,7 @@ export default function DiscoverPage() {
         <InteractiveMap 
           className="h-full"
           categoryFilter={selectedCategory === "All" ? null : selectedCategory}
+          lgbtStatusFilter={selectedLgbtStatus}
         />
       </div>
       
@@ -136,6 +144,13 @@ export default function DiscoverPage() {
                       <div className="absolute top-2 left-2">
                         <h3 className="text-white font-bold text-lg">{place.name}</h3>
                       </div>
+                      {place.verified && (
+                        <div className="absolute top-2 right-2">
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            ✓ Verified
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     <CardContent className={`p-4 ${colors.bg}`}>
                       <div className="flex justify-between items-center">
@@ -182,6 +197,13 @@ export default function DiscoverPage() {
                       <div className="absolute top-2 right-2">
                         <Badge variant="secondary" className="text-xs bg-white/80">New</Badge>
                       </div>
+                      {place.verified && (
+                        <div className="absolute top-10 right-2">
+                          <Badge className="bg-green-100 text-green-800 border-green-300">
+                            ✓ Verified
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                     <CardContent className={`p-4 ${colors.bg}`}>
                       <h3 className={`font-bold ${colors.text}`}>{place.name}</h3>

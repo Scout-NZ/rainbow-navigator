@@ -5,19 +5,42 @@ import { mockPlaces } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { transformLocation } from './mapUtils';
 
-export function useLocations(
-  filter: string = "",
-  categoryFilter: string | null = null,
-  lgbtStatusFilter: string | null = null
-) {
+type LocationFilters = {
+  searchText?: string;
+  categoryFilter?: string | null;
+  lgbtStatusFilter?: string | null;
+  verifiedOnly?: boolean;
+};
+
+export function useLocations({
+  searchText = "",
+  categoryFilter = null,
+  lgbtStatusFilter = null,
+  verifiedOnly = false,
+}: LocationFilters) {
   // Fetch locations from Supabase
   const { data: locations = [], isLoading, error } = useQuery({
-    queryKey: ['locations'],
+    queryKey: ['locations', categoryFilter, lgbtStatusFilter, verifiedOnly],
     queryFn: async () => {
       try {
-        const { data, error } = await supabase
+        let query = supabase
           .from('locations')
           .select('*');
+        
+        // Add filters to the query if they exist
+        if (categoryFilter) {
+          query = query.eq('category', categoryFilter);
+        }
+        
+        if (lgbtStatusFilter) {
+          query = query.eq('lgbt_status', lgbtStatusFilter);
+        }
+        
+        if (verifiedOnly) {
+          query = query.eq('verified', true);
+        }
+        
+        const { data, error } = await query;
         
         if (error) {
           console.error('Error fetching locations:', error);
@@ -40,41 +63,37 @@ export function useLocations(
   // Use mockPlaces as fallback while loading or if there's an error
   const places = locations.length > 0 ? locations : mockPlaces;
   
-  // Filter places based on search text, category filter, and LGBT+ status filter
+  // Filter places based on search text if provided
   const filteredPlaces = places.filter(place => {
     // Apply search text filter
-    const matchesSearch = 
-      place.name.toLowerCase().includes(filter.toLowerCase()) || 
-      (place.category && place.category.toLowerCase().includes(filter.toLowerCase())) || 
-      (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(filter.toLowerCase())));
-    
-    // Apply category filter if it exists - check in both the category field and tags
-    let matchesCategory = true;
-    if (categoryFilter) {
-      const normalizedCategory = categoryFilter.toLowerCase();
-      matchesCategory = 
-        (place.category && place.category.toLowerCase() === normalizedCategory) ||
-        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase() === normalizedCategory));
+    if (searchText) {
+      const matchesSearch = 
+        place.name.toLowerCase().includes(searchText.toLowerCase()) || 
+        (place.category && place.category.toLowerCase().includes(searchText.toLowerCase())) || 
+        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(searchText.toLowerCase())));
       
-      // Special case for "healthcare" category since it might be capitalized differently
-      if (normalizedCategory === "healthcare") {
-        matchesCategory = 
-          (place.category && place.category.toLowerCase() === "healthcare") ||
-          (place.tags && place.tags.some((tag: string) => 
-            tag?.toLowerCase() === "healthcare" || tag?.toLowerCase() === "health" || tag?.toLowerCase() === "medical"
-          ));
+      if (!matchesSearch) return false;
+    }
+    
+    // If we're using mock data, apply the filters here since the Supabase query wasn't effective
+    if (locations.length === 0) {
+      // Category filter
+      if (categoryFilter && place.category !== categoryFilter) {
+        return false;
+      }
+      
+      // LGBT status filter
+      if (lgbtStatusFilter && place.lgbt_status !== lgbtStatusFilter) {
+        return false;
+      }
+      
+      // Verified filter
+      if (verifiedOnly && !place.verified) {
+        return false;
       }
     }
     
-    // Apply LGBT+ status filter if it exists
-    let matchesLgbtStatus = true;
-    if (lgbtStatusFilter) {
-      // When filtering for LGBT status, if the item doesn't have any status, include it in results
-      // This ensures we show places without a specified LGBT status when filtering
-      matchesLgbtStatus = !place.lgbt_status || place.lgbt_status === lgbtStatusFilter;
-    }
-    
-    return matchesSearch && matchesCategory && matchesLgbtStatus;
+    return true;
   });
 
   return { filteredPlaces, isLoading, error };

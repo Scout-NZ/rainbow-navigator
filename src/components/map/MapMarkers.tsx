@@ -2,6 +2,7 @@
 import React from 'react';
 import { MarkerF, InfoWindowF } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { getMarkerIcon } from './mapUtils';
 
 type MapMarkersProps = {
@@ -66,23 +67,38 @@ export function MapMarkers({
           }}
           onCloseClick={onInfoWindowClose}
         >
-          <div className="p-2 max-w-[200px]">
-            <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
-            <p className="text-xs text-muted-foreground mt-1">{selectedPlace.category}</p>
-            <p className="text-xs mt-1">
+          <div className="p-2 max-w-[250px]">
+            <div className="flex items-start justify-between gap-1">
+              <h3 className="font-semibold text-sm">{selectedPlace.name}</h3>
+              {selectedPlace.verified && (
+                <Badge className="ml-1 bg-green-100 text-green-800 text-xs border-green-300 whitespace-nowrap">
+                  ✓ Verified
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex flex-wrap gap-1 mt-2">
+              <Badge variant="outline" className="text-xs">
+                {selectedPlace.category}
+              </Badge>
+              
+              {selectedPlace.lgbt_status && (
+                <Badge variant="outline" className="text-xs">
+                  {selectedPlace.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
+                  {selectedPlace.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
+                  {selectedPlace.lgbt_status === 'ally' && '❤️ Ally'}
+                </Badge>
+              )}
+            </div>
+            
+            <p className="text-xs mt-2">
               {selectedPlace.location.address}, {selectedPlace.location.city}
             </p>
-            {selectedPlace.lgbt_status && (
-              <p className="text-xs mt-1 font-medium">
-                {selectedPlace.lgbt_status === 'lgbt_owned' && '🏳️‍🌈 LGBT+ Owned'}
-                {selectedPlace.lgbt_status === 'lgbt_managed' && '🏳️‍🌈 LGBT+ Managed'}
-                {selectedPlace.lgbt_status === 'ally' && '❤️ Ally'}
-              </p>
-            )}
+            
             <Button 
               size="sm" 
               variant="link" 
-              className="text-xs p-0 h-auto mt-1" 
+              className="text-xs p-0 h-auto mt-2" 
               onClick={() => onViewDetails(selectedPlace)}
             >
               View Details

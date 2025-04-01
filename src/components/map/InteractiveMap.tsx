@@ -7,6 +7,7 @@ import { MapSearchBar } from "./MapSearchBar";
 import { MapLoadingState } from "./MapLoadingState";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapMarkers } from "./MapMarkers";
+import { FilterPanel } from "./FilterPanel";
 import { useLocations } from "./useLocations";
 import {
   DEFAULT_LOCATION,
@@ -28,11 +29,11 @@ type MapProps = {
 export function InteractiveMap({ 
   className, 
   defaultLocation = DEFAULT_LOCATION, 
-  categoryFilter,
-  lgbtStatusFilter,
+  categoryFilter: initialCategoryFilter,
+  lgbtStatusFilter: initialLgbtStatusFilter,
   onLocationSelect 
 }: MapProps) {
-  const [filter, setFilter] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<any | null>(null);
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -42,8 +43,19 @@ export function InteractiveMap({
   const mapRef = useRef<google.maps.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   
-  const { filteredPlaces } = useLocations(filter, categoryFilter, lgbtStatusFilter);
+  // Advanced filter states
+  const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategoryFilter || null);
+  const [lgbtStatusFilter, setLgbtStatusFilter] = useState<string | null>(initialLgbtStatusFilter || null);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  
+  const { filteredPlaces, isLoading, error } = useLocations({
+    searchText,
+    categoryFilter,
+    lgbtStatusFilter,
+    verifiedOnly,
+  });
   
   // Using the consistent loader ID from mapUtils
   const { isLoaded, loadError } = useJsApiLoader({
@@ -149,13 +161,24 @@ export function InteractiveMap({
     }
   };
 
+  // Calculate active filters count for badge
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (categoryFilter) count++;
+    if (lgbtStatusFilter) count++;
+    if (verifiedOnly) count++;
+    return count;
+  };
+
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
       <MapSearchBar 
-        filter={filter}
-        onFilterChange={setFilter}
+        filter={searchText}
+        onFilterChange={setSearchText}
         onLocateMe={getUserLocation}
         isLocating={isLocating}
+        onOpenFilters={() => setShowFilterPanel(true)}
+        activeFiltersCount={getActiveFiltersCount()}
       />
       
       <div className="relative flex-1 min-h-[300px]">
@@ -188,6 +211,20 @@ export function InteractiveMap({
             onZoomIn={() => handleZoom(true)}
             onZoomOut={() => handleZoom(false)}
           />
+        )}
+        
+        {showFilterPanel && (
+          <div className="absolute top-2 right-2 left-2 z-10 flex justify-center">
+            <FilterPanel 
+              onClose={() => setShowFilterPanel(false)}
+              selectedCategory={categoryFilter}
+              onCategoryChange={setCategoryFilter}
+              selectedLgbtStatus={lgbtStatusFilter}
+              onLgbtStatusChange={setLgbtStatusFilter}
+              verifiedOnly={verifiedOnly}
+              onVerifiedChange={setVerifiedOnly}
+            />
+          </div>
         )}
       </div>
 
