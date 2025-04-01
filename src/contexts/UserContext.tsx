@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile, mockGroups, mockEvents } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 // Define a more comprehensive SocialLinks type
 interface SocialLinks {
@@ -131,18 +132,107 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    async function getSession() {
+    console.log("UserContext initializing...");
+    
+    // 1. Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, newSession) => {
+        console.log("Auth state changed:", event, newSession?.user?.id);
+        setSession(newSession as AuthSession | null);
+        
+        if (event === "SIGNED_IN" && newSession) {
+          // Handle sign in
+          console.log("User signed in, fetching profile");
+          
+          // Use setTimeout to avoid potential deadlocks with Supabase client
+          setTimeout(async () => {
+            try {
+              // Fetch user profile from Supabase
+              const { data: profileData, error: profileError } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", newSession.user.id)
+                .single();
+
+              if (profileError) {
+                console.error("Error fetching profile:", profileError.message);
+                return;
+              }
+
+              if (!profileData) {
+                console.log("No profile found, creating new profile");
+                return;
+              }
+
+              // Parse sociallinks from JSON if it exists
+              let socialLinks = defaultSocialLinks;
+              if (profileData.sociallinks) {
+                try {
+                  const parsedLinks = typeof profileData.sociallinks === 'object' 
+                    ? profileData.sociallinks 
+                    : JSON.parse(profileData.sociallinks as string);
+                  
+                  socialLinks = {
+                    ...defaultSocialLinks,
+                    ...parsedLinks
+                  };
+                } catch (e) {
+                  console.error("Error parsing social links:", e);
+                }
+              }
+
+              // Convert Supabase profile to our UserProfile format
+              const userProfile: UserProfile = {
+                id: profileData.id,
+                name: profileData.name || "",
+                username: profileData.username || "",
+                email: newSession.user.email || "",
+                avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
+                imageUrl: profileData.imageurl || "", // For compatibility
+                coverPhoto: "",
+                bio: profileData.bio || "",
+                location: profileData.location || "",
+                pronouns: profileData.pronouns || "",
+                identities: [profileData.identity || ""].filter(Boolean),
+                identity: profileData.identity || "", // For compatibility
+                gender: profileData.gender || "", // For compatibility
+                interests: profileData.interests || [],
+                joinDate: profileData.created_at || new Date().toISOString(),
+                badges: [],
+                socialLinks: socialLinks,
+                settings: { privacy: "public", notifications: true, theme: "light" },
+                friends: profileData.friends > 0 ? ["2", "3"] : [],
+                groups: profileData.groups > 0 ? ["1", "4"] : [],
+                events: profileData.events > 0 ? ["1", "3"] : []
+              };
+              
+              console.log("Setting user profile:", userProfile.name);
+              setUser(userProfile);
+            } catch (error) {
+              console.error("Error processing profile:", error);
+            }
+          }, 0);
+        } else if (event === "SIGNED_OUT") {
+          console.log("User signed out");
+          setUser(null);
+        }
+      }
+    );
+
+    // 2. THEN check for existing session
+    const checkSession = async () => {
       try {
+        console.log("Checking for existing session...");
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
           console.error("Error fetching session:", error.message);
-          setUser(mockUser); // For development, use mock data
           setLoading(false);
           return;
         }
 
         if (data?.session) {
+          console.log("Found existing session for user:", data.session.user.id);
           setSession(data.session as AuthSession);
           
           // Fetch user profile from Supabase
@@ -152,10 +242,100 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .eq("id", data.session.user.id)
             .single();
 
-          if (profileError || !profileData) {
-            console.log("No profile found, using mock data for development");
-            setUser(mockUser); // For development, use mock data
+          if (profileError) {
+            console.error("Error checking profile:", profileError.message);
+            setLoading(false);
+            return;
+          }
+
+          if (!profileData) {
+            console.log("No profile found, checking if we need to create one");
+            
+            // Get user metadata
+            const userData = data.session.user;
+            let fullName = userData.user_metadata?.full_name || 
+                         userData.user_metadata?.name ||
+                         userData.user_metadata?.preferred_username;
+            let userEmail = userData.email;
+            
+            console.log("User data for potential profile creation:", {
+              id: userData.id,
+              email: userEmail,
+              metadata: userData.user_metadata,
+              fullName
+            });
+            
+            // Create a new profile with more robust defaults
+            const userName = userEmail?.split('@')[0] || 'user';
+            const newProfile = {
+              id: userData.id,
+              name: fullName || userName,
+              username: userName,
+              interests: [],
+              friends: 0,
+              groups: 0,
+              events: 0,
+            };
+            
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert([newProfile]);
+              
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+              toast({
+                title: "Error",
+                description: "Failed to create user profile. Please try again.",
+                variant: "destructive",
+              });
+              setLoading(false);
+              return;
+            } else {
+              console.log('New profile created successfully:', newProfile);
+              
+              // Fetch the newly created profile
+              const { data: newProfileData, error: newProfileError } = await supabase
+                .from("profiles")
+                .select("*")
+                .eq("id", userData.id)
+                .single();
+                
+              if (newProfileError || !newProfileData) {
+                console.error("Error fetching new profile:", newProfileError);
+                setLoading(false);
+                return;
+              }
+              
+              // Convert the new profile to our UserProfile format
+              const userProfile: UserProfile = {
+                id: newProfileData.id,
+                name: newProfileData.name || "",
+                username: newProfileData.username || "",
+                email: userData.email || "",
+                avatar: newProfileData.imageurl || "",
+                imageUrl: newProfileData.imageurl || "",
+                coverPhoto: "",
+                bio: newProfileData.bio || "",
+                location: newProfileData.location || "",
+                pronouns: newProfileData.pronouns || "",
+                identities: [newProfileData.identity || ""].filter(Boolean),
+                identity: newProfileData.identity || "",
+                gender: newProfileData.gender || "",
+                interests: newProfileData.interests || [],
+                joinDate: newProfileData.created_at || new Date().toISOString(),
+                badges: [],
+                socialLinks: defaultSocialLinks,
+                settings: { privacy: "public", notifications: true, theme: "light" },
+                friends: [],
+                groups: [],
+                events: []
+              };
+              
+              setUser(userProfile);
+            }
           } else {
+            console.log("Profile found:", profileData.name);
+            
             // Parse sociallinks from JSON if it exists
             let socialLinks = defaultSocialLinks;
             if (profileData.sociallinks) {
@@ -197,90 +377,25 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
               groups: profileData.groups > 0 ? ["1", "4"] : [],
               events: profileData.events > 0 ? ["1", "3"] : []
             };
+            
             setUser(userProfile);
           }
         } else {
-          // No session found, use mock data for development
-          setUser(mockUser);
+          console.log("No session found");
         }
       } catch (error) {
         console.error("Session check error:", error);
-        setUser(mockUser); // For development, use mock data
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    getSession();
+    checkSession();
 
-    // Subscribe to auth changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        setSession(newSession as AuthSession | null);
-        
-        if (event === "SIGNED_IN" && newSession) {
-          // Fetch user profile from Supabase
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", newSession.user.id)
-            .single();
-
-          if (profileError || !profileData) {
-            console.log("No profile found or error:", profileError?.message);
-            setUser(mockUser); // For development, use mock data
-          } else {
-            // Parse sociallinks from JSON if it exists
-            let socialLinks = defaultSocialLinks;
-            if (profileData.sociallinks) {
-              try {
-                const parsedLinks = typeof profileData.sociallinks === 'object' 
-                  ? profileData.sociallinks 
-                  : JSON.parse(profileData.sociallinks as string);
-                
-                socialLinks = {
-                  ...defaultSocialLinks,
-                  ...parsedLinks
-                };
-              } catch (e) {
-                console.error("Error parsing social links:", e);
-              }
-            }
-
-            // Convert Supabase profile to our UserProfile format
-            const userProfile: UserProfile = {
-              id: profileData.id,
-              name: profileData.name || "",
-              username: profileData.username || "",
-              email: newSession.user.email || "",
-              avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
-              imageUrl: profileData.imageurl || "", // For compatibility
-              coverPhoto: "",
-              bio: profileData.bio || "",
-              location: profileData.location || "",
-              pronouns: profileData.pronouns || "",
-              identities: [profileData.identity || ""].filter(Boolean),
-              identity: profileData.identity || "", // For compatibility
-              gender: profileData.gender || "", // For compatibility
-              interests: profileData.interests || [],
-              joinDate: profileData.created_at || new Date().toISOString(),
-              badges: [],
-              socialLinks: socialLinks,
-              settings: { privacy: "public", notifications: true, theme: "light" },
-              friends: profileData.friends > 0 ? ["2", "3"] : [],
-              groups: profileData.groups > 0 ? ["1", "4"] : [],
-              events: profileData.events > 0 ? ["1", "3"] : []
-            };
-            setUser(userProfile);
-          }
-        } else if (event === "SIGNED_OUT") {
-          setUser(null);
-        }
-      }
-    );
-
+    // Clean up the subscription when the component unmounts
     return () => {
-      authListener.subscription.unsubscribe();
+      console.log("Cleaning up auth subscription");
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -289,6 +404,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
+      setSession(null);
       toast({
         title: "Signed out successfully",
       });
