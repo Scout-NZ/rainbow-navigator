@@ -57,8 +57,6 @@ export function InteractiveMap({
     verifiedOnly,
   });
   
-  console.log("Using Google Maps API Key:", GOOGLE_MAPS_API_KEY);
-  
   // Using the consistent loader ID from mapUtils
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: GOOGLE_MAPS_API_KEY,

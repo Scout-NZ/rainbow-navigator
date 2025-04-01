@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Outlet, useLocation, Link, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, Link } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
 import { MessageCircle, Search, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,8 @@ export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const isHomePage = location.pathname === "/";
-  const { user, loading, signOut } = useUser();
+  const { user } = useUser();
   
   // Create a default profile for when userProfile is not available
   const defaultProfile = {
@@ -34,20 +33,6 @@ export function AppLayout() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  // If still loading, show a loading spinner
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  // If no user is logged in, redirect to auth page
-  if (!user) {
-    return null; // The redirect will be handled by the ProtectedRoute
-  }
 
   return (
     <div className="min-h-screen bg-background pb-16 flex flex-col">
@@ -95,18 +80,6 @@ export function AppLayout() {
                 onClick={() => setShowChat(true)}
               />
             </div>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="text-muted-foreground"
-              onClick={() => {
-                signOut();
-                navigate("/auth");
-              }}
-            >
-              Sign Out
-            </Button>
           </div>
         </div>
       </header>
