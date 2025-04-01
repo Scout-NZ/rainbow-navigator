@@ -23,8 +23,8 @@ export type Database = {
           lgbt_status: string | null
           lng: number | null
           name: string
-          neighbourhood: string | null
           phone: string | null
+          "social media": string | null
           tags: string[] | null
           type: string
           updated_at: string | null
@@ -44,8 +44,8 @@ export type Database = {
           lgbt_status?: string | null
           lng?: number | null
           name: string
-          neighbourhood?: string | null
           phone?: string | null
+          "social media"?: string | null
           tags?: string[] | null
           type: string
           updated_at?: string | null
@@ -65,8 +65,8 @@ export type Database = {
           lgbt_status?: string | null
           lng?: number | null
           name?: string
-          neighbourhood?: string | null
           phone?: string | null
+          "social media"?: string | null
           tags?: string[] | null
           type?: string
           updated_at?: string | null
