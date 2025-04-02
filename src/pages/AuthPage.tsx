@@ -143,8 +143,8 @@ export default function AuthPage() {
     setAuthInProgress(true);
     
     try {
-      // Open the auth popup window with the correct path for subdomain
-      const popupPath = `${basePath}auth-popup`;
+      // Open the auth popup window with the correct path
+      const popupPath = `${window.location.origin}${basePath}auth-popup`;
       const popupWindow = window.open(popupPath, '_blank', 'width=600,height=600');
       
       if (!popupWindow) {

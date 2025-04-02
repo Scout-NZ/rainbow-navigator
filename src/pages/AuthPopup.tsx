@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -12,7 +11,7 @@ export default function AuthPopup() {
     const handleAuth = async () => {
       try {
         const currentOrigin = window.location.origin;
-        // Construct the redirect URL using the current origin (app.rainbownavigator.com)
+        // Construct the redirect URL using the current origin
         const redirectUrl = `${currentOrigin}${basePath}auth/callback`;
         
         console.log("Auth popup opened, initiating Google OAuth with redirect URL:", redirectUrl);
@@ -40,8 +39,6 @@ export default function AuthPopup() {
               error: error.message 
             }, window.location.origin);
           }
-          
-          // Don't close the window on error to let the user see the error message
         } else {
           console.log("OAuth initialized, awaiting redirect:", data);
         }
@@ -57,8 +54,6 @@ export default function AuthPopup() {
             error: error.message 
           }, window.location.origin);
         }
-        
-        // Don't close the window on error to let the user see the error message
       }
     };
 
