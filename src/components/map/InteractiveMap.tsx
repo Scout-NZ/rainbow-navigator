@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from "react";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { toast } from "@/components/ui/use-toast";
@@ -69,6 +68,7 @@ export function InteractiveMap({
   
   useEffect(() => {
     console.log("Google Maps API Key being used:", apiKey);
+    console.log("Filtered places:", filteredPlaces?.length || 0);
     
     if (loadError) {
       console.error("Error loading Google Maps:", loadError);
@@ -79,7 +79,7 @@ export function InteractiveMap({
         variant: "destructive"
       });
     }
-  }, [loadError, apiKey]);
+  }, [loadError, apiKey, filteredPlaces]);
 
   const handleMarkerClick = (place: any) => {
     setSelectedPlace(place);

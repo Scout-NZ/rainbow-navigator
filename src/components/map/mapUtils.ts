@@ -1,4 +1,3 @@
-
 // Map container style
 export const containerStyle = {
   width: '100%',
@@ -84,6 +83,19 @@ export const transformLocation = (location: any) => {
   // Ensure that type and category are included in tags
   let tags = location.tags || [];
   
+  // Make sure tags is an array
+  if (!Array.isArray(tags)) {
+    if (typeof tags === 'string') {
+      try {
+        tags = JSON.parse(tags);
+      } catch (e) {
+        tags = [tags];
+      }
+    } else {
+      tags = [];
+    }
+  }
+  
   // Add type and category to tags if they don't already exist
   if (location.type && !tags.includes(location.type.toLowerCase())) {
     tags.push(location.type.toLowerCase());
@@ -107,7 +119,7 @@ export const transformLocation = (location: any) => {
     description: location.description || '',
     location: {
       address: location.address || '',
-      neighbourhood: '', // This is the fix for the TypeScript error
+      neighbourhood: location.neighbourhood || '', // Add default value for neighbourhood
       city: location.city || '',
       lat: coordinates.lat,
       lng: coordinates.lng

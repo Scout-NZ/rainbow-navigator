@@ -20,10 +20,10 @@ export function useLocations({
 }: LocationFilters) {
   // Fetch locations from Supabase
   const { data: locations = [], isLoading, error } = useQuery({
-    queryKey: ['locations', categoryFilter, lgbtStatusFilter, verifiedOnly],
+    queryKey: ['locations', searchText, categoryFilter, lgbtStatusFilter, verifiedOnly],
     queryFn: async () => {
       try {
-        console.log("Fetching locations with filters:", { categoryFilter, lgbtStatusFilter, verifiedOnly });
+        console.log("Fetching locations with filters:", { searchText, categoryFilter, lgbtStatusFilter, verifiedOnly });
         
         let query = supabase
           .from('locations')
@@ -42,6 +42,11 @@ export function useLocations({
           query = query.eq('verified', true);
         }
         
+        // Apply search text filter if provided
+        if (searchText && searchText.trim() !== "") {
+          query = query.or(`name.ilike.%${searchText}%,category.ilike.%${searchText}%,tags.cs.{${searchText.toLowerCase()}}`);
+        }
+        
         const { data, error } = await query;
         
         if (error) {
@@ -49,8 +54,13 @@ export function useLocations({
           throw error;
         }
         
-        console.log("Fetched locations from Supabase:", data);
-        return data.map(transformLocation);
+        console.log("Fetched locations from Supabase:", data?.length || 0, "records");
+        if (data && data.length > 0) {
+          return data.map(transformLocation);
+        } else {
+          console.log("No locations found in database, using mock data as fallback");
+          return [];
+        }
       } catch (err) {
         console.error('Failed to fetch locations:', err);
         toast({
@@ -63,11 +73,17 @@ export function useLocations({
     }
   });
   
-  // Use mockPlaces as fallback while loading or if there's an error
+  // Only use mockPlaces as fallback if no locations were found in the database
   const places = locations.length > 0 ? locations : mockPlaces;
   
-  // Filter places based on search text if provided
+  // Filter places based on search text if we're using mock data
   const filteredPlaces = places.filter(place => {
+    // If we're already using the database results, we don't need to filter again
+    if (locations.length > 0) {
+      return true;
+    }
+    
+    // For mock data, apply all filters manually
     // Apply search text filter
     if (searchText) {
       const matchesSearch = 
@@ -78,22 +94,19 @@ export function useLocations({
       if (!matchesSearch) return false;
     }
     
-    // If we're using mock data, apply the filters here since the Supabase query wasn't effective
-    if (locations.length === 0) {
-      // Category filter
-      if (categoryFilter && place.category !== categoryFilter) {
-        return false;
-      }
-      
-      // LGBT status filter
-      if (lgbtStatusFilter && place.lgbt_status !== lgbtStatusFilter) {
-        return false;
-      }
-      
-      // Verified filter
-      if (verifiedOnly && !place.verified) {
-        return false;
-      }
+    // Category filter
+    if (categoryFilter && place.category !== categoryFilter) {
+      return false;
+    }
+    
+    // LGBT status filter
+    if (lgbtStatusFilter && place.lgbt_status !== lgbtStatusFilter) {
+      return false;
+    }
+    
+    // Verified filter
+    if (verifiedOnly && !place.verified) {
+      return false;
     }
     
     return true;
