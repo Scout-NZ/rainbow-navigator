@@ -6,7 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
-import { UserProvider, useUser } from "./contexts/UserContext";
+import { UserProvider } from "./contexts/UserContext";
+import { AuthGuard } from "./components/auth/AuthGuard";
 import DiscoverPage from "./pages/DiscoverPage";
 import ConnectPage from "./pages/ConnectPage";
 import EventsPage from "./pages/EventsPage";
@@ -27,25 +28,6 @@ const queryClient = new QueryClient();
 // If environment variable is set, use it; otherwise, use '/'
 const BASE_PATH = import.meta.env.VITE_BASE_PATH || '/';
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useUser();
-  
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
-  }
-  
-  return <>{children}</>;
-};
-
 const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -55,21 +37,26 @@ const App = () => (
         <UserProvider>
           <BrowserRouter basename={BASE_PATH}>
             <Routes>
+              {/* Public routes - accessible without authentication */}
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/auth-popup" element={<AuthPopup />} />
               
+              {/* Routes that require the AppLayout */}
               <Route element={<AppLayout />}>
+                {/* Protected routes - require authentication */}
+                <Route path="/profile" element={
+                  <AuthGuard>
+                    <ProfilePage />
+                  </AuthGuard>
+                } />
+                
+                {/* Semi-protected routes - allow viewing but some features require auth */}
                 <Route path="/" element={<DiscoverPage />} />
                 <Route path="/connect" element={<ConnectPage />} />
                 <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <ProfilePage />
-                  </ProtectedRoute>
-                } />
                 <Route path="/feed" element={<FeedPage />} />
               </Route>
               

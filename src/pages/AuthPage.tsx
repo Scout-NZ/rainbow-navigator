@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Navigate } from 'react-router-dom';
+import { useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/contexts/UserContext';
@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 export default function AuthPage() {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, loading } = useUser();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,10 +28,15 @@ export default function AuthPage() {
   // For subdomain setup, we don't need a base path in the URL
   const basePath = import.meta.env.VITE_BASE_PATH || '/';
   
-  // If user is already logged in, redirect to home
-  if (!loading && user) {
-    return <Navigate to="/" replace />;
-  }
+  // Get the location to redirect to after login
+  const from = location.state?.from?.pathname || '/';
+  
+  // If user is already logged in, redirect to intended location or home
+  useEffect(() => {
+    if (!loading && user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, loading, navigate, from]);
 
   useEffect(() => {
     // Listen for messages from the popup window
@@ -47,7 +53,7 @@ export default function AuthPage() {
             title: 'Success',
             description: 'You have been signed in successfully.',
           });
-          navigate('/');
+          navigate(from, { replace: true });
         } else {
           toast({
             title: 'Authentication Error',
@@ -60,7 +66,7 @@ export default function AuthPage() {
     
     window.addEventListener('message', handleAuthMessage);
     return () => window.removeEventListener('message', handleAuthMessage);
-  }, [toast, navigate]);
+  }, [toast, navigate, from]);
 
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +85,7 @@ export default function AuthPage() {
         description: 'You have been signed in successfully.',
       });
       
-      navigate('/');
+      navigate(from, { replace: true });
     } catch (error: any) {
       console.error('Error signing in:', error);
       toast({
@@ -188,6 +194,15 @@ export default function AuthPage() {
       setAuthInProgress(false);
     }
   };
+
+  // Show loading state while checking authentication
+  if (loading) {
+    return (
+      <div className="container flex items-center justify-center min-h-screen py-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <>

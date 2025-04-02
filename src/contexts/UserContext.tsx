@@ -1,8 +1,8 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { mockUserProfile, mockGroups, mockEvents } from "@/data/mockData";
+import { mockUserProfile } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
+import { Session, User } from "@supabase/supabase-js";
 
 // Define a more comprehensive SocialLinks type
 interface SocialLinks {
@@ -43,23 +43,9 @@ interface UserProfile {
   gender?: string; // Added for compatibility with existing components
 }
 
-interface AuthSession {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  refresh_token: string;
-  user: {
-    id: string;
-    app_metadata: Record<string, any>;
-    user_metadata: Record<string, any>;
-    aud: string;
-    email?: string;
-  };
-}
-
 interface UserContextType {
   user: UserProfile | null;
-  session: AuthSession | null;
+  session: Session | null;
   loading: boolean;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
@@ -97,8 +83,9 @@ const defaultSocialLinks: SocialLinks = {
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null);
-  const [session, setSession] = useState<AuthSession | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authListenersInitialized, setAuthListenersInitialized] = useState(false);
 
   // Mock user for development
   const mockUser: UserProfile = {
@@ -130,159 +117,150 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     gender: "Non-Binary" // Default gender
   };
 
-  useEffect(() => {
-    async function getSession() {
-      try {
-        const { data, error } = await supabase.auth.getSession();
+  // Helper function to fetch user profile from Supabase
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .single();
 
-        if (error) {
-          console.error("Error fetching session:", error.message);
-          setUser(mockUser); // For development, use mock data
-          setLoading(false);
+      if (profileError) {
+        console.log("No profile found, creating one...");
+        // If no profile exists, create one
+        const userEmail = session?.user?.email || "";
+        await supabase.from("profiles").insert({
+          id: userId,
+          name: userEmail.split('@')[0],
+          username: userEmail.split('@')[0],
+          sociallinks: defaultSocialLinks
+        });
+        
+        // Fetch the newly created profile
+        const { data: newProfile, error: newProfileError } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", userId)
+          .single();
+          
+        if (newProfileError || !newProfile) {
+          console.error("Failed to fetch newly created profile:", newProfileError);
+          setUser(mockUser); // Fallback to mock user
           return;
         }
-
-        if (data?.session) {
-          setSession(data.session as AuthSession);
-          
-          // Fetch user profile from Supabase
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", data.session.user.id)
-            .single();
-
-          if (profileError || !profileData) {
-            console.log("No profile found, using mock data for development");
-            setUser(mockUser); // For development, use mock data
-          } else {
-            // Parse sociallinks from JSON if it exists
-            let socialLinks = defaultSocialLinks;
-            if (profileData.sociallinks) {
-              try {
-                const parsedLinks = typeof profileData.sociallinks === 'object' 
-                  ? profileData.sociallinks 
-                  : JSON.parse(profileData.sociallinks as string);
-                
-                socialLinks = {
-                  ...defaultSocialLinks,
-                  ...parsedLinks
-                };
-              } catch (e) {
-                console.error("Error parsing social links:", e);
-              }
-            }
-
-            // Convert Supabase profile to our UserProfile format
-            const userProfile: UserProfile = {
-              id: profileData.id,
-              name: profileData.name || "",
-              username: profileData.username || "",
-              email: data.session.user.email || "",
-              avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
-              imageUrl: profileData.imageurl || "", // For compatibility
-              coverPhoto: "",
-              bio: profileData.bio || "",
-              location: profileData.location || "",
-              pronouns: profileData.pronouns || "",
-              identities: [profileData.identity || ""].filter(Boolean),
-              identity: profileData.identity || "", // For compatibility
-              gender: profileData.gender || "", // For compatibility
-              interests: profileData.interests || [],
-              joinDate: profileData.created_at || new Date().toISOString(),
-              badges: [],
-              socialLinks: socialLinks,
-              settings: { privacy: "public", notifications: true, theme: "light" },
-              friends: profileData.friends > 0 ? ["2", "3"] : [],
-              groups: profileData.groups > 0 ? ["1", "4"] : [],
-              events: profileData.events > 0 ? ["1", "3"] : []
-            };
-            setUser(userProfile);
-          }
-        } else {
-          // No session found, use mock data for development
-          setUser(mockUser);
-        }
-      } catch (error) {
-        console.error("Session check error:", error);
-        setUser(mockUser); // For development, use mock data
-      } finally {
-        setLoading(false);
+        
+        profileData = newProfile;
       }
+
+      if (profileData) {
+        // Parse sociallinks from JSON if it exists
+        let socialLinks = defaultSocialLinks;
+        if (profileData.sociallinks) {
+          try {
+            const parsedLinks = typeof profileData.sociallinks === 'object' 
+              ? profileData.sociallinks 
+              : JSON.parse(profileData.sociallinks as string);
+            
+            socialLinks = {
+              ...defaultSocialLinks,
+              ...parsedLinks
+            };
+          } catch (e) {
+            console.error("Error parsing social links:", e);
+          }
+        }
+
+        // Convert Supabase profile to our UserProfile format
+        const userProfile: UserProfile = {
+          id: profileData.id,
+          name: profileData.name || "",
+          username: profileData.username || "",
+          email: session?.user?.email || "",
+          avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
+          imageUrl: profileData.imageurl || "", // For compatibility
+          coverPhoto: "",
+          bio: profileData.bio || "",
+          location: profileData.location || "",
+          pronouns: profileData.pronouns || "",
+          identities: [profileData.identity || ""].filter(Boolean),
+          identity: profileData.identity || "", // For compatibility
+          gender: profileData.gender || "", // For compatibility
+          interests: profileData.interests || [],
+          joinDate: profileData.created_at || new Date().toISOString(),
+          badges: [],
+          socialLinks: socialLinks,
+          settings: { privacy: "public", notifications: true, theme: "light" },
+          friends: profileData.friends > 0 ? ["2", "3"] : [],
+          groups: profileData.groups > 0 ? ["1", "4"] : [],
+          events: profileData.events > 0 ? ["1", "3"] : []
+        };
+        
+        setUser(userProfile);
+      } else {
+        // No profile found after attempted creation, use mock data
+        setUser(mockUser);
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setUser(mockUser); // Fallback to mock user
     }
+  };
 
-    getSession();
-
-    // Subscribe to auth changes
+  useEffect(() => {
+    // First, set up the auth listeners
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
-        setSession(newSession as AuthSession | null);
+        console.log("Auth state changed:", event, newSession?.user?.id);
+        setSession(newSession);
         
         if (event === "SIGNED_IN" && newSession) {
-          // Fetch user profile from Supabase
-          const { data: profileData, error: profileError } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", newSession.user.id)
-            .single();
-
-          if (profileError || !profileData) {
-            console.log("No profile found or error:", profileError?.message);
-            setUser(mockUser); // For development, use mock data
-          } else {
-            // Parse sociallinks from JSON if it exists
-            let socialLinks = defaultSocialLinks;
-            if (profileData.sociallinks) {
-              try {
-                const parsedLinks = typeof profileData.sociallinks === 'object' 
-                  ? profileData.sociallinks 
-                  : JSON.parse(profileData.sociallinks as string);
-                
-                socialLinks = {
-                  ...defaultSocialLinks,
-                  ...parsedLinks
-                };
-              } catch (e) {
-                console.error("Error parsing social links:", e);
-              }
-            }
-
-            // Convert Supabase profile to our UserProfile format
-            const userProfile: UserProfile = {
-              id: profileData.id,
-              name: profileData.name || "",
-              username: profileData.username || "",
-              email: newSession.user.email || "",
-              avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
-              imageUrl: profileData.imageurl || "", // For compatibility
-              coverPhoto: "",
-              bio: profileData.bio || "",
-              location: profileData.location || "",
-              pronouns: profileData.pronouns || "",
-              identities: [profileData.identity || ""].filter(Boolean),
-              identity: profileData.identity || "", // For compatibility
-              gender: profileData.gender || "", // For compatibility
-              interests: profileData.interests || [],
-              joinDate: profileData.created_at || new Date().toISOString(),
-              badges: [],
-              socialLinks: socialLinks,
-              settings: { privacy: "public", notifications: true, theme: "light" },
-              friends: profileData.friends > 0 ? ["2", "3"] : [],
-              groups: profileData.groups > 0 ? ["1", "4"] : [],
-              events: profileData.events > 0 ? ["1", "3"] : []
-            };
-            setUser(userProfile);
-          }
+          await fetchUserProfile(newSession.user.id);
         } else if (event === "SIGNED_OUT") {
           setUser(null);
         }
       }
     );
+    
+    setAuthListenersInitialized(true);
 
+    // Then check if there's an existing session
+    async function getSession() {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error("Error fetching session:", error.message);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+
+        if (data?.session) {
+          setSession(data.session);
+          await fetchUserProfile(data.session.user.id);
+        } else {
+          // No session found
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Session check error:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (authListenersInitialized) {
+      getSession();
+    }
+
+    // Clean up the auth listener on unmount
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, []);
+  }, [authListenersInitialized]);
 
   const signOut = async () => {
     try {
