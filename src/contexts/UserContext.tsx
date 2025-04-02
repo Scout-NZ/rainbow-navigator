@@ -1,8 +1,10 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { Session, User } from "@supabase/supabase-js";
+import { Json } from "@/integrations/supabase/types";
 
 // Define a more comprehensive SocialLinks type
 interface SocialLinks {
@@ -120,7 +122,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Helper function to fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data: profileData, error: profileError } = await supabase
+      const { data, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
@@ -130,11 +132,15 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log("No profile found, creating one...");
         // If no profile exists, create one
         const userEmail = session?.user?.email || "";
+        
+        // Convert the socialLinks to JSON format for Supabase
+        const socialLinksJson = JSON.stringify(defaultSocialLinks) as unknown as Json;
+        
         await supabase.from("profiles").insert({
           id: userId,
           name: userEmail.split('@')[0],
           username: userEmail.split('@')[0],
-          sociallinks: defaultSocialLinks
+          sociallinks: socialLinksJson
         });
         
         // Fetch the newly created profile
@@ -150,21 +156,19 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         
-        profileData = newProfile;
-      }
-
-      if (profileData) {
+        const profileData = newProfile;
+        
         // Parse sociallinks from JSON if it exists
         let socialLinks = defaultSocialLinks;
         if (profileData.sociallinks) {
           try {
             const parsedLinks = typeof profileData.sociallinks === 'object' 
-              ? profileData.sociallinks 
+              ? profileData.sociallinks as Record<string, unknown>
               : JSON.parse(profileData.sociallinks as string);
             
             socialLinks = {
               ...defaultSocialLinks,
-              ...parsedLinks
+              ...(parsedLinks as Partial<SocialLinks>)
             };
           } catch (e) {
             console.error("Error parsing social links:", e);
@@ -194,6 +198,50 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           friends: profileData.friends > 0 ? ["2", "3"] : [],
           groups: profileData.groups > 0 ? ["1", "4"] : [],
           events: profileData.events > 0 ? ["1", "3"] : []
+        };
+        
+        setUser(userProfile);
+      } else if (data) {
+        // Parse sociallinks from JSON if it exists
+        let socialLinks = defaultSocialLinks;
+        if (data.sociallinks) {
+          try {
+            const parsedLinks = typeof data.sociallinks === 'object' 
+              ? data.sociallinks as Record<string, unknown>
+              : JSON.parse(data.sociallinks as string);
+            
+            socialLinks = {
+              ...defaultSocialLinks,
+              ...(parsedLinks as Partial<SocialLinks>)
+            };
+          } catch (e) {
+            console.error("Error parsing social links:", e);
+          }
+        }
+
+        // Convert Supabase profile to our UserProfile format
+        const userProfile: UserProfile = {
+          id: data.id,
+          name: data.name || "",
+          username: data.username || "",
+          email: session?.user?.email || "",
+          avatar: data.imageurl || "", // Note the lowercase 'url' from DB
+          imageUrl: data.imageurl || "", // For compatibility
+          coverPhoto: "",
+          bio: data.bio || "",
+          location: data.location || "",
+          pronouns: data.pronouns || "",
+          identities: [data.identity || ""].filter(Boolean),
+          identity: data.identity || "", // For compatibility
+          gender: data.gender || "", // For compatibility
+          interests: data.interests || [],
+          joinDate: data.created_at || new Date().toISOString(),
+          badges: [],
+          socialLinks: socialLinks,
+          settings: { privacy: "public", notifications: true, theme: "light" },
+          friends: data.friends > 0 ? ["2", "3"] : [],
+          groups: data.groups > 0 ? ["1", "4"] : [],
+          events: data.events > 0 ? ["1", "3"] : []
         };
         
         setUser(userProfile);
