@@ -23,6 +23,8 @@ export function useLocations({
     queryKey: ['locations', categoryFilter, lgbtStatusFilter, verifiedOnly],
     queryFn: async () => {
       try {
+        console.log("Fetching locations with filters:", { categoryFilter, lgbtStatusFilter, verifiedOnly });
+        
         let query = supabase
           .from('locations')
           .select('*');
@@ -47,6 +49,7 @@ export function useLocations({
           throw error;
         }
         
+        console.log("Fetched locations from Supabase:", data);
         return data.map(transformLocation);
       } catch (err) {
         console.error('Failed to fetch locations:', err);

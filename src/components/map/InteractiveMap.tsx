@@ -57,14 +57,19 @@ export function InteractiveMap({
     verifiedOnly,
   });
   
+  // Using the API key from window or from mapUtils
+  const apiKey = (window as any).VITE_GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY;
+  
   // Using the consistent loader ID from mapUtils
   const { isLoaded, loadError } = useJsApiLoader({
-    googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+    googleMapsApiKey: apiKey,
     libraries,
     id: LOADER_ID
   });
   
   useEffect(() => {
+    console.log("Google Maps API Key being used:", apiKey);
+    
     if (loadError) {
       console.error("Error loading Google Maps:", loadError);
       setMapError("Failed to load Google Maps. Please check your connection and try again.");
@@ -74,7 +79,7 @@ export function InteractiveMap({
         variant: "destructive"
       });
     }
-  }, [loadError]);
+  }, [loadError, apiKey]);
 
   const handleMarkerClick = (place: any) => {
     setSelectedPlace(place);
