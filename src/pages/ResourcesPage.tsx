@@ -89,7 +89,7 @@ export default function ResourcesPage() {
             city: location.city || "",
             lat: location.lat || 0,
             lng: location.lng || 0,
-            neighbourhood: location.neighbourhood,
+            neighbourhood: "",
           },
           tags: location.tags || ["healthcare"],
           imageUrl: location.image_url,
