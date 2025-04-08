@@ -34,6 +34,9 @@ export function AppLayout() {
     };
   }, []);
 
+  // Determine which image URL to use for the avatar in the header
+  const profileImageUrl = user?.imageUrl || user?.avatar || "";
+
   return (
     <div className="min-h-screen bg-background pb-16 flex flex-col">
       {/* Gradient background for the header area */}
@@ -50,7 +53,7 @@ export function AppLayout() {
             <Link to="/profile" className="flex items-center">
               <Avatar className="h-10 w-10 border-2 border-white">
                 <AvatarImage 
-                  src={user?.avatar || ""}
+                  src={profileImageUrl}
                   alt={user?.name || "User"} 
                 />
                 <AvatarFallback>

@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile } from "@/data/mockData";
@@ -377,6 +378,48 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       console.log("Updating profile with:", updates);
+      
+      // Handle profile image separately if it's a File object or blob URL
+      if (updates.imageUrl && updates.imageUrl.startsWith('blob:')) {
+        try {
+          // Convert blob URL to File object
+          const response = await fetch(updates.imageUrl);
+          const blob = await response.blob();
+          const fileName = `${user.id}-profile-${Date.now()}`;
+          const fileExt = blob.type.split('/')[1] || 'jpg';
+          const filePath = `${fileName}.${fileExt}`;
+          
+          // Upload to Supabase Storage
+          const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('profiles')
+            .upload(filePath, blob, {
+              cacheControl: '3600',
+              upsert: true,
+            });
+          
+          if (uploadError) {
+            throw new Error(`Error uploading image: ${uploadError.message}`);
+          }
+          
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('profiles')
+            .getPublicUrl(filePath);
+            
+          console.log("Image uploaded successfully:", publicUrl);
+          
+          // Update imageUrl in updates object with the stored URL
+          updates.imageUrl = publicUrl;
+        } catch (error) {
+          console.error("Error processing profile image:", error);
+          toast({
+            title: "Error updating profile image",
+            description: "There was an error uploading your profile image",
+            variant: "destructive",
+          });
+          // Continue with other updates even if image upload fails
+        }
+      }
       
       // First update the local state for immediate UI feedback
       const updatedUser = { ...user, ...updates };

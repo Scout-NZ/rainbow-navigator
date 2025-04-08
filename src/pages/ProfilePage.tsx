@@ -154,7 +154,7 @@ export default function ProfilePage() {
 
     toast({
       title: "Profile picture updated",
-      description: "Your profile picture has been successfully updated.",
+      description: "Your profile picture is being uploaded and saved.",
     });
   };
 
@@ -171,6 +171,8 @@ export default function ProfilePage() {
   const groupsCount = typeof user.groups === 'number' ? user.groups : user.groups?.length || 0;
   const eventsCount = typeof user.events === 'number' ? user.events : user.events?.length || 0;
 
+  // Determine which image URL to use, preferring imageUrl if available
+  const profileImageUrl = user.imageUrl || user.avatar || "";
   
   return (
     <div className="pb-4">
@@ -199,7 +201,7 @@ export default function ProfilePage() {
             <div className="absolute -top-12 group">
               <Avatar className="h-24 w-24 border-4 border-background relative">
                 <AvatarImage
-                  src={user.imageUrl || user.avatar} 
+                  src={profileImageUrl} 
                   alt={user.name}
                   className="object-cover"
                 />
