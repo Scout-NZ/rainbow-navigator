@@ -338,28 +338,81 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
+      // First set loading to prevent UI glitches
+      setLoading(true);
+      
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Clear user and session state
       setUser(null);
+      setSession(null);
+      
       toast({
         title: "Signed out successfully",
       });
+      
+      // Navigate to the auth page using window.location to ensure full page reload
+      window.location.href = "/auth";
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
         title: "Error signing out",
         variant: "destructive",
       });
+      // End loading state even on error
+      setLoading(false);
     }
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
-    if (!user) return;
+    if (!user || !session) {
+      toast({
+        title: "Error updating profile",
+        description: "You must be logged in to update your profile",
+        variant: "destructive",
+      });
+      return;
+    }
     
     try {
-      // In a real app, update the profile in Supabase
-      // For now, just update the local state
-      setUser({ ...user, ...updates });
+      console.log("Updating profile with:", updates);
+      
+      // First update the local state for immediate UI feedback
+      const updatedUser = { ...user, ...updates };
+      setUser(updatedUser);
+      
+      // Prepare the data for Supabase update
+      const supabaseUpdates: Record<string, any> = {};
+      
+      // Map UserProfile fields to Supabase profiles table fields
+      if (updates.name !== undefined) supabaseUpdates.name = updates.name;
+      if (updates.username !== undefined) supabaseUpdates.username = updates.username;
+      if (updates.bio !== undefined) supabaseUpdates.bio = updates.bio;
+      if (updates.location !== undefined) supabaseUpdates.location = updates.location;
+      if (updates.pronouns !== undefined) supabaseUpdates.pronouns = updates.pronouns;
+      if (updates.identity !== undefined) supabaseUpdates.identity = updates.identity;
+      if (updates.gender !== undefined) supabaseUpdates.gender = updates.gender;
+      if (updates.interests !== undefined) supabaseUpdates.interests = updates.interests;
+      if (updates.imageUrl !== undefined) supabaseUpdates.imageurl = updates.imageUrl;
+      
+      // Handle social links separately as they need to be stored as JSON
+      if (updates.socialLinks) {
+        supabaseUpdates.sociallinks = updates.socialLinks;
+      }
+      
+      console.log("Sending to Supabase:", supabaseUpdates);
+      
+      // Update the profile in Supabase
+      const { error } = await supabase
+        .from("profiles")
+        .update(supabaseUpdates)
+        .eq("id", user.id);
+      
+      if (error) {
+        console.error("Supabase update error:", error);
+        throw error;
+      }
       
       toast({
         title: "Profile updated successfully",
@@ -368,8 +421,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("Error updating profile:", error);
       toast({
         title: "Error updating profile",
+        description: "Your changes couldn't be saved. Please try again.",
         variant: "destructive",
       });
+      
+      // Revert the local state on error to maintain consistency
+      fetchUserProfile(user.id);
     }
   };
 

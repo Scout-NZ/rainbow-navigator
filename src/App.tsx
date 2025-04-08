@@ -43,20 +43,17 @@ const App = () => (
               <Route path="/auth-popup" element={<AuthPopup />} />
               
               {/* Routes that require the AppLayout */}
-              <Route element={<AppLayout />}>
-                {/* Protected routes - require authentication */}
-                <Route path="/profile" element={
-                  <AuthGuard>
-                    <ProfilePage />
-                  </AuthGuard>
-                } />
-                
-                {/* Semi-protected routes - allow viewing but some features require auth */}
+              <Route element={
+                <AuthGuard>
+                  <AppLayout />
+                </AuthGuard>
+              }>
                 <Route path="/" element={<DiscoverPage />} />
                 <Route path="/connect" element={<ConnectPage />} />
                 <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/feed" element={<FeedPage />} />
               </Route>
               
