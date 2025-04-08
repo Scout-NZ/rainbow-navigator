@@ -21,6 +21,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
   
   // For subdomain setup, we don't need a base path in the URL
   const basePath = import.meta.env.VITE_BASE_PATH || '/';
@@ -70,22 +71,37 @@ export default function AuthPage() {
     setIsSubmitting(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      // Sign up the user
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             name: name,
           },
+          // Don't redirect to external URL, just create the user
+          emailRedirectTo: window.location.origin + '/auth/callback',
         },
       });
 
       if (error) throw error;
       
-      toast({
-        title: 'Account created',
-        description: 'Please check your email to confirm your account.',
-      });
+      // Check if email confirmation is needed, based on the session
+      if (data.session) {
+        // If we have a session, the user is automatically signed in (email verification disabled)
+        toast({
+          title: 'Account created',
+          description: 'Your account has been created and you are now logged in!',
+        });
+        navigate(from, { replace: true });
+      } else {
+        // Email confirmation is required
+        setRegistrationSuccess(true);
+        toast({
+          title: 'Verify your email',
+          description: 'Please check your email for a confirmation link to complete registration.',
+        });
+      }
     } catch (error: any) {
       console.error('Error signing up:', error);
       toast({
@@ -118,112 +134,131 @@ export default function AuthPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Tabs defaultValue="login" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login" className="space-y-4">
-                <form onSubmit={handleEmailSignIn}>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          placeholder="m@example.com"
-                          className="pl-10"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
+            {registrationSuccess ? (
+              <div className="bg-muted p-4 rounded-md text-center space-y-4">
+                <h3 className="font-medium text-lg">Email Verification Sent</h3>
+                <p>
+                  We've sent a verification link to <strong>{email}</strong>. Please check your inbox and spam folders.
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  If you don't receive an email within a few minutes, you can try signing in. Some email providers may delay delivery.
+                </p>
+                <Button 
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => setRegistrationSuccess(false)}
+                >
+                  Back to Sign In
+                </Button>
+              </div>
+            ) : (
+              <Tabs defaultValue="login" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="login">Login</TabsTrigger>
+                  <TabsTrigger value="register">Register</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="login" className="space-y-4">
+                  <form onSubmit={handleEmailSignIn}>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <Input
+                            id="email"
+                            placeholder="m@example.com"
+                            className="pl-10"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="password"
-                          type="password"
-                          className="pl-10"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
+                      <div className="space-y-2">
+                        <Label htmlFor="password">Password</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <Input
+                            id="password"
+                            type="password"
+                            className="pl-10"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Signing in...' : 'Sign In'}
+                      </Button>
                     </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Signing in...' : 'Sign In'}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
-              
-              <TabsContent value="register" className="space-y-4">
-                <form onSubmit={handleEmailSignUp}>
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="name"
-                          placeholder="Your name"
-                          className="pl-10"
-                          value={name}
-                          onChange={(e) => setName(e.target.value)}
-                          required
-                        />
+                  </form>
+                </TabsContent>
+                
+                <TabsContent value="register" className="space-y-4">
+                  <form onSubmit={handleEmailSignUp}>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name">Name</Label>
+                        <div className="relative">
+                          <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <Input
+                            id="name"
+                            placeholder="Your name"
+                            className="pl-10"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email-register">Email</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="email-register"
-                          placeholder="m@example.com"
-                          className="pl-10"
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          required
-                        />
+                      <div className="space-y-2">
+                        <Label htmlFor="email-register">Email</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <Input
+                            id="email-register"
+                            placeholder="m@example.com"
+                            className="pl-10"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="password-register">Password</Label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                        <Input
-                          id="password-register"
-                          type="password"
-                          className="pl-10"
-                          value={password}
-                          onChange={(e) => setPassword(e.target.value)}
-                          required
-                        />
+                      <div className="space-y-2">
+                        <Label htmlFor="password-register">Password</Label>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                          <Input
+                            id="password-register"
+                            type="password"
+                            className="pl-10"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                          />
+                        </div>
                       </div>
+                      <Button 
+                        type="submit" 
+                        className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? 'Creating account...' : 'Create Account'}
+                      </Button>
                     </div>
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? 'Creating account...' : 'Create Account'}
-                    </Button>
-                  </div>
-                </form>
-              </TabsContent>
-            </Tabs>
+                  </form>
+                </TabsContent>
+              </Tabs>
+            )}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 text-center">
             <p className="text-xs text-muted-foreground">
