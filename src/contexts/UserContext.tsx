@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile } from "@/data/mockData";
@@ -87,7 +86,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [authListenersInitialized, setAuthListenersInitialized] = useState(false);
 
   // Mock user for development
   const mockUser: UserProfile = {
@@ -121,27 +119,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Helper function to fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
+    console.log("Fetching user profile for:", userId);
+    
     try {
-      const { data, error: profileError } = await supabase
+      const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
         .single();
 
-      if (profileError) {
+      if (error) {
+        console.log("Profile error:", error);
         console.log("No profile found, creating one...");
         // If no profile exists, create one
         const userEmail = session?.user?.email || "";
+        const userName = userEmail.split('@')[0];
         
         // Convert the socialLinks to JSON format for Supabase
         const socialLinksJson = JSON.stringify(defaultSocialLinks) as unknown as Json;
         
-        await supabase.from("profiles").insert({
+        const { error: insertError } = await supabase.from("profiles").insert({
           id: userId,
-          name: userEmail.split('@')[0],
-          username: userEmail.split('@')[0],
+          name: userName,
+          username: userName,
           sociallinks: socialLinksJson
         });
+        
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          setUser(mockUser); // Fallback to mock user
+          setLoading(false);
+          return;
+        }
         
         // Fetch the newly created profile
         const { data: newProfile, error: newProfileError } = await supabase
@@ -153,6 +162,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (newProfileError || !newProfile) {
           console.error("Failed to fetch newly created profile:", newProfileError);
           setUser(mockUser); // Fallback to mock user
+          setLoading(false);
           return;
         }
         
@@ -178,8 +188,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Convert Supabase profile to our UserProfile format
         const userProfile: UserProfile = {
           id: profileData.id,
-          name: profileData.name || "",
-          username: profileData.username || "",
+          name: profileData.name || userName,
+          username: profileData.username || userName,
           email: session?.user?.email || "",
           avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
           imageUrl: profileData.imageurl || "", // For compatibility
@@ -195,13 +205,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           badges: [],
           socialLinks: socialLinks,
           settings: { privacy: "public", notifications: true, theme: "light" },
-          friends: profileData.friends > 0 ? ["2", "3"] : [],
-          groups: profileData.groups > 0 ? ["1", "4"] : [],
-          events: profileData.events > 0 ? ["1", "3"] : []
+          friends: [],
+          groups: [],
+          events: []
         };
         
+        console.log("Created and loaded new profile:", userProfile);
         setUser(userProfile);
+        setLoading(false);
       } else if (data) {
+        console.log("Found existing profile:", data);
         // Parse sociallinks from JSON if it exists
         let socialLinks = defaultSocialLinks;
         if (data.sociallinks) {
@@ -244,38 +257,50 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           events: data.events > 0 ? ["1", "3"] : []
         };
         
+        console.log("Profile loaded successfully:", userProfile);
         setUser(userProfile);
+        setLoading(false);
       } else {
         // No profile found after attempted creation, use mock data
+        console.warn("No profile data returned, using mock data");
         setUser(mockUser);
+        setLoading(false);
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("Error in fetchUserProfile:", error);
       setUser(mockUser); // Fallback to mock user
+      setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log("UserProvider mounted");
+    
     // First, set up the auth listeners
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         console.log("Auth state changed:", event, newSession?.user?.id);
-        setSession(newSession);
         
         if (event === "SIGNED_IN" && newSession) {
-          await fetchUserProfile(newSession.user.id);
+          setSession(newSession);
+          // Use setTimeout to prevent potential Supabase deadlock
+          setTimeout(() => {
+            fetchUserProfile(newSession.user.id);
+          }, 0);
         } else if (event === "SIGNED_OUT") {
+          setSession(null);
           setUser(null);
+          setLoading(false);
+        } else if (event === "TOKEN_REFRESHED" && newSession) {
+          setSession(newSession);
         }
       }
     );
-    
-    setAuthListenersInitialized(true);
 
     // Then check if there's an existing session
     async function getSession() {
       try {
-        setLoading(true);
+        console.log("Checking for existing session");
         const { data, error } = await supabase.auth.getSession();
 
         if (error) {
@@ -286,29 +311,30 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (data?.session) {
+          console.log("Found existing session:", data.session.user.id);
           setSession(data.session);
           await fetchUserProfile(data.session.user.id);
         } else {
           // No session found
+          console.log("No session found");
           setUser(null);
+          setLoading(false);
         }
       } catch (error) {
         console.error("Session check error:", error);
         setUser(null);
-      } finally {
         setLoading(false);
       }
     }
 
-    if (authListenersInitialized) {
-      getSession();
-    }
+    getSession();
 
     // Clean up the auth listener on unmount
     return () => {
+      console.log("UserProvider unmounting");
       authListener.subscription.unsubscribe();
     };
-  }, [authListenersInitialized]);
+  }, []);
 
   const signOut = async () => {
     try {

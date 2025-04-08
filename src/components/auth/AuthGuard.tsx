@@ -37,8 +37,8 @@ export const AuthGuard = ({ children }: AuthGuardProps) => {
     checkSession();
   }, []);
 
-  // Wait for both our local loading and the user context loading to complete
-  if (loading || userContextLoading) {
+  // Only show loading when both local and userContext are loading
+  if (loading && userContextLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
