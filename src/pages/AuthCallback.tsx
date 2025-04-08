@@ -14,7 +14,7 @@ export default function AuthCallback() {
   const basePath = import.meta.env.VITE_BASE_PATH || '/';
 
   useEffect(() => {
-    // Handle OAuth callback
+    // Handle auth callback (mainly for email confirmations)
     const handleAuthCallback = async () => {
       try {
         console.log('Auth callback initiated');
@@ -57,9 +57,7 @@ export default function AuthCallback() {
           
           // Get user metadata
           const userData = data.session.user;
-          let fullName = userData.user_metadata?.full_name || 
-                       userData.user_metadata?.name ||
-                       userData.user_metadata?.preferred_username;
+          let fullName = userData.user_metadata?.name || userData.email?.split('@')[0] || 'User';
           let userEmail = userData.email;
           
           console.log('User data for profile creation:', {
@@ -73,7 +71,7 @@ export default function AuthCallback() {
           const userName = userEmail?.split('@')[0] || 'user';
           const newProfile = {
             id: userData.id,
-            name: fullName || userName,
+            name: fullName,
             username: userName,
             interests: [],
             friends: 0,
@@ -95,18 +93,10 @@ export default function AuthCallback() {
           console.log('Profile found:', profileData);
         }
 
-        // If we're in a popup, notify the parent window and close
-        if (window.opener) {
-          console.log('This is a popup window, notifying parent and closing');
-          window.opener.postMessage({ type: 'AUTH_COMPLETE', success: true }, window.location.origin);
-          window.close();
-          return;
-        }
-
         // Redirect to home page if authentication was successful
         toast({
           title: 'Success',
-          description: 'You have been signed in successfully.',
+          description: 'Your email has been confirmed. You are now signed in.',
         });
         
         navigate('/', { replace: true });
@@ -118,21 +108,6 @@ export default function AuthCallback() {
           description: err.message || 'Failed to complete authentication',
           variant: 'destructive',
         });
-        
-        // If we're in a popup, notify the parent window of the error and close
-        if (window.opener) {
-          window.opener.postMessage({ 
-            type: 'AUTH_COMPLETE', 
-            success: false, 
-            error: err.message 
-          }, window.location.origin);
-          
-          // Wait a moment before closing to ensure the message is sent
-          setTimeout(() => {
-            window.close();
-          }, 1000);
-          return;
-        }
         
         // Wait a moment before redirecting on error
         setTimeout(() => {
