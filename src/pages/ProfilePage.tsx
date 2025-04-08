@@ -1,3 +1,4 @@
+
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,10 +40,12 @@ interface ProfileFormValues {
 }
 
 export default function ProfilePage() {
+  // Always declare all hooks at the top level, before any conditional logic
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user, updateProfile, signOut } = useUser();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // If user is null, return a loading state to prevent errors
   if (!user) {
@@ -52,8 +55,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-  
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
