@@ -56,6 +56,8 @@ export default function ProfilePage() {
     );
   }
   
+  // Initialize form hooks AFTER the null check, but BEFORE any other logic
+  // This ensures hooks are always called in the same order during every render
   const form = useForm<ProfileFormValues>({
     defaultValues: {
       name: user.name || "",

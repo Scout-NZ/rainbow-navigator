@@ -32,9 +32,9 @@ const App = () => (
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
         <UserProvider>
+          <Toaster />
+          <Sonner />
           <BrowserRouter basename={BASE_PATH}>
             <Routes>
               {/* Public routes - accessible without authentication */}
