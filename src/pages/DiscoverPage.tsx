@@ -1,7 +1,6 @@
 
 import { useState } from "react";
-import { MapPin, Grid, Coffee, Music, Heart, ShoppingBag, Settings, Users, Stethoscope, Search, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Grid, Coffee, Music, Heart, ShoppingBag, Settings, Users, Stethoscope } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { InteractiveMap } from "@/components/map/InteractiveMap";
@@ -14,6 +13,7 @@ import {
   CarouselPrevious 
 } from "@/components/ui/carousel";
 import { mockPlaces } from "@/data/mockData";
+import { Button } from "@/components/ui/button";
 
 // Define categories with their icons
 const categories = [
@@ -54,35 +54,9 @@ export default function DiscoverPage() {
   
   return (
     <div className="space-y-6">
-      {/* Simple header */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Simple header - removed the buttons */}
+      <div className="mb-4">
         <h1 className="text-2xl font-bold">Discover</h1>
-        <div className="flex gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1"
-          >
-            <MapPin className="h-4 w-4" />
-            <span className="sr-only sm:not-sr-only">Current Location</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1"
-          >
-            <Search className="h-4 w-4" />
-            <span className="sr-only sm:not-sr-only">Search</span>
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            <span className="sr-only sm:not-sr-only">Add Place</span>
-          </Button>
-        </div>
       </div>
       
       {/* Map Section - Large and prominent */}
