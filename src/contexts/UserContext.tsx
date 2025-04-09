@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { mockUserProfile } from "@/data/mockData";
@@ -6,7 +5,6 @@ import { toast } from "@/components/ui/use-toast";
 import { Session, User } from "@supabase/supabase-js";
 import { Json } from "@/integrations/supabase/types";
 
-// Define a more comprehensive SocialLinks type
 interface SocialLinks {
   instagram: string;
   twitter: string;
@@ -40,9 +38,9 @@ interface UserProfile {
   friends: string[];
   groups: string[];
   events: string[];
-  imageUrl?: string; // Added for compatibility with existing components
-  identity?: string; // Added for compatibility with existing components
-  gender?: string; // Added for compatibility with existing components
+  imageUrl?: string;
+  identity?: string;
+  gender?: string;
 }
 
 interface UserContextType {
@@ -61,7 +59,6 @@ interface UserContextType {
   isInGroup: (groupId: string) => boolean;
   isAttendingEvent: (eventId: string) => boolean;
   
-  // For backward compatibility with existing components
   userProfile: UserProfile | null;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
   currentUser: { id: string };
@@ -72,7 +69,6 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Create default social links object
 const defaultSocialLinks: SocialLinks = {
   instagram: "",
   twitter: "",
@@ -88,7 +84,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Mock user for development
   const mockUser: UserProfile = {
     id: String(mockUserProfile.id),
     name: mockUserProfile.name,
@@ -113,12 +108,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     friends: ["2", "3"],
     groups: ["1", "4"],
     events: ["1", "3"],
-    imageUrl: mockUserProfile.avatar, // Add imageUrl for compatibility
-    identity: mockUserProfile.identities[0] || "", // Add identity for compatibility
-    gender: "Non-Binary" // Default gender
+    imageUrl: mockUserProfile.avatar,
+    identity: mockUserProfile.identities[0] || "",
+    gender: "Non-Binary"
   };
 
-  // Helper function to fetch user profile from Supabase
   const fetchUserProfile = async (userId: string) => {
     console.log("Fetching user profile for:", userId);
     
@@ -132,11 +126,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.log("Profile error:", error);
         console.log("No profile found, creating one...");
-        // If no profile exists, create one
         const userEmail = session?.user?.email || "";
         const userName = userEmail.split('@')[0];
         
-        // Convert the socialLinks to JSON format for Supabase
         const socialLinksJson = JSON.stringify(defaultSocialLinks) as unknown as Json;
         
         const { error: insertError } = await supabase.from("profiles").insert({
@@ -148,12 +140,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (insertError) {
           console.error("Error creating profile:", insertError);
-          setUser(mockUser); // Fallback to mock user
+          setUser(mockUser);
           setLoading(false);
           return;
         }
         
-        // Fetch the newly created profile
         const { data: newProfile, error: newProfileError } = await supabase
           .from("profiles")
           .select("*")
@@ -162,14 +153,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
         if (newProfileError || !newProfile) {
           console.error("Failed to fetch newly created profile:", newProfileError);
-          setUser(mockUser); // Fallback to mock user
+          setUser(mockUser);
           setLoading(false);
           return;
         }
         
         const profileData = newProfile;
         
-        // Parse sociallinks from JSON if it exists
         let socialLinks = defaultSocialLinks;
         if (profileData.sociallinks) {
           try {
@@ -186,21 +176,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        // Convert Supabase profile to our UserProfile format
         const userProfile: UserProfile = {
           id: profileData.id,
           name: profileData.name || userName,
           username: profileData.username || userName,
           email: session?.user?.email || "",
-          avatar: profileData.imageurl || "", // Note the lowercase 'url' from DB
-          imageUrl: profileData.imageurl || "", // For compatibility
+          avatar: profileData.imageurl || "",
+          imageUrl: profileData.imageurl || "",
           coverPhoto: "",
           bio: profileData.bio || "",
           location: profileData.location || "",
           pronouns: profileData.pronouns || "",
           identities: [profileData.identity || ""].filter(Boolean),
-          identity: profileData.identity || "", // For compatibility
-          gender: profileData.gender || "", // For compatibility
+          identity: profileData.identity || "",
+          gender: profileData.gender || "",
           interests: profileData.interests || [],
           joinDate: profileData.created_at || new Date().toISOString(),
           badges: [],
@@ -216,7 +205,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
       } else if (data) {
         console.log("Found existing profile:", data);
-        // Parse sociallinks from JSON if it exists
         let socialLinks = defaultSocialLinks;
         if (data.sociallinks) {
           try {
@@ -233,21 +221,20 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
 
-        // Convert Supabase profile to our UserProfile format
         const userProfile: UserProfile = {
           id: data.id,
           name: data.name || "",
           username: data.username || "",
           email: session?.user?.email || "",
-          avatar: data.imageurl || "", // Note the lowercase 'url' from DB
-          imageUrl: data.imageurl || "", // For compatibility
+          avatar: data.imageurl || "",
+          imageUrl: data.imageurl || "",
           coverPhoto: "",
           bio: data.bio || "",
           location: data.location || "",
           pronouns: data.pronouns || "",
           identities: [data.identity || ""].filter(Boolean),
-          identity: data.identity || "", // For compatibility
-          gender: data.gender || "", // For compatibility
+          identity: data.identity || "",
+          gender: data.gender || "",
           interests: data.interests || [],
           joinDate: data.created_at || new Date().toISOString(),
           badges: [],
@@ -262,14 +249,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(userProfile);
         setLoading(false);
       } else {
-        // No profile found after attempted creation, use mock data
         console.warn("No profile data returned, using mock data");
         setUser(mockUser);
         setLoading(false);
       }
     } catch (error) {
       console.error("Error in fetchUserProfile:", error);
-      setUser(mockUser); // Fallback to mock user
+      setUser(mockUser);
       setLoading(false);
     }
   };
@@ -277,14 +263,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     console.log("UserProvider mounted");
     
-    // First, set up the auth listeners
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
         console.log("Auth state changed:", event, newSession?.user?.id);
         
         if (event === "SIGNED_IN" && newSession) {
           setSession(newSession);
-          // Use setTimeout to prevent potential Supabase deadlock
           setTimeout(() => {
             fetchUserProfile(newSession.user.id);
           }, 0);
@@ -298,7 +282,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Then check if there's an existing session
     async function getSession() {
       try {
         console.log("Checking for existing session");
@@ -316,7 +299,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSession(data.session);
           await fetchUserProfile(data.session.user.id);
         } else {
-          // No session found
           console.log("No session found");
           setUser(null);
           setLoading(false);
@@ -330,7 +312,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getSession();
 
-    // Clean up the auth listener on unmount
     return () => {
       console.log("UserProvider unmounting");
       authListener.subscription.unsubscribe();
@@ -339,13 +320,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     try {
-      // First set loading to prevent UI glitches
       setLoading(true);
       
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      // Clear user and session state
       setUser(null);
       setSession(null);
       
@@ -353,7 +332,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Signed out successfully",
       });
       
-      // Navigate to the auth page using window.location to ensure full page reload
       window.location.href = "/auth";
     } catch (error) {
       console.error("Error signing out:", error);
@@ -361,7 +339,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Error signing out",
         variant: "destructive",
       });
-      // End loading state even on error
       setLoading(false);
     }
   };
@@ -379,17 +356,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log("Updating profile with:", updates);
       
-      // Handle profile image separately if it's a File object or blob URL
       if (updates.imageUrl && updates.imageUrl.startsWith('blob:')) {
         try {
-          // Convert blob URL to File object
           const response = await fetch(updates.imageUrl);
           const blob = await response.blob();
           const fileName = `${user.id}-profile-${Date.now()}`;
           const fileExt = blob.type.split('/')[1] || 'jpg';
           const filePath = `${fileName}.${fileExt}`;
           
-          // Upload to Supabase Storage
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('profiles')
             .upload(filePath, blob, {
@@ -401,14 +375,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             throw new Error(`Error uploading image: ${uploadError.message}`);
           }
           
-          // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from('profiles')
             .getPublicUrl(filePath);
             
           console.log("Image uploaded successfully:", publicUrl);
           
-          // Update imageUrl in updates object with the stored URL
           updates.imageUrl = publicUrl;
         } catch (error) {
           console.error("Error processing profile image:", error);
@@ -417,18 +389,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             description: "There was an error uploading your profile image",
             variant: "destructive",
           });
-          // Continue with other updates even if image upload fails
         }
       }
       
-      // First update the local state for immediate UI feedback
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
       
-      // Prepare the data for Supabase update
       const supabaseUpdates: Record<string, any> = {};
       
-      // Map UserProfile fields to Supabase profiles table fields
       if (updates.name !== undefined) supabaseUpdates.name = updates.name;
       if (updates.username !== undefined) supabaseUpdates.username = updates.username;
       if (updates.bio !== undefined) supabaseUpdates.bio = updates.bio;
@@ -439,14 +407,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (updates.interests !== undefined) supabaseUpdates.interests = updates.interests;
       if (updates.imageUrl !== undefined) supabaseUpdates.imageurl = updates.imageUrl;
       
-      // Handle social links separately as they need to be stored as JSON
       if (updates.socialLinks) {
         supabaseUpdates.sociallinks = updates.socialLinks;
       }
       
       console.log("Sending to Supabase:", supabaseUpdates);
       
-      // Update the profile in Supabase
       const { error } = await supabase
         .from("profiles")
         .update(supabaseUpdates)
@@ -468,20 +434,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
       
-      // Revert the local state on error to maintain consistency
       fetchUserProfile(user.id);
     }
   };
 
-  // Legacy alias for updateProfile
   const updateUserProfile = updateProfile;
 
   const joinGroup = async (groupId: string) => {
     if (!user) return;
     
     try {
-      // In a real app, update the groups in Supabase
-      // For now, just update the local state
       const updatedGroups = [...user.groups, groupId];
       setUser({ ...user, groups: updatedGroups });
       
@@ -501,8 +463,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
-      // In a real app, update the groups in Supabase
-      // For now, just update the local state
       const updatedGroups = user.groups.filter(g => g !== groupId);
       setUser({ ...user, groups: updatedGroups });
       
@@ -522,8 +482,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
-      // In a real app, update the events in Supabase
-      // For now, just update the local state
       const updatedEvents = [...user.events, eventId];
       setUser({ ...user, events: updatedEvents });
       
@@ -543,8 +501,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
-      // In a real app, update the events in Supabase
-      // For now, just update the local state
       const updatedEvents = user.events.filter(e => e !== eventId);
       setUser({ ...user, events: updatedEvents });
       
@@ -564,8 +520,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
-      // In a real app, update the friends in Supabase
-      // For now, just update the local state
       const updatedFriends = [...user.friends, friendId];
       setUser({ ...user, friends: updatedFriends });
       
@@ -585,8 +539,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return;
     
     try {
-      // In a real app, update the friends in Supabase
-      // For now, just update the local state
       const updatedFriends = user.friends.filter(f => f !== friendId);
       setUser({ ...user, friends: updatedFriends });
       
@@ -617,14 +569,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user.events.includes(eventId);
   };
   
-  // Compatibility methods
   const isGroupMember = (groupId: string | number) => {
     if (!user) return false;
     return user.groups.includes(String(groupId));
   };
   
   const isGroupAdmin = (groupId: string | number) => {
-    // For now, just return true for the groups the user is in
     return isGroupMember(groupId);
   };
   
@@ -652,7 +602,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isInGroup,
     isAttendingEvent,
     
-    // For backward compatibility
     userProfile: user,
     updateUserProfile,
     currentUser: { id: user?.id || "1" },

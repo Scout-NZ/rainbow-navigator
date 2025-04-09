@@ -1,3 +1,4 @@
+
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,6 +19,8 @@ import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@/contexts/UserContext";
+import { supabase } from "@/integrations/supabase/client";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ProfileFormValues {
   name: string;
@@ -41,17 +44,10 @@ interface ProfileFormValues {
 export default function ProfilePage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const { user, updateProfile, signOut } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <p>Loading profile...</p>
-      </div>
-    );
-  }
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
@@ -92,13 +88,22 @@ export default function ProfilePage() {
     }
   });
 
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p>Loading profile...</p>
+      </div>
+    );
+  }
+  
+  // Reset form values when user data changes
   if (user && user.name !== form.getValues().name) {
     form.reset({
       name: user.name || "",
       username: user.username || "",
       bio: user.bio || "",
       location: user.location || "",
-      interests: user.interests.join(", ") || "",
+      interests: user.interests?.join(", ") || "",
       identity: user.identity || "",
       pronouns: user.pronouns || "",
       gender: user.gender || "",
@@ -170,19 +175,64 @@ export default function ProfilePage() {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    const imageUrl = URL.createObjectURL(file);
-    updateProfile({
-      imageUrl,
-    });
-
-    toast({
-      title: "Profile picture updated",
-      description: "Your profile picture is being uploaded and saved.",
-    });
+    
+    try {
+      setIsUploading(true);
+      
+      // Create a temporary preview URL for immediate feedback
+      const previewUrl = URL.createObjectURL(file);
+      
+      // First show the image immediately for better UX
+      updateProfile({
+        imageUrl: previewUrl,
+      });
+      
+      // Generate a unique filename using UUID to prevent overwrites
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${uuidv4()}.${fileExt}`;
+      
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('profiles')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true,
+        });
+      
+      if (uploadError) {
+        throw new Error(`Error uploading image: ${uploadError.message}`);
+      }
+      
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('profiles')
+        .getPublicUrl(fileName);
+      
+      // Update user profile with permanent URL
+      await updateProfile({
+        imageUrl: publicUrl,
+      });
+      
+      toast({
+        title: "Profile picture updated",
+        description: "Your profile picture has been updated and saved.",
+      });
+      
+      // Clean up the temporary URL object
+      URL.revokeObjectURL(previewUrl);
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      toast({
+        title: "Upload failed",
+        description: "There was an error uploading your profile picture.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleSignOut = async () => {
@@ -234,8 +284,13 @@ export default function ProfilePage() {
                 <button 
                   className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-full flex items-center justify-center"
                   onClick={handleProfilePictureClick}
+                  disabled={isUploading}
                 >
-                  <Camera className="h-8 w-8 text-white" />
+                  {isUploading ? (
+                    <div className="h-8 w-8 border-2 border-t-transparent border-white rounded-full animate-spin"></div>
+                  ) : (
+                    <Camera className="h-8 w-8 text-white" />
+                  )}
                 </button>
                 
                 <input 
@@ -244,6 +299,7 @@ export default function ProfilePage() {
                   className="hidden" 
                   accept="image/*"
                   onChange={handleFileChange}
+                  disabled={isUploading}
                 />
               </Avatar>
             </div>
@@ -283,7 +339,7 @@ export default function ProfilePage() {
             )}
             
             <div className="flex gap-2 mt-3 flex-wrap">
-              {user.interests.map((interest, idx) => (
+              {user.interests?.map((interest, idx) => (
                 <Badge key={interest + idx} variant="secondary" className="text-xs">
                   #{interest}
                 </Badge>
