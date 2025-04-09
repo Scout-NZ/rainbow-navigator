@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AppLayout } from "./components/layout/AppLayout";
 import { UserProvider } from "./contexts/UserContext";
 import { UserProfileProvider } from "./contexts/UserProfile";
@@ -20,7 +20,7 @@ import GroupDetailPage from "./pages/GroupDetailPage";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
 import AuthPopup from "./pages/AuthPopup";
-import LandingPage from "./pages/LandingPage";
+import AboutPage from "./pages/AboutPage"; // We'll create this file for the former landing page
 
 // Create a client
 const queryClient = new QueryClient();
@@ -43,14 +43,18 @@ const App = () => (
                 <Route path="/auth" element={<AuthPage />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/auth-popup" element={<AuthPopup />} />
-                <Route path="/" element={<LandingPage />} />
+                <Route path="/about" element={<AboutPage />} /> {/* Move landing page to /about */}
                 
-                {/* Routes that require the AppLayout */}
+                {/* Root route redirects to login if not authenticated */}
+                <Route path="/" element={<Navigate to="/auth" replace />} />
+                
+                {/* Protected routes that require the AppLayout */}
                 <Route element={
                   <AuthGuard>
                     <AppLayout />
                   </AuthGuard>
                 }>
+                  {/* Make Discover the default protected route */}
                   <Route path="/discover" element={<DiscoverPage />} />
                   <Route path="/connect" element={<ConnectPage />} />
                   <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />

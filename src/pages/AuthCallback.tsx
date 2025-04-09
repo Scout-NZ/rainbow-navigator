@@ -93,13 +93,13 @@ export default function AuthCallback() {
           console.log('Profile found:', profileData);
         }
 
-        // Redirect to home page if authentication was successful
+        // Redirect to discover page if authentication was successful
         toast({
           title: 'Success',
           description: 'Your email has been confirmed. You are now signed in.',
         });
         
-        navigate('/', { replace: true });
+        navigate('/discover', { replace: true });
       } catch (err: any) {
         console.error('Error during auth callback:', err);
         setError(err.message || 'Authentication failed');

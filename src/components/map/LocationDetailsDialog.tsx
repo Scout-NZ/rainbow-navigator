@@ -1,215 +1,222 @@
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Mail, MapPin, Phone, Heart, Clock, Info } from "lucide-react";
-import { mockPlaces } from "@/data/mockData";
+import { Button } from "@/components/ui/button";
+import { Phone, Globe, MapPin, Clock, Star } from "lucide-react";
 import { CategoryPlaceholderImage } from "@/components/ui/CategoryPlaceholderImage";
 
-type LocationDetailsProps = {
-  location: typeof mockPlaces[0] | null;
+// Define a type for the possible operating hours
+interface OperatingHours {
+  day: string;
+  hours: string;
+}
+
+// Extend the Place type to include optional hours
+interface ExtendedPlace {
+  id: number;
+  name: string;
+  category: string;
+  description?: string;
+  verified?: boolean;
+  location: {
+    lat: number;
+    lng: number;
+    address?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+  };
+  contact?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  lgbt_status?: 'lgbt_owned' | 'lgbt_managed' | 'ally';
+  tags?: string[];
+  featured?: boolean;
+  imageUrl?: string;
+  rating?: number;
+  hours?: OperatingHours[]; // Optional hours property
+}
+
+interface LocationDetailsDialogProps {
+  location: ExtendedPlace | null;
   isOpen: boolean;
   onClose: () => void;
-};
+}
 
-export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDetailsProps) {
+export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDetailsDialogProps) {
   if (!location) return null;
 
-  const handleOpenWebsite = (url: string) => {
-    // Check if the URL has a protocol, if not add https://
-    const websiteUrl = url.startsWith('http') ? url : `https://${url}`;
-    window.open(websiteUrl, '_blank', 'noopener,noreferrer');
+  // Function to get category-specific styling
+  const getCategoryColor = (category: string) => {
+    const categoryColors: Record<string, { bg: string, text: string }> = {
+      "Cafes": { bg: "bg-orange-100", text: "text-orange-800" },
+      "Bars": { bg: "bg-blue-100", text: "text-blue-800" },
+      "Nightlife": { bg: "bg-pink-100", text: "text-pink-800" },
+      "Shopping": { bg: "bg-yellow-100", text: "text-yellow-800" },
+      "Services": { bg: "bg-purple-100", text: "text-purple-800" },
+      "Community": { bg: "bg-green-100", text: "text-green-800" },
+      "Healthcare": { bg: "bg-cyan-100", text: "text-cyan-800" },
+      "default": { bg: "bg-gray-100", text: "text-gray-800" }
+    };
+
+    return categoryColors[category] || categoryColors.default;
   };
 
-  // Function to get the LGBT+ status badge
-  const getLgbtStatusBadge = () => {
-    if (!location.lgbt_status) return null;
-    
-    let badgeProps: {
-      variant: "default" | "secondary" | "destructive" | "outline" | "lgbtOwned" | "lgbtManaged" | "ally";
-      text: string;
-    } = {
-      variant: 'default',
-      text: '',
-    };
-    
-    switch(location.lgbt_status) {
-      case 'lgbt_owned':
-        badgeProps.variant = 'lgbtOwned';
-        badgeProps.text = 'LGBT+ Owned';
-        break;
-      case 'lgbt_managed':
-        badgeProps.variant = 'lgbtManaged';
-        badgeProps.text = 'LGBT+ Managed';
-        break;
-      case 'ally':
-        badgeProps.variant = 'ally';
-        badgeProps.text = 'Ally';
-        break;
-      default:
-        return null;
-    }
-    
-    return (
-      <Badge variant={badgeProps.variant} className="flex items-center gap-1">
-        <Heart className="h-3 w-3" />
-        {badgeProps.text}
-      </Badge>
-    );
-  };
+  const colors = getCategoryColor(location.category);
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{location.name}</DialogTitle>
-          <DialogDescription className="flex items-center gap-2 text-sm flex-wrap">
-            <Badge variant="outline">{location.category}</Badge>
-            <Badge variant="secondary">{location.type}</Badge>
-            {getLgbtStatusBadge()}
+          <DialogTitle className="text-xl font-bold">{location.name}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Location Image */}
+          <div className="h-60 relative rounded-lg overflow-hidden">
+            {location.imageUrl ? (
+              <img
+                src={location.imageUrl}
+                alt={location.name}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  const parentElement = (e.target as HTMLImageElement).parentElement;
+                  if (parentElement) {
+                    const placeholderDiv = document.createElement('div');
+                    placeholderDiv.className = 'w-full h-full';
+                    parentElement.appendChild(placeholderDiv);
+                    
+                    // Use CategoryPlaceholderImage instead of direct manipulation
+                    const placeholderImgContainer = document.createElement('div');
+                    placeholderImgContainer.className = 'w-full h-full';
+                    placeholderDiv.appendChild(placeholderImgContainer);
+                    
+                    // React would normally handle this, but for error cases:
+                    const img = document.createElement('img');
+                    img.src = `https://images.unsplash.com/photo-1573592371950-348a8f1d9f38?q=80&w=1000&auto=format`;
+                    img.alt = location.category;
+                    img.className = 'w-full h-full object-cover';
+                    placeholderImgContainer.appendChild(img);
+                  }
+                }}
+              />
+            ) : (
+              <CategoryPlaceholderImage
+                category={location.category}
+                className="w-full h-full"
+              />
+            )}
+          </div>
+          
+          {/* Location Badges */}
+          <div className="flex flex-wrap gap-2">
+            <Badge className={`${colors.bg} ${colors.text}`}>{location.category}</Badge>
             {location.verified && (
-              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
-                ✓ Verified
+              <Badge className="bg-green-100 text-green-800">✓ Verified</Badge>
+            )}
+            {location.lgbt_status && (
+              <Badge variant={
+                location.lgbt_status === 'lgbt_owned' ? 'lgbtOwned' :
+                location.lgbt_status === 'lgbt_managed' ? 'lgbtManaged' : 'ally'
+              }>
+                {location.lgbt_status === 'lgbt_owned' ? '🏳️‍🌈 LGBT+ Owned' :
+                 location.lgbt_status === 'lgbt_managed' ? '🏳️‍🌈 LGBT+ Managed' : '❤️ Ally'}
               </Badge>
             )}
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="h-48 w-full rounded-md bg-muted overflow-hidden">
-          {location.imageUrl ? (
-            <img 
-              src={location.imageUrl}
-              alt={location.name}
-              className="w-full h-full object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                const parentElement = target.parentElement;
-                if (parentElement) {
-                  const placeholderDiv = document.createElement('div');
-                  placeholderDiv.className = 'w-full h-full';
-                  parentElement.appendChild(placeholderDiv);
-                  
-                  // Render the CategoryPlaceholderImage using DOM operations
-                  const img = document.createElement('img');
-                  img.src = `https://images.unsplash.com/photo-1573592371950-348a8f1d9f38?q=80&w=1000&auto=format`;
-                  img.alt = location.category;
-                  img.className = 'w-full h-full object-cover';
-                  placeholderDiv.appendChild(img);
-                }
-              }}
-            />
-          ) : (
-            <CategoryPlaceholderImage 
-              category={location.category} 
-              className="w-full h-full"
-            />
-          )}
-        </div>
-        
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">{location.description}</p>
+            {location.tags?.map(tag => (
+              <Badge variant="outline" key={tag}>{tag}</Badge>
+            ))}
+          </div>
           
-          {location.hours && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium flex items-center gap-2">
-                <Clock className="h-4 w-4 text-primary" /> Hours
-              </h4>
-              <p className="text-sm text-muted-foreground ml-6">
-                {location.hours}
+          {/* Location Description */}
+          {location.description && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">About</h3>
+              <p className="text-gray-700">{location.description}</p>
+            </div>
+          )}
+          
+          {/* Location Hours if available */}
+          {location.hours && location.hours.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                Hours
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {location.hours.map((item, index) => (
+                  <div key={index} className="flex justify-between">
+                    <span className="font-medium">{item.day}</span>
+                    <span>{item.hours}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {/* Location Address */}
+          {location.location && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2 flex items-center">
+                <MapPin className="h-5 w-5 mr-2" />
+                Address
+              </h3>
+              <p className="text-gray-700">
+                {location.location.address && `${location.location.address}, `}
+                {location.location.city && `${location.location.city}, `}
+                {location.location.state && `${location.location.state} `}
+                {location.location.zip && location.location.zip}
               </p>
             </div>
           )}
           
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary" /> Location
-            </h4>
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-sm ml-6">
-                <span>{location.location.address}</span>
-              </div>
-              {location.location.neighbourhood && (
-                <div className="flex items-center gap-2 text-sm ml-6">
-                  <span>{location.location.neighbourhood}</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2 text-sm ml-6">
-                <span>{location.location.city}</span>
-              </div>
-            </div>
-          </div>
-          
-          {location.contact && (location.contact.phone || location.contact.email || location.contact.website) && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium flex items-center gap-2">
-                <Info className="h-4 w-4 text-primary" /> Contact
-              </h4>
-              <div className="space-y-1">
+          {/* Contact Information */}
+          {location.contact && (
+            <div className="space-y-3">
+              <h3 className="text-lg font-semibold">Contact</h3>
+              <div className="space-y-2">
                 {location.contact.phone && (
-                  <div className="flex items-center gap-2 text-sm ml-6">
-                    <Phone className="h-4 w-4 text-primary" />
-                    <span>{location.contact.phone}</span>
-                  </div>
-                )}
-                {location.contact.email && (
-                  <div className="flex items-center gap-2 text-sm ml-6">
-                    <Mail className="h-4 w-4 text-primary" />
-                    <span>{location.contact.email}</span>
+                  <div className="flex items-center">
+                    <Phone className="h-5 w-5 mr-2" />
+                    <a href={`tel:${location.contact.phone}`} className="text-blue-600 hover:underline">
+                      {location.contact.phone}
+                    </a>
                   </div>
                 )}
                 {location.contact.website && (
-                  <div className="flex items-center gap-2 text-sm ml-6">
-                    <ExternalLink className="h-4 w-4 text-primary" />
-                    <button 
-                      onClick={() => handleOpenWebsite(location.contact!.website!)} 
-                      className="text-primary hover:underline text-left"
+                  <div className="flex items-center">
+                    <Globe className="h-5 w-5 mr-2" />
+                    <a 
+                      href={location.contact.website.startsWith('http') ? location.contact.website : `https://${location.contact.website}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
                     >
-                      {location.contact.website.replace(/^https?:\/\/(www\.)?/, '')}
-                    </button>
+                      {location.contact.website.replace(/^https?:\/\//, '')}
+                    </a>
                   </div>
                 )}
               </div>
             </div>
           )}
           
-          <div className="space-y-2">
-            <h4 className="text-sm font-medium">Tags</h4>
-            <div className="flex flex-wrap gap-1">
-              {location.tags && location.tags.map(tag => (
-                <Badge key={tag} variant="secondary" className="text-xs">
-                  #{tag}
-                </Badge>
-              ))}
-              
-              {/* Always show type and category as tags if they aren't already in the tags array */}
-              {!location.tags?.includes(location.type.toLowerCase()) && (
-                <Badge variant="secondary" className="text-xs">
-                  #{location.type.toLowerCase()}
-                </Badge>
-              )}
-              
-              {!location.tags?.includes(location.category.toLowerCase()) && (
-                <Badge variant="secondary" className="text-xs">
-                  #{location.category.toLowerCase()}
-                </Badge>
-              )}
+          {/* Rating if available */}
+          {location.rating && (
+            <div className="flex items-center">
+              <Star className="h-5 w-5 text-yellow-400 mr-1 fill-current" />
+              <span className="font-medium">{location.rating.toFixed(1)}</span>
+              <span className="text-gray-500 ml-1">/ 5.0</span>
             </div>
-          </div>
+          )}
         </div>
         
-        <div className="flex justify-end gap-2 mt-4">
+        <div className="flex justify-end space-x-2 mt-6">
           <Button variant="outline" onClick={onClose}>Close</Button>
-          {location.contact?.website && (
-            <Button 
-              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-              onClick={() => handleOpenWebsite(location.contact!.website!)}
-            >
-              <span className="flex items-center gap-1">
-                Visit Website <ExternalLink className="h-4 w-4" />
-              </span>
-            </Button>
-          )}
+          <Button>Get Directions</Button>
         </div>
       </DialogContent>
     </Dialog>
