@@ -1,4 +1,3 @@
-
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -19,7 +18,6 @@ import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@/contexts/UserContext";
-import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
 
 interface ProfileFormValues {
@@ -96,7 +94,6 @@ export default function ProfilePage() {
     );
   }
   
-  // Reset form values when user data changes
   if (user && user.name !== form.getValues().name) {
     form.reset({
       name: user.name || "",
@@ -182,47 +179,16 @@ export default function ProfilePage() {
     try {
       setIsUploading(true);
       
-      // Create a temporary preview URL for immediate feedback
       const previewUrl = URL.createObjectURL(file);
       
-      // First show the image immediately for better UX
       updateProfile({
         imageUrl: previewUrl,
       });
       
-      // Generate a unique filename using UUID to prevent overwrites
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${uuidv4()}.${fileExt}`;
-      
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('profiles')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: true,
-        });
-      
-      if (uploadError) {
-        throw new Error(`Error uploading image: ${uploadError.message}`);
-      }
-      
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('profiles')
-        .getPublicUrl(fileName);
-      
-      // Update user profile with permanent URL
-      await updateProfile({
-        imageUrl: publicUrl,
-      });
-      
       toast({
-        title: "Profile picture updated",
-        description: "Your profile picture has been updated and saved.",
+        title: "Uploading profile picture...",
+        description: "Your profile picture is being uploaded.",
       });
-      
-      // Clean up the temporary URL object
-      URL.revokeObjectURL(previewUrl);
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       toast({
@@ -230,7 +196,6 @@ export default function ProfilePage() {
         description: "There was an error uploading your profile picture.",
         variant: "destructive",
       });
-    } finally {
       setIsUploading(false);
     }
   };

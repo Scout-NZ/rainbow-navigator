@@ -4,6 +4,7 @@ import { mockUserProfile } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { Session, User } from "@supabase/supabase-js";
 import { Json } from "@/integrations/supabase/types";
+import { v4 as uuidv4 } from 'uuid';
 
 interface SocialLinks {
   instagram: string;
@@ -360,7 +361,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const response = await fetch(updates.imageUrl);
           const blob = await response.blob();
-          const fileName = `${user.id}-profile-${Date.now()}`;
+          
+          const fileName = `${user.id}/${uuidv4()}`;
           const fileExt = blob.type.split('/')[1] || 'jpg';
           const filePath = `${fileName}.${fileExt}`;
           
