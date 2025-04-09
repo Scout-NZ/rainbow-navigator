@@ -1,4 +1,3 @@
-
 import { Bell, Calendar, Edit, Globe, Heart, Settings, Users, Camera, Instagram, Facebook, Twitter, Linkedin, Music, Video, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -40,14 +39,12 @@ interface ProfileFormValues {
 }
 
 export default function ProfilePage() {
-  // Always declare all hooks at the top level, before any conditional logic
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSocialDialogOpen, setIsSocialDialogOpen] = useState(false);
   const { toast } = useToast();
   const { user, updateProfile, signOut } = useUser();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // If user is null, return a loading state to prevent errors
   if (!user) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -56,10 +53,47 @@ export default function ProfilePage() {
     );
   }
   
-  // Initialize form hooks AFTER the null check, but BEFORE any other logic
-  // This ensures hooks are always called in the same order during every render
   const form = useForm<ProfileFormValues>({
     defaultValues: {
+      name: "",
+      username: "",
+      bio: "",
+      location: "",
+      interests: "",
+      identity: "",
+      pronouns: "",
+      gender: "",
+      socialLinks: {
+        instagram: "",
+        facebook: "",
+        twitter: "",
+        spotify: "",
+        tiktok: "",
+        linkedin: ""
+      }
+    },
+  });
+
+  const socialForm = useForm<{
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    spotify: string;
+    tiktok: string;
+    linkedin: string;
+  }>({
+    defaultValues: {
+      instagram: "",
+      facebook: "",
+      twitter: "",
+      spotify: "",
+      tiktok: "",
+      linkedin: ""
+    }
+  });
+
+  if (user && user.name !== form.getValues().name) {
+    form.reset({
       name: user.name || "",
       username: user.username || "",
       bio: user.bio || "",
@@ -76,26 +110,17 @@ export default function ProfilePage() {
         tiktok: user.socialLinks?.tiktok || "",
         linkedin: user.socialLinks?.linkedin || ""
       }
-    },
-  });
-
-  const socialForm = useForm<{
-    instagram: string;
-    facebook: string;
-    twitter: string;
-    spotify: string;
-    tiktok: string;
-    linkedin: string;
-  }>({
-    defaultValues: {
+    });
+    
+    socialForm.reset({
       instagram: user.socialLinks?.instagram || "",
       facebook: user.socialLinks?.facebook || "",
       twitter: user.socialLinks?.twitter || "",
       spotify: user.socialLinks?.spotify || "",
       tiktok: user.socialLinks?.tiktok || "",
       linkedin: user.socialLinks?.linkedin || ""
-    }
-  });
+    });
+  }
 
   const onSubmit = (values: ProfileFormValues) => {
     const updatedProfile = {
@@ -168,14 +193,11 @@ export default function ProfilePage() {
 
   const hasAnySocialLink = user.socialLinks && Object.values(user.socialLinks).some(link => !!link);
 
-  // Compute these values to avoid errors when used in the JSX
   const friendsCount = typeof user.friends === 'number' ? user.friends : user.friends?.length || 0;
   const groupsCount = typeof user.groups === 'number' ? user.groups : user.groups?.length || 0;
   const eventsCount = typeof user.events === 'number' ? user.events : user.events?.length || 0;
-
-  // Determine which image URL to use, preferring imageUrl if available
   const profileImageUrl = user.imageUrl || user.avatar || "";
-  
+
   return (
     <div className="pb-4">
       <div className="flex justify-between items-center mb-4">
@@ -468,7 +490,6 @@ export default function ProfilePage() {
           </div>
         </TabsContent>
       </Tabs>
-      
       
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[500px] max-h-[80vh]">
