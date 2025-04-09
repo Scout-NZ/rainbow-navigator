@@ -2,26 +2,25 @@
 import { useState, useEffect } from "react";
 import { Outlet, useLocation, Link } from "react-router-dom";
 import { BottomNavigation } from "./BottomNavigation";
-import { MessageCircle, Search, User } from "lucide-react";
+import { MessageCircle, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { ChatBot } from "@/components/ai/ChatBot";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
+import { useUserProfile } from "@/contexts/UserProfile";
 
 export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const location = useLocation();
-  const isHomePage = location.pathname === "/";
+  const isHomePage = location.pathname === "/discover";
   const { user } = useUser();
+  const { userProfile } = useUserProfile();
   
-  // Create a default profile for when userProfile is not available
-  const defaultProfile = {
-    name: "Guest",
-    imageUrl: "",
-  };
+  // Get profile info from our new UserProfile context
+  const profileName = userProfile?.name || user?.name || "User";
+  const profileImageUrl = userProfile?.imageUrl || user?.imageUrl || user?.avatar || "";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -33,9 +32,6 @@ export function AppLayout() {
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
-
-  // Determine which image URL to use for the avatar in the header
-  const profileImageUrl = user?.imageUrl || user?.avatar || "";
 
   return (
     <div className="min-h-screen bg-background pb-16 flex flex-col">
@@ -54,10 +50,10 @@ export function AppLayout() {
               <Avatar className="h-10 w-10 border-2 border-white">
                 <AvatarImage 
                   src={profileImageUrl}
-                  alt={user?.name || "User"} 
+                  alt={profileName} 
                 />
                 <AvatarFallback>
-                  {user?.name ? user.name.substring(0, 2).toUpperCase() : "U"}
+                  {profileName ? profileName.substring(0, 2).toUpperCase() : "U"}
                 </AvatarFallback>
               </Avatar>
             </Link>

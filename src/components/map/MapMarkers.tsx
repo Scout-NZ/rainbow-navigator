@@ -42,6 +42,7 @@ export function MapMarkers({
             strokeColor: "#FFFFFF",
             strokeWeight: 2,
           }}
+          zIndex={1000} // Make sure user location is always on top
         />
       )}
       
@@ -53,8 +54,16 @@ export function MapMarkers({
             lat: place.location.lat,
             lng: place.location.lng
           }}
-          icon={getMarkerIcon(place.type, place.lgbt_status)}
+          icon={getMarkerIcon(place.category, place.lgbt_status)}
           onClick={() => onMarkerClick(place)}
+          animation={google.maps.Animation.DROP}
+          // Add category-specific style to markers
+          label={{
+            text: place.name.substring(0, 1),
+            color: '#FFFFFF',
+            fontWeight: 'bold',
+            fontSize: '14px',
+          }}
         />
       ))}
       
@@ -66,6 +75,10 @@ export function MapMarkers({
             lng: selectedPlace.location.lng
           }}
           onCloseClick={onInfoWindowClose}
+          options={{
+            pixelOffset: new google.maps.Size(0, -30),
+            maxWidth: 300
+          }}
         >
           <div className="p-2 max-w-[250px]">
             <div className="flex items-start justify-between gap-1">

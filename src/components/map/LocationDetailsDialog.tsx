@@ -2,8 +2,9 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, Mail, MapPin, Phone, Heart } from "lucide-react";
+import { ExternalLink, Mail, MapPin, Phone, Heart, Clock, Info } from "lucide-react";
 import { mockPlaces } from "@/data/mockData";
+import { CategoryPlaceholderImage } from "@/components/ui/CategoryPlaceholderImage";
 
 type LocationDetailsProps = {
   location: typeof mockPlaces[0] | null;
@@ -66,24 +67,66 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
             <Badge variant="outline">{location.category}</Badge>
             <Badge variant="secondary">{location.type}</Badge>
             {getLgbtStatusBadge()}
+            {location.verified && (
+              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-300">
+                ✓ Verified
+              </Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
         
-        {location.imageUrl && (
-          <div 
-            className="h-40 w-full rounded-md bg-muted bg-cover bg-center"
-            style={{ backgroundImage: `url(${location.imageUrl})` }}
-          />
-        )}
+        <div className="h-48 w-full rounded-md bg-muted overflow-hidden">
+          {location.imageUrl ? (
+            <img 
+              src={location.imageUrl}
+              alt={location.name}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const parentElement = target.parentElement;
+                if (parentElement) {
+                  const placeholderDiv = document.createElement('div');
+                  placeholderDiv.className = 'w-full h-full';
+                  parentElement.appendChild(placeholderDiv);
+                  
+                  // Render the CategoryPlaceholderImage using DOM operations
+                  const img = document.createElement('img');
+                  img.src = `https://images.unsplash.com/photo-1573592371950-348a8f1d9f38?q=80&w=1000&auto=format`;
+                  img.alt = location.category;
+                  img.className = 'w-full h-full object-cover';
+                  placeholderDiv.appendChild(img);
+                }
+              }}
+            />
+          ) : (
+            <CategoryPlaceholderImage 
+              category={location.category} 
+              className="w-full h-full"
+            />
+          )}
+        </div>
         
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">{location.description}</p>
           
+          {location.hours && (
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Clock className="h-4 w-4 text-primary" /> Hours
+              </h4>
+              <p className="text-sm text-muted-foreground ml-6">
+                {location.hours}
+              </p>
+            </div>
+          )}
+          
           <div className="space-y-2">
-            <h4 className="text-sm font-medium">Location</h4>
+            <h4 className="text-sm font-medium flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary" /> Location
+            </h4>
             <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-primary" />
+              <div className="flex items-center gap-2 text-sm ml-6">
                 <span>{location.location.address}</span>
               </div>
               {location.location.neighbourhood && (
@@ -99,22 +142,24 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
           
           {location.contact && (location.contact.phone || location.contact.email || location.contact.website) && (
             <div className="space-y-2">
-              <h4 className="text-sm font-medium">Contact</h4>
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Info className="h-4 w-4 text-primary" /> Contact
+              </h4>
               <div className="space-y-1">
                 {location.contact.phone && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm ml-6">
                     <Phone className="h-4 w-4 text-primary" />
                     <span>{location.contact.phone}</span>
                   </div>
                 )}
                 {location.contact.email && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm ml-6">
                     <Mail className="h-4 w-4 text-primary" />
                     <span>{location.contact.email}</span>
                   </div>
                 )}
                 {location.contact.website && (
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2 text-sm ml-6">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <button 
                       onClick={() => handleOpenWebsite(location.contact!.website!)} 
