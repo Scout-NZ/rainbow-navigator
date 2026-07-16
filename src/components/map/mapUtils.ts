@@ -32,8 +32,11 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 // Default location (Auckland, New Zealand)
 export const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
 
-// Google Maps API key - using the provided key
-export const GOOGLE_MAPS_API_KEY = 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
+// Google Maps API key - set VITE_GOOGLE_MAPS_API_KEY in .env (see .env.example).
+// The fallback is the original key; it should be restricted by HTTP referrer
+// in Google Cloud Console since browser keys are always publicly visible.
+export const GOOGLE_MAPS_API_KEY =
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
 
 // Loader ID - ensure it's unique and consistent across components
 export const LOADER_ID = 'rainbow-navigator-maps-loader';
