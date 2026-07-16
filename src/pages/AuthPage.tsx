@@ -79,8 +79,11 @@ export default function AuthPage() {
           data: {
             name: name,
           },
-          // Don't redirect to external URL, just create the user
-          emailRedirectTo: window.location.origin + '/auth/callback',
+          // Send the confirmation link back to this deployment (base path aware)
+          emailRedirectTo:
+            window.location.origin +
+            (import.meta.env.VITE_BASE_PATH || '') +
+            '/auth/callback',
         },
       });
 
