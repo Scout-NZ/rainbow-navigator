@@ -26,7 +26,12 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'Timaru': { lat: -44.3969, lng: 171.2550 },
   'Napier': { lat: -39.4928, lng: 176.9120 },
   'Invercargill': { lat: -46.4132, lng: 168.3538 },
-  'Taranaki': { lat: -39.0556, lng: 174.0752 }
+  'Taranaki': { lat: -39.0556, lng: 174.0752 },
+  'Hastings': { lat: -39.6381, lng: 176.8481 },
+  'Lower Hutt': { lat: -41.2094, lng: 174.9086 },
+  'Upper Hutt': { lat: -41.1244, lng: 175.0707 },
+  'Levin': { lat: -40.6218, lng: 175.2866 },
+  'Hunterville': { lat: -39.9333, lng: 175.5667 }
 };
 
 // Default location (Auckland, New Zealand)
