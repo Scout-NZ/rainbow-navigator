@@ -43,7 +43,9 @@ export default function DiscoverPage() {
   const [selectedCity, setSelectedCity] = useState("Wellington");
   const [searchText, setSearchText] = useState("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
-  const [view, setView] = useState<"list" | "map">("list");
+  // Map-first: the core journey is "I'm here (or landing somewhere new) —
+  // what's around me?" The list is one tap away.
+  const [view, setView] = useState<"list" | "map">("map");
 
   const { filteredPlaces: allPlaces, isLoading } = useLocations({});
 

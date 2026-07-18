@@ -80,6 +80,148 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          ends_at: string | null
+          group_id: string | null
+          id: string
+          price: string | null
+          source: string
+          starts_at: string
+          status: string
+          submitted_by: string | null
+          title: string
+          url: string | null
+          venue: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          id?: string
+          price?: string | null
+          source?: string
+          starts_at: string
+          status?: string
+          submitted_by?: string | null
+          title: string
+          url?: string | null
+          venue?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string | null
+          group_id?: string | null
+          id?: string
+          price?: string | null
+          source?: string
+          starts_at?: string
+          status?: string
+          submitted_by?: string | null
+          title?: string
+          url?: string | null
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      group_members: {
+        Row: {
+          created_at: string
+          group_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      groups: {
+        Row: {
+          activities: string[]
+          audience: string[]
+          city: string | null
+          contact_link: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          meeting_info: string | null
+          member_count: number
+          name: string
+          status: string
+          website: string | null
+        }
+        Insert: {
+          activities?: string[]
+          audience?: string[]
+          city?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          meeting_info?: string | null
+          member_count?: number
+          name: string
+          status?: string
+          website?: string | null
+        }
+        Update: {
+          activities?: string[]
+          audience?: string[]
+          city?: string | null
+          contact_link?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          meeting_info?: string | null
+          member_count?: number
+          name?: string
+          status?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       place_reports: {
         Row: {
           created_at: string
