@@ -53,6 +53,12 @@ export function AppLayout() {
                 </Avatar>
               </Link>
             )}
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt=""
+              aria-hidden="true"
+              className="h-8 w-8"
+            />
             <h1 className={cn(
               "text-xl font-bold",
               isHomePage || isScrolled ? "rainbow-text" : "text-white"
