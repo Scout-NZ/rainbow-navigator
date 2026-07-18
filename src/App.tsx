@@ -5,6 +5,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { AppLayout } from "./components/layout/AppLayout";
 import { UserProvider } from "./contexts/UserContext";
 import { AuthGuard } from "./components/auth/AuthGuard";
@@ -34,6 +35,7 @@ const BASE_PATH = import.meta.env.VITE_BASE_PATH || '/';
 
 const App = () => (
   <React.StrictMode>
+    <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -100,6 +102,7 @@ const App = () => (
         </UserProvider>
       </TooltipProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

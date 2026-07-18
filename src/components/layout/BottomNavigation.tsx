@@ -1,15 +1,15 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Calendar, Heart, Map, Plus, User } from "lucide-react";
+import { Calendar, Heart, Map, User, Users } from "lucide-react";
 
-// AllTrails-style tab bar: the contribution action (Suggest) sits centre,
-// like their Navigate/record button.
+// The MAP is the heart of the app, so it takes the raised centre button —
+// land anywhere, tap the middle, see what's around you.
 const navItems = [
-  { label: "Explore", path: "/", icon: Map },
-  { label: "Saved", path: "/saved", icon: Heart },
-  { label: "Suggest", path: "/suggest", icon: Plus, center: true },
+  { label: "Connect", path: "/connect", icon: Users },
   { label: "Events", path: "/events", icon: Calendar },
+  { label: "Map", path: "/", icon: Map, center: true },
+  { label: "Saved", path: "/saved", icon: Heart },
   { label: "Profile", path: "/profile", icon: User },
 ];
 
@@ -32,9 +32,13 @@ export function BottomNavigation() {
                 key={item.path}
                 to={item.path}
                 className="nav-item -mt-4"
-                aria-label="Suggest a place"
+                aria-label="Explore the map"
+                aria-current={isActive ? "page" : undefined}
               >
-                <div className="h-12 w-12 rounded-full bg-rainbow-gradient shadow-lg flex items-center justify-center">
+                <div className={cn(
+                  "h-12 w-12 rounded-full bg-rainbow-gradient shadow-lg flex items-center justify-center",
+                  isActive && "ring-2 ring-primary ring-offset-2"
+                )}>
                   <Icon className="h-6 w-6 text-white" aria-hidden="true" />
                 </div>
                 <span className="text-xs font-medium mt-0.5">{item.label}</span>
