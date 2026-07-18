@@ -109,7 +109,7 @@ export default function DiscoverPage() {
                   <Card className="overflow-hidden group cursor-pointer hover:shadow-md transition-all h-full border-0 shadow">
                     <div 
                       className="h-48 bg-cover bg-center relative" 
-                      style={{ backgroundImage: `url(${place.imageUrl || `https://picsum.photos/300/200?random=${place.id}`})` }}
+                      style={{ backgroundImage: `url(${place.imageUrl})` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent"></div>
                       <div className="absolute top-2 left-2">
@@ -165,7 +165,7 @@ export default function DiscoverPage() {
                   <Card className="overflow-hidden group hover:shadow-md transition-all h-full border-0 shadow">
                     <div
                       className="h-48 bg-cover bg-center relative"
-                      style={{ backgroundImage: `url(${place.imageUrl || `https://picsum.photos/300/200?random=${place.id}`})` }}
+                      style={{ backgroundImage: `url(${place.imageUrl})` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent"></div>
                       <div className="absolute top-2 left-2">

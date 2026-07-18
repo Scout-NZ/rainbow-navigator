@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
+import { getCategoryImage } from "@/lib/categoryImages";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,7 +93,7 @@ export default function ResourcesPage() {
             neighbourhood: "",
           },
           tags: location.tags || ["healthcare"],
-          imageUrl: location.image_url,
+          imageUrl: location.image_url || getCategoryImage(location.category),
           url: location.website || "",
           source: "database",
           featured: false,
