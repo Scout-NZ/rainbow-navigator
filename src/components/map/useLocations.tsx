@@ -1,7 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from "@/integrations/supabase/client";
-import { mockPlaces } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { transformLocation } from './mapUtils';
 
@@ -55,17 +54,12 @@ export function useLocations({
         }
         
         console.log("Fetched locations from Supabase:", data?.length || 0, "records");
-        if (data && data.length > 0) {
-          return data.map(transformLocation);
-        } else {
-          console.log("No locations found in database, using mock data as fallback");
-          return [];
-        }
+        return (data || []).map(transformLocation);
       } catch (err) {
         console.error('Failed to fetch locations:', err);
         toast({
-          title: "Error",
-          description: "Failed to load location data. Using mock data instead.",
+          title: "Couldn't load places",
+          description: "Please check your connection and try again.",
           variant: "destructive"
         });
         return [];
@@ -73,44 +67,7 @@ export function useLocations({
     }
   });
   
-  // Only use mockPlaces as fallback if no locations were found in the database
-  const places = locations.length > 0 ? locations : mockPlaces;
-  
-  // Filter places based on search text if we're using mock data
-  const filteredPlaces = places.filter(place => {
-    // If we're already using the database results, we don't need to filter again
-    if (locations.length > 0) {
-      return true;
-    }
-    
-    // For mock data, apply all filters manually
-    // Apply search text filter
-    if (searchText) {
-      const matchesSearch = 
-        place.name.toLowerCase().includes(searchText.toLowerCase()) || 
-        (place.category && place.category.toLowerCase().includes(searchText.toLowerCase())) || 
-        (place.tags && place.tags.some((tag: string) => tag?.toLowerCase().includes(searchText.toLowerCase())));
-      
-      if (!matchesSearch) return false;
-    }
-    
-    // Category filter
-    if (categoryFilter && place.category !== categoryFilter) {
-      return false;
-    }
-    
-    // LGBT status filter
-    if (lgbtStatusFilter && place.lgbt_status !== lgbtStatusFilter) {
-      return false;
-    }
-    
-    // Verified filter
-    if (verifiedOnly && !place.verified) {
-      return false;
-    }
-    
-    return true;
-  });
-
-  return { filteredPlaces, isLoading, error };
+  // Filtering happens in the Supabase query above; never substitute mock data
+  // for real results — an empty database should look empty, not fake-populated.
+  return { filteredPlaces: locations, isLoading, error };
 }

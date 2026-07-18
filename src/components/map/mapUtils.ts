@@ -34,8 +34,8 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'Hunterville': { lat: -39.9333, lng: 175.5667 }
 };
 
-// Default location (Auckland, New Zealand)
-export const DEFAULT_LOCATION = { lat: -36.8485, lng: 174.7633 };
+// Default location (Wellington — the pilot city)
+export const DEFAULT_LOCATION = { lat: -41.2865, lng: 174.7762 };
 
 // Google Maps API key - set VITE_GOOGLE_MAPS_API_KEY in .env (see .env.example).
 // The fallback is the original key; it should be restricted by HTTP referrer

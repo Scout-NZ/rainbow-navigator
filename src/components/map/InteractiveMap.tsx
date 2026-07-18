@@ -48,6 +48,16 @@ export function InteractiveMap({
   const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategoryFilter || null);
   const [lgbtStatusFilter, setLgbtStatusFilter] = useState<string | null>(initialLgbtStatusFilter || null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+
+  // Keep internal filter state in sync when the parent changes the props
+  // (e.g. the category chips on the Discover page)
+  useEffect(() => {
+    setCategoryFilter(initialCategoryFilter || null);
+  }, [initialCategoryFilter]);
+
+  useEffect(() => {
+    setLgbtStatusFilter(initialLgbtStatusFilter || null);
+  }, [initialLgbtStatusFilter]);
   
   const { filteredPlaces, isLoading, error } = useLocations({
     searchText,

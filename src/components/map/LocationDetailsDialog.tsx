@@ -66,6 +66,11 @@ export function LocationDetailsDialog({ location, isOpen, onClose }: LocationDet
             <Badge variant="outline">{location.category}</Badge>
             <Badge variant="secondary">{location.type}</Badge>
             {getLgbtStatusBadge()}
+            {location.verified ? (
+              <Badge className="bg-green-100 text-green-800 border-green-300">✓ Verified</Badge>
+            ) : (
+              <Badge className="bg-amber-100 text-amber-800 border-amber-300">Community submitted</Badge>
+            )}
           </DialogDescription>
         </DialogHeader>
         

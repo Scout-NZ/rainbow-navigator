@@ -13,13 +13,11 @@ import ConnectPage from "./pages/ConnectPage";
 import EventsPage from "./pages/EventsPage";
 import ResourcesPage from "./pages/ResourcesPage";
 import ProfilePage from "./pages/ProfilePage";
-import FeedPage from "./pages/FeedPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
 import NotFound from "./pages/NotFound";
 import GroupDetailPage from "./pages/GroupDetailPage";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
-import AuthPopup from "./pages/AuthPopup";
-import LandingPage from "./pages/LandingPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -40,23 +38,48 @@ const App = () => (
               {/* Public routes - accessible without authentication */}
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
-              <Route path="/auth-popup" element={<AuthPopup />} />
-              
-              {/* Routes that require the AppLayout */}
-              <Route element={
-                <AuthGuard>
-                  <AppLayout />
-                </AuthGuard>
-              }>
+
+              {/* App shell: the map and resources are public so anyone can
+                  discover places; personal/community areas require sign-in. */}
+              <Route element={<AppLayout />}>
                 <Route path="/" element={<DiscoverPage />} />
-                <Route path="/connect" element={<ConnectPage />} />
-                <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
-                <Route path="/events" element={<EventsPage />} />
                 <Route path="/resources" element={<ResourcesPage />} />
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/feed" element={<FeedPage />} />
+                <Route path="/events" element={<EventsPage />} />
+                <Route
+                  path="/feed"
+                  element={
+                    <ComingSoonPage
+                      title="Community Feed — coming soon"
+                      description="A place to share tips and moments tied to real places, with proper moderation. We're building it carefully rather than quickly."
+                    />
+                  }
+                />
+                <Route
+                  path="/connect"
+                  element={
+                    <AuthGuard>
+                      <ConnectPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/connect/groups/:groupId"
+                  element={
+                    <AuthGuard>
+                      <GroupDetailPage />
+                    </AuthGuard>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <AuthGuard>
+                      <ProfilePage />
+                    </AuthGuard>
+                  }
+                />
               </Route>
-              
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

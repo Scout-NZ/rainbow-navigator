@@ -120,7 +120,7 @@ export function FilterPanel({
           />
           <Label htmlFor="verified-filter">Verified locations only</Label>
           <Badge className="ml-2 bg-green-100 text-green-800 border-green-300">
-            ✓ Rainbow Tick
+            ✓ Verified
           </Badge>
         </div>
       </div>

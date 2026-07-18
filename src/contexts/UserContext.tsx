@@ -1,9 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { mockUserProfile } from "@/data/mockData";
 import { toast } from "@/components/ui/use-toast";
 import { Session, User } from "@supabase/supabase-js";
-import { Json } from "@/integrations/supabase/types";
 import { v4 as uuidv4 } from 'uuid';
 
 interface SocialLinks {
@@ -85,179 +83,106 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const mockUser: UserProfile = {
-    id: String(mockUserProfile.id),
-    name: mockUserProfile.name,
-    username: mockUserProfile.username,
-    email: mockUserProfile.email || "",
-    avatar: mockUserProfile.avatar,
-    coverPhoto: mockUserProfile.coverPhoto,
-    bio: mockUserProfile.bio,
-    location: mockUserProfile.location,
-    pronouns: mockUserProfile.pronouns,
-    identities: mockUserProfile.identities,
-    interests: mockUserProfile.interests,
-    joinDate: mockUserProfile.joinDate,
-    badges: mockUserProfile.badges,
-    socialLinks: {
-      ...defaultSocialLinks,
-      instagram: mockUserProfile.socialLinks?.instagram || "",
-      twitter: mockUserProfile.socialLinks?.twitter || "",
-      website: mockUserProfile.socialLinks?.website || ""
-    },
-    settings: mockUserProfile.settings,
-    friends: ["2", "3"],
-    groups: ["1", "4"],
-    events: ["1", "3"],
-    imageUrl: mockUserProfile.avatar,
-    identity: mockUserProfile.identities[0] || "",
-    gender: "Non-Binary"
+  // Map a raw profiles row from Supabase into the app's UserProfile shape
+  const mapRowToProfile = (row: any, email: string): UserProfile => {
+    let socialLinks = defaultSocialLinks;
+    if (row.sociallinks) {
+      try {
+        const parsedLinks = typeof row.sociallinks === 'object'
+          ? row.sociallinks as Record<string, unknown>
+          : JSON.parse(row.sociallinks as string);
+
+        socialLinks = {
+          ...defaultSocialLinks,
+          ...(parsedLinks as Partial<SocialLinks>)
+        };
+      } catch (e) {
+        console.error("Error parsing social links:", e);
+      }
+    }
+
+    return {
+      id: row.id,
+      name: row.name || "",
+      username: row.username || "",
+      email,
+      avatar: row.imageurl || "",
+      imageUrl: row.imageurl || "",
+      coverPhoto: "",
+      bio: row.bio || "",
+      location: row.location || "",
+      pronouns: row.pronouns || "",
+      identities: [row.identity || ""].filter(Boolean),
+      identity: row.identity || "",
+      gender: row.gender || "",
+      interests: row.interests || [],
+      joinDate: row.created_at || new Date().toISOString(),
+      badges: [],
+      socialLinks,
+      settings: { privacy: "public", notifications: true, theme: "light" },
+      friends: [],
+      groups: [],
+      events: []
+    };
   };
 
-  const fetchUserProfile = async (userId: string) => {
+  const fetchUserProfile = async (userId: string, sessionUser?: User | null) => {
     console.log("Fetching user profile for:", userId);
-    
+    const email = sessionUser?.email || session?.user?.email || "";
+
     try {
+      // maybeSingle distinguishes "no row yet" (null) from real errors
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", userId)
-        .single();
+        .maybeSingle();
 
-      if (error) {
-        console.log("Profile error:", error);
-        console.log("No profile found, creating one...");
-        const userEmail = session?.user?.email || "";
-        const userName = userEmail.split('@')[0];
-        
-        const socialLinksJson = JSON.stringify(defaultSocialLinks) as unknown as Json;
-        
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: userId,
-          name: userName,
-          username: userName,
-          sociallinks: socialLinksJson
-        });
-        
-        if (insertError) {
-          console.error("Error creating profile:", insertError);
-          setUser(mockUser);
-          setLoading(false);
-          return;
-        }
-        
-        const { data: newProfile, error: newProfileError } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", userId)
-          .single();
-          
-        if (newProfileError || !newProfile) {
-          console.error("Failed to fetch newly created profile:", newProfileError);
-          setUser(mockUser);
-          setLoading(false);
-          return;
-        }
-        
-        const profileData = newProfile;
-        
-        let socialLinks = defaultSocialLinks;
-        if (profileData.sociallinks) {
-          try {
-            const parsedLinks = typeof profileData.sociallinks === 'object' 
-              ? profileData.sociallinks as Record<string, unknown>
-              : JSON.parse(profileData.sociallinks as string);
-            
-            socialLinks = {
-              ...defaultSocialLinks,
-              ...(parsedLinks as Partial<SocialLinks>)
-            };
-          } catch (e) {
-            console.error("Error parsing social links:", e);
-          }
-        }
+      if (error) throw error;
 
-        const userProfile: UserProfile = {
-          id: profileData.id,
-          name: profileData.name || userName,
-          username: profileData.username || userName,
-          email: session?.user?.email || "",
-          avatar: profileData.imageurl || "",
-          imageUrl: profileData.imageurl || "",
-          coverPhoto: "",
-          bio: profileData.bio || "",
-          location: profileData.location || "",
-          pronouns: profileData.pronouns || "",
-          identities: [profileData.identity || ""].filter(Boolean),
-          identity: profileData.identity || "",
-          gender: profileData.gender || "",
-          interests: profileData.interests || [],
-          joinDate: profileData.created_at || new Date().toISOString(),
-          badges: [],
-          socialLinks: socialLinks,
-          settings: { privacy: "public", notifications: true, theme: "light" },
-          friends: [],
-          groups: [],
-          events: []
-        };
-        
-        console.log("Created and loaded new profile:", userProfile);
-        setUser(userProfile);
+      if (data) {
+        setUser(mapRowToProfile(data, email));
         setLoading(false);
-      } else if (data) {
-        console.log("Found existing profile:", data);
-        let socialLinks = defaultSocialLinks;
-        if (data.sociallinks) {
-          try {
-            const parsedLinks = typeof data.sociallinks === 'object' 
-              ? data.sociallinks as Record<string, unknown>
-              : JSON.parse(data.sociallinks as string);
-            
-            socialLinks = {
-              ...defaultSocialLinks,
-              ...(parsedLinks as Partial<SocialLinks>)
-            };
-          } catch (e) {
-            console.error("Error parsing social links:", e);
-          }
-        }
-
-        const userProfile: UserProfile = {
-          id: data.id,
-          name: data.name || "",
-          username: data.username || "",
-          email: session?.user?.email || "",
-          avatar: data.imageurl || "",
-          imageUrl: data.imageurl || "",
-          coverPhoto: "",
-          bio: data.bio || "",
-          location: data.location || "",
-          pronouns: data.pronouns || "",
-          identities: [data.identity || ""].filter(Boolean),
-          identity: data.identity || "",
-          gender: data.gender || "",
-          interests: data.interests || [],
-          joinDate: data.created_at || new Date().toISOString(),
-          badges: [],
-          socialLinks: socialLinks,
-          settings: { privacy: "public", notifications: true, theme: "light" },
-          friends: data.friends > 0 ? ["2", "3"] : [],
-          groups: data.groups > 0 ? ["1", "4"] : [],
-          events: data.events > 0 ? ["1", "3"] : []
-        };
-        
-        console.log("Profile loaded successfully:", userProfile);
-        setUser(userProfile);
-        setLoading(false);
-      } else {
-        console.warn("No profile data returned, using mock data");
-        setUser(mockUser);
-        setLoading(false);
+        return;
       }
-    } catch (error) {
-      console.error("Error in fetchUserProfile:", error);
-      setUser(mockUser);
+
+      // No row yet: the DB trigger creates it on signup, so this is rare
+      // (e.g. accounts predating the trigger). Create it, then re-read.
+      console.log("No profile row found; creating one...");
+      const userName = email.split('@')[0] || "user";
+
+      const { error: insertError } = await supabase.from("profiles").insert({
+        id: userId,
+        name: userName,
+        username: userName,
+      });
+
+      // Ignore duplicate-key errors (trigger may have won the race)
+      if (insertError && insertError.code !== "23505") {
+        throw insertError;
+      }
+
+      const { data: newProfile, error: refetchError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (refetchError) throw refetchError;
+      if (!newProfile) throw new Error("Profile could not be created");
+
+      setUser(mapRowToProfile(newProfile, email));
       setLoading(false);
+    } catch (error) {
+      // Never substitute a fake identity: surface the failure honestly.
+      console.error("Error in fetchUserProfile:", error);
+      setUser(null);
+      setLoading(false);
+      toast({
+        title: "Couldn't load your profile",
+        description: "Please check your connection and refresh the page.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -271,7 +196,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (event === "SIGNED_IN" && newSession) {
           setSession(newSession);
           setTimeout(() => {
-            fetchUserProfile(newSession.user.id);
+            fetchUserProfile(newSession.user.id, newSession.user);
           }, 0);
         } else if (event === "SIGNED_OUT") {
           setSession(null);
@@ -298,7 +223,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (data?.session) {
           console.log("Found existing session:", data.session.user.id);
           setSession(data.session);
-          await fetchUserProfile(data.session.user.id);
+          await fetchUserProfile(data.session.user.id, data.session.user);
         } else {
           console.log("No session found");
           setUser(null);
@@ -333,7 +258,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "Signed out successfully",
       });
       
-      window.location.href = "/auth";
+      // Respect the deployment base path (e.g. /rainbow-navigator on GitHub Pages)
+      window.location.href = (import.meta.env.VITE_BASE_PATH || "") + "/auth";
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
@@ -576,8 +502,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return user.groups.includes(String(groupId));
   };
   
-  const isGroupAdmin = (groupId: string | number) => {
-    return isGroupMember(groupId);
+  const isGroupAdmin = (_groupId: string | number) => {
+    // Admin roles aren't implemented yet; membership must never imply admin.
+    return false;
   };
   
   const createGroup = async (groupId: string) => {

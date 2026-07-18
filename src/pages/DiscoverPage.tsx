@@ -12,8 +12,7 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
-import { mockPlaces } from "@/data/mockData";
-import { Button } from "@/components/ui/button";
+import { useLocations } from "@/components/map/useLocations";
 
 // Define categories with their icons
 const categories = [
@@ -47,10 +46,12 @@ const getCategoryColor = (category: string) => {
 export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLgbtStatus, setSelectedLgbtStatus] = useState<string | null>(null);
-  
-  // Get featured and recent places from mockPlaces
-  const featuredPlaces = mockPlaces.filter(place => place.featured).slice(0, 10);
-  const recentPlaces = [...mockPlaces].sort((a, b) => b.id - a.id).slice(0, 10);
+
+  // Real places from the database: verified ones are featured, and
+  // community-submitted (unverified) ones get their own honest section.
+  const { filteredPlaces: allPlaces } = useLocations({});
+  const featuredPlaces = allPlaces.filter(place => place.verified).slice(0, 10);
+  const communityPlaces = allPlaces.filter(place => !place.verified).slice(0, 10);
   
   return (
     <div className="space-y-6">
@@ -95,11 +96,7 @@ export default function DiscoverPage() {
       {/* Featured Listings - Horizontal Carousel */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Featured Trending</h2>
-          <div className="flex gap-2">
-            <Button variant="secondary" size="sm">Added Recently</Button>
-            <Button variant="default" size="sm">Most Visited</Button>
-          </div>
+          <h2 className="text-xl font-bold">Verified Places</h2>
         </div>
         
         <Carousel className="w-full">
@@ -151,36 +148,37 @@ export default function DiscoverPage() {
         </Carousel>
       </div>
       
-      {/* Recently Added - Horizontal Carousel */}
+      {/* Community submitted - Horizontal Carousel */}
       <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Recently Added</h2>
-        
+        <h2 className="text-xl font-bold mb-1">Community Submitted</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Suggested by community members — details not yet re-verified by us.
+        </p>
+
         <Carousel className="w-full">
           <CarouselContent className="-ml-4">
-            {recentPlaces.map(place => {
+            {communityPlaces.map(place => {
               const colors = getCategoryColor(place.category);
-              
+
               return (
                 <CarouselItem key={place.id} className="pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <Card className="overflow-hidden group cursor-pointer hover:shadow-md transition-all h-full border-0 shadow">
-                    <div 
-                      className="h-48 bg-cover bg-center relative" 
+                  <Card className="overflow-hidden group hover:shadow-md transition-all h-full border-0 shadow">
+                    <div
+                      className="h-48 bg-cover bg-center relative"
                       style={{ backgroundImage: `url(${place.imageUrl || `https://picsum.photos/300/200?random=${place.id}`})` }}
                     >
                       <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-transparent"></div>
-                      <div className="absolute top-2 right-2">
-                        <Badge variant="secondary" className="text-xs bg-white/80">New</Badge>
+                      <div className="absolute top-2 left-2">
+                        <h3 className="text-white font-bold text-lg">{place.name}</h3>
                       </div>
-                      {place.verified && (
-                        <div className="absolute top-10 right-2">
-                          <Badge className="bg-green-100 text-green-800 border-green-300">
-                            ✓ Verified
-                          </Badge>
-                        </div>
-                      )}
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-amber-100 text-amber-800 border-amber-300">
+                          Community submitted
+                        </Badge>
+                      </div>
                     </div>
                     <CardContent className={`p-4 ${colors.bg}`}>
-                      <h3 className={`font-bold ${colors.text}`}>{place.name}</h3>
+                      <p className={`font-semibold ${colors.text}`}>{place.category}</p>
                       <p className={`text-sm ${colors.text}`}>{place.location.city}</p>
                     </CardContent>
                   </Card>
