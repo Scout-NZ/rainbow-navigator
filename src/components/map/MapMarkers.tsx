@@ -1,6 +1,7 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { MarkerF, InfoWindowF, MarkerClustererF } from '@react-google-maps/api';
+import type { Clusterer } from '@react-google-maps/marker-clusterer';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getMarkerIcon } from './mapUtils';
@@ -22,6 +23,19 @@ export function MapMarkers({
   onInfoWindowClose,
   onViewDetails
 }: MapMarkersProps) {
+  const clustererRef = useRef<Clusterer | null>(null);
+
+  // Markers are added/removed with noClustererRedraw so that tearing the map
+  // down (switching to list view, navigating to a place page) never asks the
+  // clusterer to recompute bounds on a detached map — that crashes inside the
+  // library ("undefined is not an object (evaluating 'getNorthEast().lat')").
+  // Instead we repaint once per places change while the map is alive.
+  useEffect(() => {
+    if (clustererRef.current) {
+      clustererRef.current.repaint();
+    }
+  }, [places]);
+
   // Early return if google isn't available
   if (typeof google === 'undefined') {
     console.warn('Google Maps API not loaded yet');
@@ -47,22 +61,26 @@ export function MapMarkers({
       
       {/* Place markers, clustered so dense city centres stay readable */}
       <MarkerClustererF>
-        {(clusterer) => (
-          <>
-            {places.map((place) => (
-              <MarkerF
-                key={place.id}
-                position={{
-                  lat: place.location.lat,
-                  lng: place.location.lng
-                }}
-                icon={getMarkerIcon(place.type, place.lgbt_status)}
-                onClick={() => onMarkerClick(place)}
-                clusterer={clusterer}
-              />
-            ))}
-          </>
-        )}
+        {(clusterer) => {
+          clustererRef.current = clusterer;
+          return (
+            <>
+              {places.map((place) => (
+                <MarkerF
+                  key={place.id}
+                  position={{
+                    lat: place.location.lat,
+                    lng: place.location.lng
+                  }}
+                  icon={getMarkerIcon(place.type, place.lgbt_status)}
+                  onClick={() => onMarkerClick(place)}
+                  clusterer={clusterer}
+                  noClustererRedraw
+                />
+              ))}
+            </>
+          );
+        }}
       </MarkerClustererF>
       
       {/* Info window for selected place */}
