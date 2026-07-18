@@ -1,66 +1,55 @@
 
-import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { DiscoverIcon, ConnectIcon, FeedIcon, EventsIcon, ResourcesIcon } from "@/components/navigation/NavIcons";
+import { Calendar, Heart, Map, Plus, User } from "lucide-react";
 
-// Define navigation items
+// AllTrails-style tab bar: the contribution action (Suggest) sits centre,
+// like their Navigate/record button.
 const navItems = [
-  {
-    label: "Discover",
-    path: "/",
-    icon: DiscoverIcon
-  },
-  {
-    label: "Connect",
-    path: "/connect",
-    icon: ConnectIcon
-  },
-  {
-    label: "Feed",
-    path: "/feed",
-    icon: FeedIcon
-  },
-  {
-    label: "Events",
-    path: "/events",
-    icon: EventsIcon
-  },
-  {
-    label: "Resources",
-    path: "/resources",
-    icon: ResourcesIcon
-  }
+  { label: "Explore", path: "/", icon: Map },
+  { label: "Saved", path: "/saved", icon: Heart },
+  { label: "Suggest", path: "/suggest", icon: Plus, center: true },
+  { label: "Events", path: "/events", icon: Calendar },
+  { label: "Profile", path: "/profile", icon: User },
 ];
 
 export function BottomNavigation() {
   const location = useLocation();
-  const [activeIndex, setActiveIndex] = useState(0);
-
-  useEffect(() => {
-    const index = navItems.findIndex(item => item.path === location.pathname);
-    setActiveIndex(index !== -1 ? index : 0);
-  }, [location]);
 
   return (
     <div className="fixed bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-sm z-50">
-      <nav className="flex items-center justify-around max-w-md mx-auto">
-        {navItems.map((item, index) => {
+      <nav className="flex items-center justify-around max-w-md mx-auto" aria-label="Main navigation">
+        {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = index === activeIndex;
-          
+          const isActive =
+            item.path === "/"
+              ? location.pathname === "/" || location.pathname.startsWith("/place/")
+              : location.pathname.startsWith(item.path);
+
+          if (item.center) {
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className="nav-item -mt-4"
+                aria-label="Suggest a place"
+              >
+                <div className="h-12 w-12 rounded-full bg-rainbow-gradient shadow-lg flex items-center justify-center">
+                  <Icon className="h-6 w-6 text-white" aria-hidden="true" />
+                </div>
+                <span className="text-xs font-medium mt-0.5">{item.label}</span>
+              </Link>
+            );
+          }
+
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={cn(
-                "nav-item",
-                isActive ? "active" : "text-muted-foreground"
-              )}
+              className={cn("nav-item", isActive ? "active text-primary" : "text-muted-foreground")}
+              aria-current={isActive ? "page" : undefined}
             >
-              <div className={isActive ? "text-primary h-6 w-6" : "h-6 w-6"}>
-                <Icon />
-              </div>
+              <Icon className="h-6 w-6" aria-hidden="true" />
               <span className="text-xs font-medium">{item.label}</span>
             </Link>
           );
