@@ -141,6 +141,36 @@ export default function AuthPage() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: 'Enter your email first',
+        description: 'Type your email address above, then tap "Forgot password?" again.',
+      });
+      return;
+    }
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo:
+          window.location.origin +
+          (import.meta.env.VITE_BASE_PATH || '') +
+          '/auth/update-password',
+      });
+      if (error) throw error;
+      toast({
+        title: 'Reset email sent',
+        description: `Check ${email} for a link to set a new password.`,
+      });
+    } catch (error: any) {
+      console.error('Password reset failed:', error);
+      toast({
+        title: "Couldn't send reset email",
+        description: error.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const handleGoogleSignIn = async () => {
     setIsSubmitting(true);
     try {
@@ -262,13 +292,21 @@ export default function AuthPage() {
                           />
                         </div>
                       </div>
-                      <Button 
-                        type="submit" 
+                      <Button
+                        type="submit"
                         className="w-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? 'Signing in...' : 'Sign In'}
                       </Button>
+                      <button
+                        type="button"
+                        className="w-full text-sm text-muted-foreground hover:text-foreground underline"
+                        onClick={handleForgotPassword}
+                        disabled={isSubmitting}
+                      >
+                        Forgot password?
+                      </button>
                     </div>
                   </form>
                 </TabsContent>

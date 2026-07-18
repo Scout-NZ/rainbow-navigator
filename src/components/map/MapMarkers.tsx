@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MarkerF, InfoWindowF } from '@react-google-maps/api';
+import { MarkerF, InfoWindowF, MarkerClustererF } from '@react-google-maps/api';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { getMarkerIcon } from './mapUtils';
@@ -45,18 +45,25 @@ export function MapMarkers({
         />
       )}
       
-      {/* Place markers */}
-      {places.map((place) => (
-        <MarkerF
-          key={place.id}
-          position={{
-            lat: place.location.lat,
-            lng: place.location.lng
-          }}
-          icon={getMarkerIcon(place.type, place.lgbt_status)}
-          onClick={() => onMarkerClick(place)}
-        />
-      ))}
+      {/* Place markers, clustered so dense city centres stay readable */}
+      <MarkerClustererF>
+        {(clusterer) => (
+          <>
+            {places.map((place) => (
+              <MarkerF
+                key={place.id}
+                position={{
+                  lat: place.location.lat,
+                  lng: place.location.lng
+                }}
+                icon={getMarkerIcon(place.type, place.lgbt_status)}
+                onClick={() => onMarkerClick(place)}
+                clusterer={clusterer}
+              />
+            ))}
+          </>
+        )}
+      </MarkerClustererF>
       
       {/* Info window for selected place */}
       {selectedPlace && (

@@ -18,6 +18,9 @@ import NotFound from "./pages/NotFound";
 import GroupDetailPage from "./pages/GroupDetailPage";
 import AuthPage from "./pages/AuthPage";
 import AuthCallback from "./pages/AuthCallback";
+import UpdatePasswordPage from "./pages/UpdatePasswordPage";
+import SafetyPage from "./pages/SafetyPage";
+import SuggestPlacePage from "./pages/SuggestPlacePage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -38,11 +41,21 @@ const App = () => (
               {/* Public routes - accessible without authentication */}
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/auth/update-password" element={<UpdatePasswordPage />} />
 
               {/* App shell: the map and resources are public so anyone can
                   discover places; personal/community areas require sign-in. */}
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DiscoverPage />} />
+                <Route path="/safety" element={<SafetyPage />} />
+                <Route
+                  path="/suggest"
+                  element={
+                    <AuthGuard>
+                      <SuggestPlacePage />
+                    </AuthGuard>
+                  }
+                />
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route
