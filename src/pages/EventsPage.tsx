@@ -70,16 +70,13 @@ export default function EventsPage() {
   
   return (
     <div className="pb-4">
-      <div className="flex justify-end items-center mb-4">
-        <Button 
-          size="sm"
-          className="rounded-full bg-rainbow-gradient hover:bg-rainbow-gradient-hover"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create Event
-        </Button>
+      {/* Honest preview notice: events aren't live data yet */}
+      <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+        <strong>Early preview.</strong> These are sample events showing the
+        design — real community events (and creating your own) are coming soon.
       </div>
-      
+
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <Input 
           type="search" 

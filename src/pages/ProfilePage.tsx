@@ -178,16 +178,15 @@ export default function ProfilePage() {
     
     try {
       setIsUploading(true);
-      
+
       const previewUrl = URL.createObjectURL(file);
-      
-      updateProfile({
+
+      await updateProfile({
         imageUrl: previewUrl,
       });
-      
+
       toast({
-        title: "Uploading profile picture...",
-        description: "Your profile picture is being uploaded.",
+        title: "Profile picture updated",
       });
     } catch (error) {
       console.error("Error uploading profile picture:", error);
@@ -196,6 +195,7 @@ export default function ProfilePage() {
         description: "There was an error uploading your profile picture.",
         variant: "destructive",
       });
+    } finally {
       setIsUploading(false);
     }
   };
