@@ -1,3 +1,5 @@
+import { getCategoryImage } from "@/lib/categoryImages";
+
 // Map container style
 export const containerStyle = {
   width: '100%',
@@ -137,7 +139,7 @@ export const transformLocation = (location: any) => {
       email: location.email || '',
       website: location.website || ''
     },
-    imageUrl: location.image_url || '',
+    imageUrl: location.image_url || getCategoryImage(location.category),
     verified: location.verified || false,
     lgbt_status: location.lgbt_status || null
   };
