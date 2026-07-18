@@ -23,6 +23,7 @@ import SafetyPage from "./pages/SafetyPage";
 import SuggestPlacePage from "./pages/SuggestPlacePage";
 import PlaceDetailPage from "./pages/PlaceDetailPage";
 import SavedPage from "./pages/SavedPage";
+import NewGroupPage from "./pages/NewGroupPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -71,19 +72,15 @@ const App = () => (
                     />
                   }
                 />
+                {/* Group browsing is public (a traveler's first stop);
+                    joining and creating require sign-in */}
+                <Route path="/connect" element={<ConnectPage />} />
+                <Route path="/connect/groups/:groupId" element={<GroupDetailPage />} />
                 <Route
-                  path="/connect"
+                  path="/connect/new"
                   element={
                     <AuthGuard>
-                      <ConnectPage />
-                    </AuthGuard>
-                  }
-                />
-                <Route
-                  path="/connect/groups/:groupId"
-                  element={
-                    <AuthGuard>
-                      <GroupDetailPage />
+                      <NewGroupPage />
                     </AuthGuard>
                   }
                 />
