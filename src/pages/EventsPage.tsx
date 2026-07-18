@@ -203,6 +203,21 @@ export default function EventsPage() {
         ))
       )}
 
+      {/* Eventfinda API terms require attribution wherever their listings show */}
+      {filtered.some((ev: any) => ev.source === "eventfinda") && (
+        <p className="text-xs text-muted-foreground text-center">
+          Some listings{" "}
+          <a
+            href="https://www.eventfinda.co.nz"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline"
+          >
+            Powered by Eventfinda
+          </a>
+        </p>
+      )}
+
       {/* Add event dialog */}
       <Dialog open={showAdd} onOpenChange={setShowAdd}>
         <DialogContent className="sm:max-w-[480px]">
