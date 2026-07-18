@@ -21,6 +21,8 @@ import AuthCallback from "./pages/AuthCallback";
 import UpdatePasswordPage from "./pages/UpdatePasswordPage";
 import SafetyPage from "./pages/SafetyPage";
 import SuggestPlacePage from "./pages/SuggestPlacePage";
+import PlaceDetailPage from "./pages/PlaceDetailPage";
+import SavedPage from "./pages/SavedPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -47,6 +49,8 @@ const App = () => (
                   discover places; personal/community areas require sign-in. */}
               <Route element={<AppLayout />}>
                 <Route path="/" element={<DiscoverPage />} />
+                <Route path="/place/:placeId" element={<PlaceDetailPage />} />
+                <Route path="/saved" element={<SavedPage />} />
                 <Route path="/safety" element={<SafetyPage />} />
                 <Route
                   path="/suggest"

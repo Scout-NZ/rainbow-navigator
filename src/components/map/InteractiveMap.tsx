@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
 import { toast } from "@/components/ui/use-toast";
-import { LocationDetailsDialog } from "./LocationDetailsDialog";
 import { MapSearchBar } from "./MapSearchBar";
 import { MapLoadingState } from "./MapLoadingState";
 import { MapZoomControls } from "./MapZoomControls";
@@ -37,7 +37,7 @@ export function InteractiveMap({
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const navigate = useNavigate();
   const [mapCenter, setMapCenter] = useState(defaultLocation);
   const mapRef = useRef<google.maps.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -102,12 +102,12 @@ export function InteractiveMap({
   };
 
   const openLocationDetails = (place: any) => {
-    setSelectedPlace(place);
-    setShowDetailsDialog(true);
-    
     if (onLocationSelect) {
       onLocationSelect(place);
     }
+    // AllTrails pattern: pin tap shows the quick card, "View Details"
+    // opens the full place page.
+    navigate(`/place/${place.id}`);
   };
 
   const handleZoom = (zoomIn: boolean) => {
@@ -249,11 +249,6 @@ export function InteractiveMap({
         )}
       </div>
 
-      <LocationDetailsDialog 
-        location={selectedPlace} 
-        isOpen={showDetailsDialog} 
-        onClose={() => setShowDetailsDialog(false)}
-      />
     </div>
   );
 }
