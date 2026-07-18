@@ -55,6 +55,12 @@ export function InteractiveMap({
     setCategoryFilter(initialCategoryFilter || null);
   }, [initialCategoryFilter]);
 
+  // Re-centre when the parent changes the target location (city switcher)
+  useEffect(() => {
+    setMapCenter(defaultLocation);
+    setZoom(12);
+  }, [defaultLocation.lat, defaultLocation.lng]);
+
   useEffect(() => {
     setLgbtStatusFilter(initialLgbtStatusFilter || null);
   }, [initialLgbtStatusFilter]);

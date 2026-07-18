@@ -18,6 +18,8 @@ import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useUser } from "@/contexts/UserContext";
+import { useSavedPlaces } from "@/hooks/useSavedPlaces";
+import { Link } from "react-router-dom";
 import { v4 as uuidv4 } from 'uuid';
 
 interface ProfileFormValues {
@@ -45,6 +47,7 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
   const { user, updateProfile, signOut } = useUser();
+  const { savedPlaces, toggleSave } = useSavedPlaces();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const form = useForm<ProfileFormValues>({
@@ -435,51 +438,48 @@ export default function ProfilePage() {
         </TabsContent>
         
         <TabsContent value="saved" className="mt-0">
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <Card className="overflow-hidden">
-              <div className="bg-primary/10 p-4 flex flex-col items-center">
-                <Heart className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-medium text-center">Saved Resources</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Quick access to resources you've saved
+          {savedPlaces.length === 0 ? (
+            <Card>
+              <CardContent className="pt-8 pb-8 text-center space-y-3">
+                <Heart className="h-8 w-8 text-primary mx-auto" aria-hidden="true" />
+                <h3 className="font-medium">No saved places yet</h3>
+                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                  Tap the heart on any place on the map to keep it here for quick access.
                 </p>
-              </div>
+                <Button asChild variant="outline" size="sm">
+                  <Link to="/">Explore the map</Link>
+                </Button>
+              </CardContent>
             </Card>
-            
-            <Card className="overflow-hidden">
-              <div className="bg-primary/10 p-4 flex flex-col items-center">
-                <Calendar className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-medium text-center">Saved Events</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Events you're interested in or attending
-                </p>
-              </div>
-            </Card>
-            
-            <Card className="overflow-hidden">
-              <div className="bg-primary/10 p-4 flex flex-col items-center">
-                <Users className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-medium text-center">Saved Groups</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Groups you're interested in or following
-                </p>
-              </div>
-            </Card>
-            
-            <Card className="overflow-hidden">
-              <div className="bg-primary/10 p-4 flex flex-col items-center">
-                <Globe className="h-8 w-8 text-primary mb-2" />
-                <h3 className="font-medium text-center">Saved Places</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Bookmarked businesses and locations
-                </p>
-              </div>
-            </Card>
-          </div>
-          
-          <p className="text-center text-muted-foreground text-sm">
-            Items you save will appear here for easy access
-          </p>
+          ) : (
+            <div className="space-y-3">
+              {savedPlaces.map((place: any) => (
+                <Card key={place.id} className="card-hover overflow-hidden">
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div
+                      className="h-14 w-14 rounded-md bg-cover bg-center flex-shrink-0"
+                      style={{ backgroundImage: `url(${place.imageUrl})` }}
+                      aria-hidden="true"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold truncate">{place.name}</h3>
+                      <p className="text-sm text-muted-foreground truncate">
+                        {place.category} · {place.location.city}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => toggleSave(String(place.id))}
+                      aria-label={`Remove ${place.name} from saved places`}
+                    >
+                      <Heart className="h-5 w-5 fill-current text-primary" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="notifications" className="mt-0">

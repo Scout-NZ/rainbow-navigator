@@ -12,7 +12,24 @@ import {
   CarouselNext, 
   CarouselPrevious 
 } from "@/components/ui/carousel";
+import { Link } from "react-router-dom";
 import { useLocations } from "@/components/map/useLocations";
+import { getCityCoordinates } from "@/components/map/mapUtils";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MapPin, ShieldCheck } from "lucide-react";
+
+const CITY_OPTIONS = [
+  "Wellington", "Auckland", "Christchurch", "Hamilton", "Tauranga",
+  "Dunedin", "Napier", "Nelson", "Palmerston North", "Porirua",
+  "Whanganui", "Whangarei", "Invercargill", "Timaru",
+];
 
 // Define categories with their icons
 const categories = [
@@ -46,6 +63,7 @@ const getCategoryColor = (category: string) => {
 export default function DiscoverPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedLgbtStatus, setSelectedLgbtStatus] = useState<string | null>(null);
+  const [selectedCity, setSelectedCity] = useState("Wellington");
 
   // Real places from the database: verified ones are featured, and
   // community-submitted (unverified) ones get their own honest section.
@@ -55,15 +73,38 @@ export default function DiscoverPage() {
   
   return (
     <div className="space-y-6">
-      {/* Simple header - removed the buttons */}
-      <div className="mb-4">
+      {/* Header with city switcher and key actions */}
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Discover</h1>
+        <div className="flex items-center gap-2">
+          <Select value={selectedCity} onValueChange={setSelectedCity}>
+            <SelectTrigger className="w-[160px]" aria-label="Choose a city">
+              <MapPin className="h-4 w-4 mr-1 text-primary" aria-hidden="true" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CITY_OPTIONS.map((city) => (
+                <SelectItem key={city} value={city}>{city}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/safety">
+              <ShieldCheck className="h-4 w-4 mr-1" aria-hidden="true" />
+              Safety
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover">
+            <Link to="/suggest">Suggest a place</Link>
+          </Button>
+        </div>
       </div>
-      
+
       {/* Map Section - Large and prominent */}
       <div className="rounded-lg overflow-hidden h-[75vh] mb-6 shadow-md">
-        <InteractiveMap 
+        <InteractiveMap
           className="h-full"
+          defaultLocation={getCityCoordinates(selectedCity)}
           categoryFilter={selectedCategory === "All" ? null : selectedCategory}
           lgbtStatusFilter={selectedLgbtStatus}
         />

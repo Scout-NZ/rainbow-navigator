@@ -80,6 +80,83 @@ export type Database = {
         }
         Relationships: []
       }
+      place_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          location_id: string | null
+          reason: string
+          reported_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          location_id?: string | null
+          reason: string
+          reported_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          location_id?: string | null
+          reason?: string
+          reported_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_reports_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      place_suggestions: {
+        Row: {
+          address: string | null
+          category: string
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          status: string
+          submitted_by: string
+          website: string | null
+          why_suggest: string | null
+        }
+        Insert: {
+          address?: string | null
+          category: string
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          submitted_by: string
+          website?: string | null
+          why_suggest?: string | null
+        }
+        Update: {
+          address?: string | null
+          category?: string
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          submitted_by?: string
+          website?: string | null
+          why_suggest?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
@@ -136,6 +213,32 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      saved_places: {
+        Row: {
+          created_at: string
+          location_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          location_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          location_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_places_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "locations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
