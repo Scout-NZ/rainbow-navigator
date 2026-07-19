@@ -1,14 +1,34 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Users } from "lucide-react";
+import { LocateFixed, MapPin, Plus, Search, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { toast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { CITY_COORDINATES } from "@/components/map/mapUtils";
 import { useUser } from "@/contexts/UserContext";
+
+const ALL_LOCATIONS = "All locations";
+
+// Nearest known city to a lat/lng, among the cities that actually have groups
+function nearestCity(lat: number, lng: number, candidates: string[]): string | null {
+  let best: string | null = null;
+  let bestDist = Infinity;
+  for (const city of candidates) {
+    const coords = CITY_COORDINATES[city];
+    if (!coords) continue;
+    const d = (coords.lat - lat) ** 2 + (coords.lng - lng) ** 2;
+    if (d < bestDist) { bestDist = d; best = city; }
+  }
+  return best;
+}
 
 const AUDIENCE_FILTERS = [
   "All", "Everyone", "Rainbow youth", "Lesbians & queer women",
@@ -23,6 +43,9 @@ export default function ConnectPage() {
   const queryClient = useQueryClient();
   const [searchQuery, setSearchQuery] = useState("");
   const [audience, setAudience] = useState("All");
+  const [cityFilter, setCityFilter] = useState(ALL_LOCATIONS);
+  const [isLocating, setIsLocating] = useState(false);
+  const [autoLocated, setAutoLocated] = useState(false);
 
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ["groups"],
@@ -48,9 +71,50 @@ export default function ConnectPage() {
     },
   });
 
+  // Every city that has at least one group, for the dropdown
+  const allCities = useMemo(
+    () => [...new Set(groups.map((g: any) => g.city || "Elsewhere"))].sort() as string[],
+    [groups]
+  );
+
+  const locate = (silent = false) => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const near = nearestCity(pos.coords.latitude, pos.coords.longitude, allCities);
+        if (near) {
+          setCityFilter(near);
+          if (!silent) toast({ title: `Showing groups near ${near}` });
+        }
+        setIsLocating(false);
+      },
+      () => {
+        setIsLocating(false);
+        if (!silent) {
+          toast({ title: "Couldn't get your location", description: "Choose a city from the dropdown instead.", variant: "destructive" });
+        }
+      },
+      { timeout: 8000, maximumAge: 300000 }
+    );
+  };
+
+  // If location permission was already granted, default to the user's
+  // nearest city without prompting; otherwise wait for the button.
+  useEffect(() => {
+    if (autoLocated || allCities.length === 0) return;
+    setAutoLocated(true);
+    (navigator as any).permissions?.query({ name: "geolocation" })
+      .then((status: PermissionStatus) => {
+        if (status.state === "granted") locate(true);
+      })
+      .catch(() => { /* permissions API unavailable — stay on All locations */ });
+  }, [allCities, autoLocated]);
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return groups.filter((g: any) => {
+      if (cityFilter !== ALL_LOCATIONS && (g.city || "Elsewhere") !== cityFilter) return false;
       if (audience !== "All" && !(g.audience || []).includes(audience)) return false;
       if (q) {
         const hay = [g.name, g.description, g.city, ...(g.activities || []), ...(g.audience || [])]
@@ -59,7 +123,7 @@ export default function ConnectPage() {
       }
       return true;
     });
-  }, [groups, searchQuery, audience]);
+  }, [groups, searchQuery, audience, cityFilter]);
 
   const cities = useMemo(
     () => [...new Set(filtered.map((g: any) => g.city || "Elsewhere"))],
@@ -105,6 +169,33 @@ export default function ConnectPage() {
           onChange={(e) => setSearchQuery(e.target.value)}
           aria-label="Search groups"
         />
+      </div>
+
+      {/* Location: nearest city via the locate button, or pick from the list */}
+      <div className="flex items-center gap-2">
+        <Select value={cityFilter} onValueChange={setCityFilter}>
+          <SelectTrigger className="flex-1 rounded-full" aria-label="Choose a location">
+            <MapPin className="h-4 w-4 mr-1 text-primary shrink-0" aria-hidden="true" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL_LOCATIONS}>{ALL_LOCATIONS}</SelectItem>
+            {allCities.map((city) => (
+              <SelectItem key={city} value={city}>{city}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Button
+          variant="outline"
+          size="sm"
+          className="rounded-full shrink-0"
+          onClick={() => locate(false)}
+          disabled={isLocating}
+          aria-label="Show groups near me"
+        >
+          <LocateFixed className={`h-4 w-4 mr-1 ${isLocating ? "animate-spin" : ""}`} aria-hidden="true" />
+          Near me
+        </Button>
       </div>
 
       {/* Who is it for? — made explicit, because it matters */}

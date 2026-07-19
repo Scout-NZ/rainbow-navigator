@@ -33,7 +33,13 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
   'Lower Hutt': { lat: -41.2094, lng: 174.9086 },
   'Upper Hutt': { lat: -41.1244, lng: 175.0707 },
   'Levin': { lat: -40.6218, lng: 175.2866 },
-  'Hunterville': { lat: -39.9333, lng: 175.5667 }
+  'Hunterville': { lat: -39.9333, lng: 175.5667 },
+  'Blenheim': { lat: -41.5134, lng: 173.9612 },
+  'Queenstown': { lat: -45.0312, lng: 168.6626 },
+  'Wanaka': { lat: -44.7032, lng: 169.1321 },
+  'Gisborne': { lat: -38.6623, lng: 178.0176 },
+  'New Plymouth': { lat: -39.0556, lng: 174.0752 },
+  'Rotorua': { lat: -38.1368, lng: 176.2497 }
 };
 
 // Default location (Wellington — the pilot city)
