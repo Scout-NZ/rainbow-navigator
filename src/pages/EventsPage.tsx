@@ -172,7 +172,15 @@ export default function EventsPage() {
           <div key={day} className="space-y-2">
             <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">{day}</h2>
             {dayEvents.map((ev: any) => (
-              <Card key={ev.id} className="card-hover">
+              <Card key={ev.id} className="card-hover overflow-hidden">
+                {ev.image_url && (
+                  <div
+                    className="h-32 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${ev.image_url})` }}
+                    role="img"
+                    aria-label={ev.title}
+                  />
+                )}
                 <CardContent className="p-4 space-y-1.5">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold leading-tight">{ev.title}</h3>

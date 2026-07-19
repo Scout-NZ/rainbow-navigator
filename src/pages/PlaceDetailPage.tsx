@@ -14,6 +14,7 @@ import { transformLocation } from "@/components/map/mapUtils";
 import { useUser } from "@/contexts/UserContext";
 import { useSavedPlaces } from "@/hooks/useSavedPlaces";
 import { toast } from "@/components/ui/use-toast";
+import { RainbowRatingSection } from "@/components/places/RainbowRating";
 
 const REPORT_REASONS = [
   "Closed permanently",
@@ -198,6 +199,9 @@ export default function PlaceDetailPage() {
           <span className="text-xs">Share</span>
         </Button>
       </div>
+
+      {/* Community rainbow rating */}
+      <RainbowRatingSection placeId={String(place.id)} placeName={place.name} />
 
       {/* Unverified notice */}
       {!place.verified && (
