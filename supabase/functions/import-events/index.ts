@@ -27,6 +27,7 @@ type ImportedEvent = {
   address: string | null;
   url: string | null;
   price: string | null;
+  image_url: string | null;
 };
 
 type SourceReport = { fetched: number; inserted: number; skipped: number; error?: string };
@@ -65,6 +66,17 @@ function clip(s: string | null | undefined, max = 1500): string | null {
   return clean ? clean.slice(0, max) : null;
 }
 
+function eventfindaImage(images: any): string | null {
+  const img = images?.images?.[0];
+  if (!img) return null;
+  const transforms = img.transforms?.transforms;
+  const best = Array.isArray(transforms) && transforms.length
+    ? transforms[transforms.length - 1]?.url
+    : null;
+  const url = best || img.original_url || null;
+  return typeof url === "string" && url.startsWith("http") ? url : null;
+}
+
 // ---------- Eventfinda (official API) ----------
 // Credentials come from env secrets if set, otherwise from Supabase Vault via
 // a service-role-only RPC (see get_eventfinda_credentials in the database).
@@ -93,7 +105,7 @@ async function fetchEventfinda(supabase: any): Promise<ImportedEvent[]> {
         start_date: today,
         end_date: horizon,
         rows: "20",
-        fields: "event:(id,url,name,description,datetime_start,datetime_end,location_summary,address,is_free)",
+        fields: "event:(id,url,name,description,datetime_start,datetime_end,location_summary,address,is_free,images)",
       });
       if (loc) params.set("location_slug", loc);
       const res = await fetch(`https://api.eventfinda.co.nz/v2/events.json?${params}`, {
@@ -115,6 +127,7 @@ async function fetchEventfinda(supabase: any): Promise<ImportedEvent[]> {
           address: ev.address ?? null,
           url: ev.url ?? null,
           price: ev.is_free ? "Free" : null,
+          image_url: eventfindaImage(ev.images),
         });
       }
       await new Promise((r) => setTimeout(r, 1100)); // ToS: max 1 req/sec
@@ -144,6 +157,7 @@ async function fetchChchPride(): Promise<ImportedEvent[]> {
     address: ev.venue?.address ?? null,
     url: ev.url ?? null,
     price: ev.cost || null,
+    image_url: typeof ev.image?.url === "string" ? ev.image.url : null,
   })).filter((ev: ImportedEvent) => ev.title !== "Untitled" || ev.url);
 }
 
@@ -208,6 +222,11 @@ async function fetchHumanitix(): Promise<ImportedEvent[]> {
         address: typeof address === "string" ? address : null,
         url,
         price: null,
+        image_url: (() => {
+          const im = Array.isArray(ev.image) ? ev.image[0] : ev.image;
+          const u = typeof im === "string" ? im : im?.url;
+          return typeof u === "string" && u.startsWith("http") ? u : null;
+        })(),
       });
     }
   }
@@ -235,9 +254,9 @@ Deno.serve(async (req) => {
   // Existing keys for dedupe: per-source ids and cross-source title+day
   const { data: existing } = await supabase
     .from("events")
-    .select("source, external_id, title, starts_at")
+    .select("id, source, external_id, title, starts_at, image_url")
     .gte("starts_at", new Date(Date.now() - 7 * 86400_000).toISOString());
-  const byId = new Set((existing ?? []).filter((e) => e.external_id).map((e) => `${e.source}|${e.external_id}`));
+  const byId = new Map((existing ?? []).filter((e) => e.external_id).map((e) => [`${e.source}|${e.external_id}`, e]));
   const byTitleDay = new Set((existing ?? []).map((e) => `${normTitle(e.title)}|${e.starts_at?.slice(0, 10)}`));
 
   for (const [name, fetcher] of Object.entries(sources)) {
@@ -249,7 +268,13 @@ Deno.serve(async (req) => {
       for (const ev of events) {
         const idKey = `${ev.source}|${ev.external_id}`;
         const dayKey = `${normTitle(ev.title)}|${ev.starts_at.slice(0, 10)}`;
-        if (byId.has(idKey) || byTitleDay.has(dayKey)) {
+        const existingRow = byId.get(idKey);
+        if (existingRow || byTitleDay.has(dayKey)) {
+          // Backfill images onto events imported before image support
+          if (existingRow && ev.image_url && !existingRow.image_url) {
+            await supabase.from("events").update({ image_url: ev.image_url }).eq("id", existingRow.id);
+            existingRow.image_url = ev.image_url;
+          }
           report[name].skipped++;
           continue;
         }
@@ -259,7 +284,7 @@ Deno.serve(async (req) => {
           report[name].skipped++;
           console.error(`insert failed for ${idKey}:`, error.message);
         } else {
-          byId.add(idKey);
+          byId.set(idKey, { id: null, image_url: ev.image_url } as any);
           byTitleDay.add(dayKey);
           report[name].inserted++;
         }
