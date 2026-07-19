@@ -15,6 +15,7 @@ import { useUser } from "@/contexts/UserContext";
 import { useSavedPlaces } from "@/hooks/useSavedPlaces";
 import { toast } from "@/components/ui/use-toast";
 import { RainbowRatingSection } from "@/components/places/RainbowRating";
+import { CheckInSection } from "@/components/places/CheckIn";
 
 const REPORT_REASONS = [
   "Closed permanently",
@@ -199,6 +200,14 @@ export default function PlaceDetailPage() {
           <span className="text-xs">Share</span>
         </Button>
       </div>
+
+      {/* Check in — the community activity signal */}
+      <CheckInSection
+        placeId={String(place.id)}
+        placeName={place.name}
+        lat={place.location.lat}
+        lng={place.location.lng}
+      />
 
       {/* Community rainbow rating */}
       <RainbowRatingSection placeId={String(place.id)} placeName={place.name} />

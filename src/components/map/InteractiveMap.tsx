@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
-import { Locate } from "lucide-react";
+import { Flame, Locate } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { MapLoadingState } from "./MapLoadingState";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapMarkers } from "./MapMarkers";
 import { MapLegend } from "./MapLegend";
+import { MapHeatLayer } from "./MapHeatLayer";
 import { useLocations } from "./useLocations";
 import {
   DEFAULT_LOCATION,
@@ -49,6 +52,21 @@ export function InteractiveMap({
   const mapRef = useRef<google.maps.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
+  const [showHeat, setShowHeat] = useState(false);
+
+  // Aggregate community-activity scores (check-ins, ratings, saves per
+  // place) for the heat layer — no individual data, places only.
+  const { data: activityScores = {} } = useQuery({
+    queryKey: ["place-activity-scores"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("place_activity")
+        .select("location_id, activity_score")
+        .gt("activity_score", 0);
+      if (error) throw error;
+      return Object.fromEntries((data || []).map((r: any) => [r.location_id, r.activity_score]));
+    },
+  });
 
   // Re-centre when the parent changes the target location (city switcher)
   useEffect(() => {
@@ -167,14 +185,17 @@ export function InteractiveMap({
             onLoad={onMapLoad}
           >
             {mapLoaded && (
-              <MapMarkers
-                places={filteredPlaces}
-                userLocation={userLocation}
-                selectedPlace={selectedPlace}
-                onMarkerClick={handleMarkerClick}
-                onInfoWindowClose={() => setSelectedPlace(null)}
-                onViewDetails={openLocationDetails}
-              />
+              <>
+                <MapMarkers
+                  places={filteredPlaces}
+                  userLocation={userLocation}
+                  selectedPlace={selectedPlace}
+                  onMarkerClick={handleMarkerClick}
+                  onInfoWindowClose={() => setSelectedPlace(null)}
+                  onViewDetails={openLocationDetails}
+                />
+                <MapHeatLayer places={filteredPlaces} scores={activityScores} visible={showHeat} />
+              </>
             )}
           </GoogleMap>
         ) : (
@@ -196,6 +217,16 @@ export function InteractiveMap({
               aria-label="Centre map on my location"
             >
               <Locate className={`h-4 w-4 ${isLocating ? "animate-spin" : ""}`} aria-hidden="true" />
+            </Button>
+            <Button
+              size="sm"
+              variant={showHeat ? "default" : "secondary"}
+              className={`absolute top-36 right-4 h-8 w-8 p-0 rounded-full shadow-md z-[1000] ${showHeat ? "" : "bg-white"}`}
+              onClick={() => setShowHeat((h) => !h)}
+              aria-label={showHeat ? "Hide community heat map" : "Show community heat map"}
+              aria-pressed={showHeat}
+            >
+              <Flame className="h-4 w-4" aria-hidden="true" />
             </Button>
             <MapLegend />
           </>
