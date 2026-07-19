@@ -55,8 +55,8 @@ export const GOOGLE_MAPS_API_KEY =
 // Loader ID - ensure it's unique and consistent across components
 export const LOADER_ID = 'rainbow-navigator-maps-loader';
 
-// Libraries to load with Google Maps
-export const libraries = ['places'] as ['places'];
+// Libraries to load with Google Maps ('visualization' powers the heat layer)
+export const libraries = ['places', 'visualization'] as ['places', 'visualization'];
 
 // Map options for Google Maps
 export const mapOptions = {
