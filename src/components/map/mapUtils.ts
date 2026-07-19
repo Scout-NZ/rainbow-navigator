@@ -146,34 +146,37 @@ export const transformLocation = (location: any) => {
   };
 };
 
-// Custom marker icons based on place type
-export const getMarkerIcon = (type: string, lgbtStatus: string | null) => {
-  // Set base color based on type
-  let fillColor = '#4B5563'; // default gray
-  
-  if (type.toLowerCase() === 'business') {
-    fillColor = '#F59E0B'; // amber
-  } else if (type.toLowerCase() === 'event') {
-    fillColor = '#8B5CF6'; // purple
-  } else if (type.toLowerCase() === 'resource') {
-    fillColor = '#10B981'; // emerald
-  }
-  
-  // Modify color for LGBT status
-  if (lgbtStatus === 'lgbt_owned' || lgbtStatus === 'lgbt_managed') {
-    fillColor = '#EC4899'; // pink
-  } else if (lgbtStatus === 'ally') {
-    fillColor = '#3B82F6'; // blue
-  }
-  
-  // For Google Maps we use SVG path with proper Point object for anchor
+// One colour per category so the map reads at a glance
+export const CATEGORY_COLORS: Record<string, string> = {
+  Cafes: '#D97706',      // amber
+  Bars: '#7C3AED',       // violet
+  Nightlife: '#DB2777',  // pink
+  Shopping: '#2563EB',   // blue
+  Services: '#0D9488',   // teal
+  Community: '#16A34A',  // green
+  Healthcare: '#DC2626', // red
+};
+
+export const getCategoryColor = (category: string | null | undefined): string =>
+  CATEGORY_COLORS[category ?? ''] ?? '#4B5563';
+
+const PIN_PATH = 'M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z';
+
+// Markers are coloured by category; rainbow-owned/managed places get the
+// biggest pin with a gold ring, allies the smallest and slightly faded —
+// the community's own places should always stand out first.
+export const getMarkerIcon = (category: string | null, lgbtStatus: string | null) => {
+  const fillColor = getCategoryColor(category);
+  const isRainbow = lgbtStatus === 'lgbt_owned' || lgbtStatus === 'lgbt_managed';
+  const isAlly = lgbtStatus === 'ally';
+
   return {
-    path: 'M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z',
-    fillColor: fillColor,
-    fillOpacity: 0.9,
-    strokeWeight: 1,
-    strokeColor: '#FFFFFF',
-    scale: 1.5,
+    path: PIN_PATH,
+    fillColor,
+    fillOpacity: isAlly ? 0.65 : 1,
+    strokeWeight: isRainbow ? 2.5 : 1,
+    strokeColor: isRainbow ? '#FBBF24' : '#FFFFFF',
+    scale: isRainbow ? 1.9 : isAlly ? 1.15 : 1.45,
     anchor: new google.maps.Point(12, 24),
   };
 };

@@ -25,6 +25,31 @@ export function MapMarkers({
 }: MapMarkersProps) {
   const clustererRef = useRef<Clusterer | null>(null);
 
+  // Several places share the exact same coordinates (same building, or a
+  // city-centre fallback). Identical points can never be split apart by
+  // zooming, so fan each stack out in a small circle (~20m) — far enough
+  // to tap individually at street zoom, invisible at city zoom.
+  const spreadPlaces = React.useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of places) {
+      const k = `${p.location.lat},${p.location.lng}`;
+      counts[k] = (counts[k] || 0) + 1;
+    }
+    const used: Record<string, number> = {};
+    return places.map((p) => {
+      const k = `${p.location.lat},${p.location.lng}`;
+      if (counts[k] <= 1) return { ...p, mapLat: p.location.lat, mapLng: p.location.lng };
+      const i = used[k] = (used[k] ?? -1) + 1;
+      const angle = (2 * Math.PI * i) / counts[k];
+      const radius = 0.0002;
+      return {
+        ...p,
+        mapLat: p.location.lat + radius * Math.cos(angle),
+        mapLng: p.location.lng + radius * Math.sin(angle) * 1.4,
+      };
+    });
+  }, [places]);
+
   // Markers are added/removed with noClustererRedraw so that tearing the map
   // down (switching to list view, navigating to a place page) never asks the
   // clusterer to recompute bounds on a detached map — that crashes inside the
@@ -60,19 +85,17 @@ export function MapMarkers({
       )}
       
       {/* Place markers, clustered so dense city centres stay readable */}
-      <MarkerClustererF>
+      {/* maxZoom: past street level, always show individual pins */}
+      <MarkerClustererF options={{ maxZoom: 16 }}>
         {(clusterer) => {
           clustererRef.current = clusterer;
           return (
             <>
-              {places.map((place) => (
+              {spreadPlaces.map((place) => (
                 <MarkerF
                   key={place.id}
-                  position={{
-                    lat: place.location.lat,
-                    lng: place.location.lng
-                  }}
-                  icon={getMarkerIcon(place.type, place.lgbt_status)}
+                  position={{ lat: place.mapLat, lng: place.mapLng }}
+                  icon={getMarkerIcon(place.category, place.lgbt_status)}
                   onClick={() => onMarkerClick(place)}
                   clusterer={clusterer}
                   noClustererRedraw
