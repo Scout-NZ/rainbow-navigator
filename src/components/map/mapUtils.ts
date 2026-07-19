@@ -40,10 +40,11 @@ export const CITY_COORDINATES: Record<string, { lat: number; lng: number }> = {
 export const DEFAULT_LOCATION = { lat: -41.2865, lng: 174.7762 };
 
 // Google Maps API key - set VITE_GOOGLE_MAPS_API_KEY in .env (see .env.example).
-// The fallback is the original key; it should be restricted by HTTP referrer
-// in Google Cloud Console since browser keys are always publicly visible.
+// Browser Maps keys are always publicly visible; this one is restricted by
+// HTTP referrer (rainbow-navigator.vercel.app, *.vercel.app, localhost:8080)
+// and to the Maps JavaScript API only, in Google Cloud Console.
 export const GOOGLE_MAPS_API_KEY =
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyDK3hZtsdLtb8zsTT5mzzdDCC8Nj5O2wyQ';
+  import.meta.env.VITE_GOOGLE_MAPS_API_KEY || 'AIzaSyCJ_KTxA8CLn-cPohBh4QSrVdUWwxhb7T4';
 
 // Loader ID - ensure it's unique and consistent across components
 export const LOADER_ID = 'rainbow-navigator-maps-loader';
