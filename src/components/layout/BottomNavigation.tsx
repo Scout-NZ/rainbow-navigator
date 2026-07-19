@@ -1,16 +1,17 @@
 
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Calendar, Heart, Map, User, Users } from "lucide-react";
+import { Calendar, Heart, Map, Sparkles, Users } from "lucide-react";
 
 // The MAP is the heart of the app, so it takes the raised centre button —
-// land anywhere, tap the middle, see what's around you.
+// land anywhere, tap the middle, see what's around you. Profile lives
+// behind the avatar in the header; the fifth slot belongs to Community.
 const navItems = [
   { label: "Connect", path: "/connect", icon: Users },
   { label: "Events", path: "/events", icon: Calendar },
   { label: "Map", path: "/", icon: Map, center: true },
   { label: "Saved", path: "/saved", icon: Heart },
-  { label: "Profile", path: "/profile", icon: User },
+  { label: "Community", path: "/community", icon: Sparkles },
 ];
 
 export function BottomNavigation() {

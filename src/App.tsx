@@ -26,6 +26,7 @@ import PlaceDetailPage from "./pages/PlaceDetailPage";
 import SavedPage from "./pages/SavedPage";
 import NewGroupPage from "./pages/NewGroupPage";
 import AdminPage from "./pages/AdminPage";
+import CommunityPage from "./pages/CommunityPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -67,6 +68,7 @@ const App = () => (
                 <Route path="/resources" element={<ResourcesPage />} />
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
+                <Route path="/community" element={<CommunityPage />} />
                 <Route
                   path="/feed"
                   element={
