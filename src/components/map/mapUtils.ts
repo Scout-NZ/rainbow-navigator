@@ -160,23 +160,57 @@ export const CATEGORY_COLORS: Record<string, string> = {
 export const getCategoryColor = (category: string | null | undefined): string =>
   CATEGORY_COLORS[category ?? ''] ?? '#4B5563';
 
-const PIN_PATH = 'M12,2C8.13,2,5,5.13,5,9c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2z M12,11.5c-1.38,0-2.5-1.12-2.5-2.5s1.12-2.5,2.5-2.5s2.5,1.12,2.5,2.5S13.38,11.5,12,11.5z';
+// White glyph shown inside each marker so the pin says WHAT the place is,
+// not just which colour bucket it falls in. 24x24 viewBox paths.
+const CATEGORY_GLYPHS: Record<string, string> = {
+  // coffee cup
+  Cafes: 'M20,3H4v10c0,2.21,1.79,4,4,4h6c2.21,0,4-1.79,4-4v-3h2c1.11,0,2-0.9,2-2V5C22,3.89,21.11,3,20,3z M20,8h-2V5h2V8z M4,19h16v2H4V19z',
+  // cocktail glass
+  Bars: 'M21,5V3H3v2l8,9v5H6v2h12v-2h-5v-5L21,5z M7.43,7L5.66,5h12.69l-1.78,2H7.43z',
+  // music note
+  Nightlife: 'M12,3v10.55c-0.59-0.34-1.27-0.55-2-0.55c-2.21,0-4,1.79-4,4s1.79,4,4,4s4-1.79,4-4V7h4V3H12z',
+  // shopping bag
+  Shopping: 'M18,6h-2c0-2.21-1.79-4-4-4S8,3.79,8,6H6C4.9,6,4,6.9,4,8v12c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V8C20,6.9,19.1,6,18,6z M12,4c1.1,0,2,0.9,2,2h-4C10,4.9,10.9,4,12,4z M12,10c-2.76,0-5-2.24-5-5h2c0,1.66,1.34,3,3,3s3-1.34,3-3h2C17,7.76,14.76,10,12,10z',
+  // wrench
+  Services: 'M22.7,19l-9.1-9.1c0.9-2.3,0.4-5-1.5-6.9c-2-2-5-2.4-7.4-1.3L9,6L6,9L1.6,4.7C0.4,7.1,0.9,10.1,2.9,12.1c1.9,1.9,4.6,2.4,6.9,1.5l9.1,9.1c0.4,0.4,1,0.4,1.4,0l2.3-2.3C23.1,20,23.1,19.4,22.7,19z',
+  // people
+  Community: 'M16,11c1.66,0,2.99-1.34,2.99-3S17.66,5,16,5c-1.66,0-3,1.34-3,3S14.34,11,16,11z M8,11c1.66,0,2.99-1.34,2.99-3S9.66,5,8,5C6.34,5,5,6.34,5,8S6.34,11,8,11z M8,13c-2.33,0-7,1.17-7,3.5V19h14v-2.5C15,14.17,10.33,13,8,13z M16,13c-0.29,0-0.62,0.02-0.97,0.05c1.16,0.84,1.97,1.97,1.97,3.45V19h6v-2.5C23,14.17,18.33,13,16,13z',
+  // medical cross
+  Healthcare: 'M10,2h4v8h8v4h-8v8h-4v-8H2v-4h8V2z',
+};
 
-// Markers are coloured by category; rainbow-owned/managed places get the
-// biggest pin with a gold ring, allies the smallest and slightly faded —
-// the community's own places should always stand out first.
-export const getMarkerIcon = (category: string | null, lgbtStatus: string | null) => {
-  const fillColor = getCategoryColor(category);
+// A badge-style marker: coloured circle with the category glyph, small tail
+// pointing at the location. Rainbow-owned/managed places get the biggest
+// badge with a gold ring; allies the smallest, slightly faded — the
+// community's own places should always stand out first.
+export const getMarkerSvgUri = (category: string | null, lgbtStatus: string | null): string => {
+  const fill = getCategoryColor(category);
+  const glyph = CATEGORY_GLYPHS[category ?? ''] ?? 'M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z';
   const isRainbow = lgbtStatus === 'lgbt_owned' || lgbtStatus === 'lgbt_managed';
   const isAlly = lgbtStatus === 'ally';
+  const stroke = isRainbow ? '#FBBF24' : '#FFFFFF';
+  const strokeWidth = isRainbow ? 3 : 2;
+  const opacity = isAlly ? 0.72 : 1;
 
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48">` +
+    `<g opacity="${opacity}">` +
+    `<path d="M20 46 L12.5 30.5 h15 Z" fill="${fill}"/>` +
+    `<circle cx="20" cy="18" r="14.5" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>` +
+    `<g transform="translate(10.4,8.4) scale(0.8)"><path d="${glyph}" fill="#FFFFFF"/></g>` +
+    `</g></svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+};
+
+export const getMarkerIcon = (category: string | null, lgbtStatus: string | null) => {
+  const isRainbow = lgbtStatus === 'lgbt_owned' || lgbtStatus === 'lgbt_managed';
+  const isAlly = lgbtStatus === 'ally';
+  // 40x48 viewBox scaled per prominence tier
+  const w = isRainbow ? 46 : isAlly ? 30 : 37;
+  const h = Math.round(w * 1.2);
   return {
-    path: PIN_PATH,
-    fillColor,
-    fillOpacity: isAlly ? 0.65 : 1,
-    strokeWeight: isRainbow ? 2.5 : 1,
-    strokeColor: isRainbow ? '#FBBF24' : '#FFFFFF',
-    scale: isRainbow ? 1.9 : isAlly ? 1.15 : 1.45,
-    anchor: new google.maps.Point(12, 24),
+    url: getMarkerSvgUri(category, lgbtStatus),
+    scaledSize: new google.maps.Size(w, h),
+    anchor: new google.maps.Point(w / 2, h),
   };
 };
