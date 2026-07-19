@@ -72,8 +72,7 @@ export function InteractiveMap({
     verifiedOnly,
   });
   
-  // Using the API key from window or from mapUtils
-  const apiKey = (window as any).VITE_GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY;
+  const apiKey = GOOGLE_MAPS_API_KEY;
   
   // Using the consistent loader ID from mapUtils
   const { isLoaded, loadError } = useJsApiLoader({
