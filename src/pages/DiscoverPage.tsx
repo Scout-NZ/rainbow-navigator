@@ -5,7 +5,6 @@ import { Grid, Coffee, Music, Heart, ShoppingBag, Settings, Users, Stethoscope, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -119,39 +118,35 @@ export default function DiscoverPage() {
         </Select>
       </div>
 
-      {/* Filter pills + view toggle */}
+      {/* Category dropdown, verified toggle + view toggle */}
       <div className="flex items-center gap-2">
-        <ScrollArea className="flex-1 whitespace-nowrap" orientation="horizontal">
-          <div className="flex items-center gap-2 px-1 py-1">
-            {categories.map(category => (
-              <Badge
-                key={category.name}
-                variant={selectedCategory === category.name ? "default" : "outline"}
-                className={`rounded-full cursor-pointer px-3 py-1.5 ${
-                  selectedCategory === category.name
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-background hover:bg-muted/50"
-                }`}
-                onClick={() => setSelectedCategory(category.name)}
-              >
-                <category.icon className="h-4 w-4 mr-1.5" aria-hidden="true" />
-                {category.name}
-              </Badge>
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger className="flex-1 min-w-0 max-w-[170px] rounded-full whitespace-nowrap" aria-label="Choose a category">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {categories.map((category) => (
+              <SelectItem key={category.name} value={category.name}>
+                <span className="flex items-center gap-2">
+                  <category.icon className="h-4 w-4" aria-hidden="true" />
+                  {category.name}
+                </span>
+              </SelectItem>
             ))}
-            <Badge
-              variant={verifiedOnly ? "default" : "outline"}
-              className={`rounded-full cursor-pointer px-3 py-1.5 ${
-                verifiedOnly
-                  ? "bg-green-600 text-white"
-                  : "bg-background hover:bg-muted/50"
-              }`}
-              onClick={() => setVerifiedOnly(v => !v)}
-            >
-              ✓ Verified only
-            </Badge>
-          </div>
-        </ScrollArea>
-        <div className="flex rounded-full border overflow-hidden shrink-0" role="group" aria-label="View mode">
+          </SelectContent>
+        </Select>
+        <Badge
+          variant={verifiedOnly ? "default" : "outline"}
+          className={`rounded-full cursor-pointer px-3 py-1.5 shrink-0 ${
+            verifiedOnly
+              ? "bg-green-600 text-white"
+              : "bg-background hover:bg-muted/50"
+          }`}
+          onClick={() => setVerifiedOnly(v => !v)}
+        >
+          ✓ Verified
+        </Badge>
+        <div className="flex rounded-full border overflow-hidden shrink-0 ml-auto" role="group" aria-label="View mode">
           <Button
             variant={view === "list" ? "default" : "ghost"}
             size="sm"
