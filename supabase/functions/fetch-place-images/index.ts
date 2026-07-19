@@ -35,16 +35,15 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
-  const limit = Math.min(Number(new URL(req.url).searchParams.get("limit") || 40), 60);
+  const params = new URL(req.url).searchParams;
+  const limit = Math.min(Number(params.get("limit") || 40), 60);
+  // ?table=groups pulls logos for community groups (website or contact_link)
+  const table = params.get("table") === "groups" ? "groups" : "locations";
+  const fields = table === "groups" ? "id, name, website, contact_link" : "id, name, website";
 
-  const { data: places, error } = await supabase
-    .from("locations")
-    .select("id, name, website")
-    .is("image_url", null)
-    .not("website", "is", null)
-    .neq("website", "")
-    .order("name")
-    .limit(limit);
+  let query = supabase.from(table).select(fields).is("image_url", null).order("name").limit(limit);
+  if (table === "locations") query = query.not("website", "is", null).neq("website", "");
+  const { data: places, error } = await query;
   if (error) {
     return new Response(JSON.stringify({ ok: false, error: error.message }), { status: 500 });
   }
@@ -53,7 +52,9 @@ Deno.serve(async (req) => {
   const failures: string[] = [];
 
   for (const place of places ?? []) {
-    const site = place.website.startsWith("http") ? place.website : `https://${place.website}`;
+    const target = place.website || (place as any).contact_link;
+    if (!target) continue;
+    const site = target.startsWith("http") ? target : `https://${target}`;
     try {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 8000);
@@ -65,31 +66,29 @@ Deno.serve(async (req) => {
       clearTimeout(timer);
       if (!res.ok) {
         failures.push(`${place.name}: ${res.status}`);
-        await supabase.from("locations").update({ image_url: "" }).eq("id", place.id);
+        await supabase.from(table).update({ image_url: "" }).eq("id", place.id);
         continue;
       }
       const html = (await res.text()).slice(0, 300_000);
       const image = extractImage(html, res.url || site);
       if (image) {
         const { error: upErr } = await supabase
-          .from("locations").update({ image_url: image }).eq("id", place.id);
+          .from(table).update({ image_url: image }).eq("id", place.id);
         if (!upErr) updated++;
       } else {
         failures.push(`${place.name}: no og:image`);
-        await supabase.from("locations").update({ image_url: "" }).eq("id", place.id);
+        await supabase.from(table).update({ image_url: "" }).eq("id", place.id);
       }
     } catch (err) {
       failures.push(`${place.name}: ${err instanceof Error ? err.name : "error"}`);
-      await supabase.from("locations").update({ image_url: "" }).eq("id", place.id);
+      await supabase.from(table).update({ image_url: "" }).eq("id", place.id);
     }
   }
 
   const { count } = await supabase
-    .from("locations")
+    .from(table)
     .select("id", { count: "exact", head: true })
-    .is("image_url", null)
-    .not("website", "is", null)
-    .neq("website", "");
+    .is("image_url", null);
 
   return new Response(
     JSON.stringify({ ok: true, checked: places?.length ?? 0, updated, remaining: count, failures }, null, 2),

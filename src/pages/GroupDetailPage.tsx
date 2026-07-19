@@ -93,13 +93,33 @@ export default function GroupDetailPage() {
 
   return (
     <div className="max-w-2xl mx-auto pb-10 space-y-5">
-      <button
-        onClick={() => navigate(-1)}
-        aria-label="Go back"
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
-      </button>
+      {/* Hero: the group's own logo/banner, pulled from their website or
+          Facebook page (group owners will be able to change it) */}
+      {group.image_url ? (
+        <div className="relative -mx-4 md:mx-0 md:rounded-xl overflow-hidden">
+          <div
+            className="h-48 md:h-64 bg-cover bg-center bg-muted"
+            style={{ backgroundImage: `url(${group.image_url})` }}
+            role="img"
+            aria-label={group.name}
+          />
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
+            className="absolute top-3 left-3 h-9 w-9 rounded-full bg-white/90 shadow flex items-center justify-center"
+          >
+            <ArrowLeft className="h-5 w-5 text-gray-800" aria-hidden="true" />
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Back
+        </button>
+      )}
 
       <div className="space-y-2">
         <h1 className="text-2xl font-bold leading-tight">{group.name}</h1>

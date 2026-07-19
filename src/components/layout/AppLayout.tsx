@@ -32,8 +32,9 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background pb-16 flex flex-col">
-      {/* Gradient background for the header area */}
-      <div className={`absolute top-0 left-0 right-0 h-40 z-0 ${!isHomePage ? "bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green" : ""}`}></div>
+      {/* Gradient backdrop sized to the header only, so it never sits
+          behind page content (titles used to collide with it) */}
+      <div className={`absolute top-0 left-0 right-0 h-16 z-0 ${!isHomePage ? "bg-gradient-to-r from-rainbow-orange via-rainbow-yellow to-rainbow-green" : ""}`}></div>
 
       <header
         className={cn(
@@ -41,8 +42,9 @@ export function AppLayout() {
           isScrolled ? "bg-background border-b shadow-sm" : "bg-transparent"
         )}
       >
-        <div className="container px-4 py-3 mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="container px-4 py-3 mx-auto flex items-center min-h-[56px]">
+          {/* Three zones: fixed-ish sides, wordmark centred in the middle */}
+          <div className="flex items-center shrink-0 min-w-[44px]">
             {user && (
               <Link to="/profile" className="flex items-center" aria-label="Your profile">
                 <Avatar className="h-10 w-10 border-2 border-white">
@@ -56,39 +58,45 @@ export function AppLayout() {
                 </Avatar>
               </Link>
             )}
+          </div>
+
+          <Link
+            to="/"
+            aria-label="Rainbow Navigator home"
+            className="flex-1 flex items-center justify-center gap-2 min-w-0"
+          >
             <img
               src={`${import.meta.env.BASE_URL}logo.png`}
               alt=""
               aria-hidden="true"
-              className="h-8 w-8"
+              className="h-8 w-8 shrink-0"
             />
             <h1 className={cn(
-              "text-xl font-bold",
+              "text-lg sm:text-xl font-bold whitespace-nowrap truncate",
               isHomePage || isScrolled ? "rainbow-text" : "text-white"
             )}>Rainbow Navigator</h1>
+          </Link>
+
+          <div className="flex items-center justify-end gap-2 shrink-0 min-w-[44px]">
             {isAdmin && (
               <Link
                 to="/admin"
                 aria-label="Review queue"
-                className={cn(
-                  "ml-1",
-                  isHomePage || isScrolled ? "text-primary" : "text-white"
-                )}
+                className={cn(isHomePage || isScrolled ? "text-primary" : "text-white")}
               >
                 <ShieldCheck className="h-5 w-5" aria-hidden="true" />
               </Link>
             )}
+            {!user && !loading && (
+              <Button
+                asChild
+                size="sm"
+                className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover rounded-full px-4"
+              >
+                <Link to="/auth">Sign in</Link>
+              </Button>
+            )}
           </div>
-
-          {!user && !loading && (
-            <Button
-              asChild
-              size="sm"
-              className="bg-rainbow-gradient hover:bg-rainbow-gradient-hover rounded-full px-4"
-            >
-              <Link to="/auth">Sign in</Link>
-            </Button>
-          )}
         </div>
       </header>
 
