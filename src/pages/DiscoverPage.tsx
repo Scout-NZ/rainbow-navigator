@@ -173,8 +173,10 @@ export default function DiscoverPage() {
           <InteractiveMap
             className="h-full"
             defaultLocation={getCityCoordinates(selectedCity === "All cities" ? "Wellington" : selectedCity)}
+            searchText={searchText}
             categoryFilter={selectedCategory === "All" ? null : selectedCategory}
             lgbtStatusFilter={null}
+            verifiedOnly={verifiedOnly}
           />
         </div>
       ) : (
