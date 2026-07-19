@@ -66,10 +66,22 @@ function clip(s: string | null | undefined, max = 1500): string | null {
 }
 
 // ---------- Eventfinda (official API) ----------
-async function fetchEventfinda(): Promise<ImportedEvent[]> {
-  const user = Deno.env.get("EVENTFINDA_USERNAME");
-  const pass = Deno.env.get("EVENTFINDA_PASSWORD");
-  if (!user || !pass) throw new Error("credentials not configured yet — set EVENTFINDA_USERNAME / EVENTFINDA_PASSWORD secrets");
+// Credentials come from env secrets if set, otherwise from Supabase Vault via
+// a service-role-only RPC (see get_eventfinda_credentials in the database).
+async function resolveEventfindaCreds(supabase: any): Promise<{ user: string; pass: string }> {
+  const envUser = Deno.env.get("EVENTFINDA_USERNAME");
+  const envPass = Deno.env.get("EVENTFINDA_PASSWORD");
+  if (envUser && envPass) return { user: envUser, pass: envPass };
+  const { data, error } = await supabase.rpc("get_eventfinda_credentials");
+  const row = Array.isArray(data) ? data[0] : data;
+  if (error || !row?.username || !row?.password) {
+    throw new Error("credentials not configured — set env secrets or Vault entries");
+  }
+  return { user: row.username, pass: row.password };
+}
+
+async function fetchEventfinda(supabase: any): Promise<ImportedEvent[]> {
+  const { user, pass } = await resolveEventfindaCreds(supabase);
   const auth = "Basic " + btoa(`${user}:${pass}`);
   const today = new Date().toISOString().slice(0, 10);
   const horizon = new Date(Date.now() + 120 * 86400_000).toISOString().slice(0, 10);
@@ -210,7 +222,7 @@ Deno.serve(async (req) => {
   );
 
   const sources: Record<string, () => Promise<ImportedEvent[]>> = {
-    eventfinda: fetchEventfinda,
+    eventfinda: () => fetchEventfinda(supabase),
     chchpride: fetchChchPride,
     humanitix: fetchHumanitix,
   };
