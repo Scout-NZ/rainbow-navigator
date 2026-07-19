@@ -27,6 +27,9 @@ import SavedPage from "./pages/SavedPage";
 import NewGroupPage from "./pages/NewGroupPage";
 import AdminPage from "./pages/AdminPage";
 import CommunityPage from "./pages/CommunityPage";
+import PrivacyPage from "./pages/legal/PrivacyPage";
+import TermsPage from "./pages/legal/TermsPage";
+import CodeOfConductPage from "./pages/legal/CodeOfConductPage";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -69,6 +72,9 @@ const App = () => (
                 <Route path="/events" element={<EventsPage />} />
                 <Route path="/admin" element={<AdminPage />} />
                 <Route path="/community" element={<CommunityPage />} />
+                <Route path="/privacy" element={<PrivacyPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/code-of-conduct" element={<CodeOfConductPage />} />
                 <Route
                   path="/feed"
                   element={
