@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { LocateFixed, MapPin, Plus, Search, Users } from "lucide-react";
+import { ListFilter, LocateFixed, MapPin, Plus, Search, Users } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent,
+  DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -16,6 +20,21 @@ import { CITY_COORDINATES } from "@/components/map/mapUtils";
 import { useUser } from "@/contexts/UserContext";
 
 const ALL_LOCATIONS = "All locations";
+
+// Curated activity categories for the filter checklist — each maps to the
+// underlying tags groups actually carry, so "Sports & fitness" catches a
+// running club tagged only "Running".
+const ACTIVITY_CATEGORIES: { label: string; tags: string[] }[] = [
+  { label: "Sports & fitness", tags: ["Sport", "Badminton", "Rugby", "Swimming", "Football", "Running", "Cycling", "Fitness", "Walking"] },
+  { label: "Outdoors", tags: ["Outdoors", "Tramping", "Outings"] },
+  { label: "Social", tags: ["Social", "Meetups", "Coffee", "Dinners", "Movies", "Networking"] },
+  { label: "Support & wellbeing", tags: ["Support", "Peer support", "Recovery"] },
+  { label: "Arts & culture", tags: ["Arts", "Music", "Singing", "Performance", "Drag", "Film", "Museum", "Writing", "Crafts", "Kapa haka", "Waiata", "Cultural", "Books"] },
+  { label: "Games & quiz", tags: ["Games", "Gaming", "D&D", "Quiz"] },
+  { label: "Faith", tags: ["Faith"] },
+  { label: "Festivals & events", tags: ["Festival", "Events"] },
+  { label: "Advocacy & community", tags: ["Advocacy", "Activism", "Community", "Volunteering"] },
+];
 
 // Nearest known city to a lat/lng, among the cities that actually have groups
 function nearestCity(lat: number, lng: number, candidates: string[]): string | null {
@@ -46,6 +65,13 @@ export default function ConnectPage() {
   const [cityFilter, setCityFilter] = useState(ALL_LOCATIONS);
   const [isLocating, setIsLocating] = useState(false);
   const [autoLocated, setAutoLocated] = useState(false);
+  const [activityFilters, setActivityFilters] = useState<string[]>([]);
+
+  const toggleActivity = (label: string) => {
+    setActivityFilters((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+  };
 
   const { data: groups = [], isLoading } = useQuery({
     queryKey: ["groups"],
@@ -113,9 +139,14 @@ export default function ConnectPage() {
 
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
+    // Union of tags covered by the ticked categories
+    const wantedTags = new Set(
+      ACTIVITY_CATEGORIES.filter((c) => activityFilters.includes(c.label)).flatMap((c) => c.tags)
+    );
     return groups.filter((g: any) => {
       if (cityFilter !== ALL_LOCATIONS && (g.city || "Elsewhere") !== cityFilter) return false;
       if (audience !== "All" && !(g.audience || []).includes(audience)) return false;
+      if (wantedTags.size > 0 && !(g.activities || []).some((a: string) => wantedTags.has(a))) return false;
       if (q) {
         const hay = [g.name, g.description, g.city, ...(g.activities || []), ...(g.audience || [])]
           .filter(Boolean).join(" ").toLowerCase();
@@ -123,7 +154,7 @@ export default function ConnectPage() {
       }
       return true;
     });
-  }, [groups, searchQuery, audience, cityFilter]);
+  }, [groups, searchQuery, audience, cityFilter, activityFilters]);
 
   const cities = useMemo(
     () => [...new Set(filtered.map((g: any) => g.city || "Elsewhere"))],
@@ -196,6 +227,41 @@ export default function ConnectPage() {
           <LocateFixed className={`h-4 w-4 mr-1 ${isLocating ? "animate-spin" : ""}`} aria-hidden="true" />
           Near me
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant={activityFilters.length ? "default" : "outline"}
+              size="sm"
+              className="rounded-full shrink-0"
+              aria-label="Filter by activity"
+            >
+              <ListFilter className="h-4 w-4" aria-hidden="true" />
+              {activityFilters.length > 0 && (
+                <span className="ml-1 text-xs">{activityFilters.length}</span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56">
+            {ACTIVITY_CATEGORIES.map((cat) => (
+              <DropdownMenuCheckboxItem
+                key={cat.label}
+                checked={activityFilters.includes(cat.label)}
+                onCheckedChange={() => toggleActivity(cat.label)}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {cat.label}
+              </DropdownMenuCheckboxItem>
+            ))}
+            {activityFilters.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setActivityFilters([])}>
+                  Clear activity filters
+                </DropdownMenuItem>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Who is it for? — made explicit, because it matters */}
