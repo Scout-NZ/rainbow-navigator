@@ -6,6 +6,7 @@ import { MapSearchBar } from "./MapSearchBar";
 import { MapLoadingState } from "./MapLoadingState";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapMarkers } from "./MapMarkers";
+import { MapLegend } from "./MapLegend";
 import { FilterPanel } from "./FilterPanel";
 import { useLocations } from "./useLocations";
 import {
@@ -214,10 +215,13 @@ export function InteractiveMap({
         )}
         
         {isLoaded && mapLoaded && (
-          <MapZoomControls 
-            onZoomIn={() => handleZoom(true)}
-            onZoomOut={() => handleZoom(false)}
-          />
+          <>
+            <MapZoomControls
+              onZoomIn={() => handleZoom(true)}
+              onZoomOut={() => handleZoom(false)}
+            />
+            <MapLegend />
+          </>
         )}
         
         {showFilterPanel && (
