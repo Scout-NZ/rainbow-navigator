@@ -6,12 +6,15 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { useUser } from "@/contexts/UserContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { ShieldCheck } from "lucide-react";
 
 export function AppLayout() {
   const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const isHomePage = location.pathname === "/";
   const { user, loading } = useUser();
+  const { isAdmin } = useIsAdmin();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,6 +66,18 @@ export function AppLayout() {
               "text-xl font-bold",
               isHomePage || isScrolled ? "rainbow-text" : "text-white"
             )}>Rainbow Navigator</h1>
+            {isAdmin && (
+              <Link
+                to="/admin"
+                aria-label="Review queue"
+                className={cn(
+                  "ml-1",
+                  isHomePage || isScrolled ? "text-primary" : "text-white"
+                )}
+              >
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              </Link>
+            )}
           </div>
 
           {!user && !loading && (
