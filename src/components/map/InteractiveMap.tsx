@@ -169,18 +169,6 @@ export function InteractiveMap({
     setMapLoaded(true);
   };
 
-  const onCenterChanged = () => {
-    if (mapRef.current) {
-      const newCenter = mapRef.current.getCenter();
-      if (newCenter) {
-        setMapCenter({
-          lat: newCenter.lat(),
-          lng: newCenter.lng()
-        });
-      }
-    }
-  };
-
   // Calculate active filters count for badge
   const getActiveFiltersCount = () => {
     let count = 0;
@@ -205,11 +193,10 @@ export function InteractiveMap({
         {isLoaded ? (
           <GoogleMap
             mapContainerStyle={containerStyle}
-            center={userLocation || mapCenter}
+            center={mapCenter}
             zoom={zoom}
             options={mapOptions}
             onLoad={onMapLoad}
-            onCenterChanged={onCenterChanged}
           >
             {mapLoaded && (
               <MapMarkers 
