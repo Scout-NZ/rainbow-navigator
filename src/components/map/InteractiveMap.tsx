@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { Locate } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { MapSearchBar } from "./MapSearchBar";
 import { MapLoadingState } from "./MapLoadingState";
 import { MapZoomControls } from "./MapZoomControls";
 import { MapMarkers } from "./MapMarkers";
 import { MapLegend } from "./MapLegend";
-import { FilterPanel } from "./FilterPanel";
 import { useLocations } from "./useLocations";
 import {
   DEFAULT_LOCATION,
@@ -18,22 +18,28 @@ import {
   containerStyle
 } from "./mapUtils";
 
+// All filtering (search, category, verified) is driven by the parent page —
+// the map itself only carries map-specific controls (zoom, locate, legend),
+// so the page shows ONE set of filters and the map starts above the fold.
 type MapProps = {
   className?: string;
   defaultLocation?: { lat: number; lng: number };
+  searchText?: string;
   categoryFilter?: string | null;
   lgbtStatusFilter?: string | null;
+  verifiedOnly?: boolean;
   onLocationSelect?: (location: any) => void;
 };
 
-export function InteractiveMap({ 
-  className, 
-  defaultLocation = DEFAULT_LOCATION, 
-  categoryFilter: initialCategoryFilter,
-  lgbtStatusFilter: initialLgbtStatusFilter,
-  onLocationSelect 
+export function InteractiveMap({
+  className,
+  defaultLocation = DEFAULT_LOCATION,
+  searchText = "",
+  categoryFilter = null,
+  lgbtStatusFilter = null,
+  verifiedOnly = false,
+  onLocationSelect
 }: MapProps) {
-  const [searchText, setSearchText] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<any | null>(null);
   const [zoom, setZoom] = useState(12);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -43,18 +49,6 @@ export function InteractiveMap({
   const mapRef = useRef<google.maps.Map | null>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
-  const [showFilterPanel, setShowFilterPanel] = useState(false);
-  
-  // Advanced filter states
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(initialCategoryFilter || null);
-  const [lgbtStatusFilter, setLgbtStatusFilter] = useState<string | null>(initialLgbtStatusFilter || null);
-  const [verifiedOnly, setVerifiedOnly] = useState(false);
-
-  // Keep internal filter state in sync when the parent changes the props
-  // (e.g. the category chips on the Discover page)
-  useEffect(() => {
-    setCategoryFilter(initialCategoryFilter || null);
-  }, [initialCategoryFilter]);
 
   // Re-centre when the parent changes the target location (city switcher)
   useEffect(() => {
@@ -62,30 +56,22 @@ export function InteractiveMap({
     setZoom(12);
   }, [defaultLocation.lat, defaultLocation.lng]);
 
-  useEffect(() => {
-    setLgbtStatusFilter(initialLgbtStatusFilter || null);
-  }, [initialLgbtStatusFilter]);
-  
   const { filteredPlaces, isLoading, error } = useLocations({
     searchText,
     categoryFilter,
     lgbtStatusFilter,
     verifiedOnly,
   });
-  
+
   const apiKey = GOOGLE_MAPS_API_KEY;
-  
-  // Using the consistent loader ID from mapUtils
+
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: apiKey,
     libraries,
     id: LOADER_ID
   });
-  
+
   useEffect(() => {
-    console.log("Google Maps API Key being used:", apiKey);
-    console.log("Filtered places:", filteredPlaces?.length || 0);
-    
     if (loadError) {
       console.error("Error loading Google Maps:", loadError);
       setMapError("Failed to load Google Maps. Please check your connection and try again.");
@@ -95,7 +81,7 @@ export function InteractiveMap({
         variant: "destructive"
       });
     }
-  }, [loadError, apiKey, filteredPlaces]);
+  }, [loadError]);
 
   const handleMarkerClick = (place: any) => {
     setSelectedPlace(place);
@@ -131,12 +117,12 @@ export function InteractiveMap({
           setUserLocation(userPos);
           setMapCenter(userPos);
           setZoom(14);
-          
+
           if (mapRef.current) {
             mapRef.current.panTo(userPos);
             mapRef.current.setZoom(14);
           }
-          
+
           toast({
             title: "Location found",
             description: "Map centered on your current location",
@@ -165,31 +151,12 @@ export function InteractiveMap({
   };
 
   const onMapLoad = (map: google.maps.Map) => {
-    console.log("Google Map loaded successfully");
     mapRef.current = map;
     setMapLoaded(true);
   };
 
-  // Calculate active filters count for badge
-  const getActiveFiltersCount = () => {
-    let count = 0;
-    if (categoryFilter) count++;
-    if (lgbtStatusFilter) count++;
-    if (verifiedOnly) count++;
-    return count;
-  };
-
   return (
     <div className={`rounded-lg overflow-hidden flex flex-col ${className}`}>
-      <MapSearchBar 
-        filter={searchText}
-        onFilterChange={setSearchText}
-        onLocateMe={getUserLocation}
-        isLocating={isLocating}
-        onOpenFilters={() => setShowFilterPanel(true)}
-        activeFiltersCount={getActiveFiltersCount()}
-      />
-      
       <div className="relative flex-1 min-h-[300px]">
         {isLoaded ? (
           <GoogleMap
@@ -200,7 +167,7 @@ export function InteractiveMap({
             onLoad={onMapLoad}
           >
             {mapLoaded && (
-              <MapMarkers 
+              <MapMarkers
                 places={filteredPlaces}
                 userLocation={userLocation}
                 selectedPlace={selectedPlace}
@@ -213,32 +180,27 @@ export function InteractiveMap({
         ) : (
           <MapLoadingState error={mapError} />
         )}
-        
+
         {isLoaded && mapLoaded && (
           <>
             <MapZoomControls
               onZoomIn={() => handleZoom(true)}
               onZoomOut={() => handleZoom(false)}
             />
+            <Button
+              size="sm"
+              variant="secondary"
+              className="absolute top-24 right-4 h-8 w-8 p-0 rounded-full bg-white shadow-md z-[1000]"
+              onClick={getUserLocation}
+              disabled={isLocating}
+              aria-label="Centre map on my location"
+            >
+              <Locate className={`h-4 w-4 ${isLocating ? "animate-spin" : ""}`} aria-hidden="true" />
+            </Button>
             <MapLegend />
           </>
         )}
-        
-        {showFilterPanel && (
-          <div className="absolute top-2 right-2 left-2 z-10 flex justify-center">
-            <FilterPanel 
-              onClose={() => setShowFilterPanel(false)}
-              selectedCategory={categoryFilter}
-              onCategoryChange={setCategoryFilter}
-              selectedLgbtStatus={lgbtStatusFilter}
-              onLgbtStatusChange={setLgbtStatusFilter}
-              verifiedOnly={verifiedOnly}
-              onVerifiedChange={setVerifiedOnly}
-            />
-          </div>
-        )}
       </div>
-
     </div>
   );
 }
