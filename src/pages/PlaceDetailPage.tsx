@@ -108,9 +108,11 @@ export default function PlaceDetailPage() {
     }
     setSubmittingReport(true);
     try {
+      // Safety reports work without an account — requiring identity to
+      // report an unsafe place deters exactly who most needs to report
       const { error } = await supabase.from("place_reports").insert({
         location_id: String(place.id),
-        reported_by: user!.id,
+        reported_by: user?.id ?? null,
         reason: reportReason,
         details: reportDetails || null,
       });
@@ -296,12 +298,9 @@ export default function PlaceDetailPage() {
         ) : (
           <button
             className="text-xs text-muted-foreground hover:text-foreground underline"
-            onClick={() => {
-              if (!user) { navigate("/auth"); return; }
-              setShowReport(true);
-            }}
+            onClick={() => setShowReport(true)}
           >
-            Something wrong or unsafe about this listing? Report it.
+            Something wrong or unsafe about this listing? Report it. (No account needed.)
           </button>
         )}
       </div>

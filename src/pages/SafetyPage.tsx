@@ -99,6 +99,13 @@ export default function SafetyPage() {
           </div>
         </CardContent>
       </Card>
+
+      <p className="text-sm text-muted-foreground text-center">
+        Our commitments to you:{" "}
+        <Link className="text-primary underline" to="/code-of-conduct">Code of Conduct</Link> ·{" "}
+        <Link className="text-primary underline" to="/privacy">Privacy Policy</Link> ·{" "}
+        <Link className="text-primary underline" to="/terms">Terms of Use</Link>
+      </p>
     </div>
   );
 }
