@@ -92,8 +92,20 @@ export default function AuthPage() {
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Password floor: length beats complexity rules for real-world strength.
+    // Server-side enforcement (leaked-password checks) lives in Supabase Auth.
+    if (password.length < 10) {
+      toast({
+        title: 'Choose a longer password',
+        description: 'At least 10 characters — a few random words work great and are easy to remember.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
-    
+
     try {
       // Sign up the user
       const { data, error } = await supabase.auth.signUp({
