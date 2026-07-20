@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { prideIdentities, getIdentityGradient } from "@/utils/prideFlags";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SecuritySection } from "@/components/profile/SecuritySection";
 import { useUser } from "@/contexts/UserContext";
 import { useSavedPlaces } from "@/hooks/useSavedPlaces";
 import { Link } from "react-router-dom";
@@ -938,6 +939,8 @@ export default function ProfilePage() {
           </ScrollArea>
         </DialogContent>
       </Dialog>
+
+      <SecuritySection />
     </div>
   );
 }
